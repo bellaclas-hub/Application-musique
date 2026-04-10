@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export type EntityType = 'artist' | 'album' | 'track';
 
 export interface User {
@@ -13,6 +18,12 @@ export interface User {
   avatar_url: string;
   credibility_level: 'visiteur' | 'confirme' | 'qualifie';
   premium_status: boolean;
+  stats: {
+    reviews_count: number;
+    followers_count: number;
+    following_count: number;
+    helpful_votes: number;
+  };
 }
 
 export interface Artist {
@@ -77,14 +88,29 @@ export interface Review {
   user_expertise?: string;
   target_type: EntityType;
   target_id: string;
-  rating_overall: number;
+  target_name: string;
+  rating_overall: number; // 1-5
   title?: string;
-  keywords?: string[];
-  what_i_hear: string;
-  what_it_makes_me_feel: string;
-  why_it_works_or_not: string;
-  who_its_for: string;
-  limit_or_reserve: string;
+  
+  // ÉTAPE 1: Choix guidés
+  selections: {
+    impression: string;
+    highlights: string[];
+    feeling: string;
+    accessibility: string;
+    target_audience: string[];
+    limitations: string[];
+  };
+
+  // ÉTAPE 2: Justifications
+  justifications: {
+    why_words: string;
+    key_element: string;
+    dividing_factor: string;
+    recommendation: string;
+    entry_point: string;
+  };
+  
   quality_score: number;
   helpful_count: number;
   published_at: string;
@@ -108,4 +134,14 @@ export interface SharedList {
   items: { type: EntityType; id: string; slug: string; title: string; why: string }[];
   like_count: number;
   category: 'Curated' | 'Community' | 'Thematic';
+}
+
+export interface ProReview {
+  id: string;
+  target_id: string;
+  source_name: string;
+  source_logo?: string;
+  score: string;
+  excerpt: string;
+  url: string;
 }

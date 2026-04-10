@@ -30,7 +30,9 @@ import {
   AlertCircle,
   Info,
   ChevronLeft,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  PlayCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -41,7 +43,8 @@ import {
   Review, 
   AISummary, 
   SharedList,
-  EntityType 
+  EntityType,
+  ProReview
 } from './types';
 import { 
   mockArtists, 
@@ -50,12 +53,13 @@ import {
   mockReviews, 
   mockAISummaries, 
   mockLists, 
-  mockUsers 
+  mockUsers,
+  mockProReviews
 } from './mockData';
 
-// --- Components ---
+// --- Reusable UI Components ---
 
-const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'premium' | 'success' | 'warning', key?: string | number }) => {
+const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'premium' | 'success' | 'warning' }) => {
   const styles = {
     default: 'bg-bg-surface-light text-text-muted',
     premium: 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30',
@@ -76,22 +80,19 @@ const SectionTitle = ({ children, subtitle }: { children: React.ReactNode, subti
   </div>
 );
 
-const ArtistCard = ({ artist }: { artist: Artist, key?: React.Key }) => (
-  <motion.div 
-    whileHover={{ y: -4 }}
-    className="glass-card overflow-hidden cursor-pointer group"
-  >
+const ArtistCard = ({ artist }: { artist: Artist }) => (
+  <motion.div whileHover={{ y: -4 }} className="glass-card overflow-hidden cursor-pointer group">
     <Link to={`/artiste/${artist.slug}`}>
       <div className="aspect-[16/9] overflow-hidden relative">
         <img src={artist.hero_image_url} alt={artist.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" referrerPolicy="no-referrer" />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-main/80 to-transparent" />
-        <div className="absolute bottom-3 left-3">
+        <div className="absolute bottom-3 left-3 flex gap-2">
           <Badge variant="premium">{artist.entry_level}</Badge>
         </div>
       </div>
       <div className="p-4">
         <h3 className="font-bold text-lg group-hover:text-accent-primary transition-colors">{artist.name}</h3>
-        <p className="text-text-muted text-sm line-clamp-2 mt-1">{artist.short_bio}</p>
+        <p className="text-text-muted text-sm line-clamp-1 mt-1">{artist.short_bio}</p>
         <div className="mt-4 flex items-center justify-between text-xs font-medium">
           <div className="flex items-center gap-1 text-accent-secondary">
             <TrendingUp size={14} />
@@ -104,11 +105,8 @@ const ArtistCard = ({ artist }: { artist: Artist, key?: React.Key }) => (
   </motion.div>
 );
 
-const AlbumCard = ({ album }: { album: Album, key?: React.Key }) => (
-  <motion.div 
-    whileHover={{ scale: 1.02 }}
-    className="glass-card p-3 flex gap-4 cursor-pointer group"
-  >
+const AlbumCard = ({ album }: { album: Album }) => (
+  <motion.div whileHover={{ scale: 1.02 }} className="glass-card p-3 flex gap-4 cursor-pointer group">
     <Link to={`/album/${album.slug}`} className="flex gap-4 w-full">
       <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
         <img src={album.cover_url} alt={album.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -128,19 +126,16 @@ const AlbumCard = ({ album }: { album: Album, key?: React.Key }) => (
   </motion.div>
 );
 
-const TrackCard = ({ track }: { track: Track, key?: React.Key }) => (
-  <motion.div 
-    whileHover={{ scale: 1.01 }}
-    className="glass-card p-4 flex items-center justify-between cursor-pointer group"
-  >
+const TrackCard = ({ track }: { track: Track }) => (
+  <motion.div whileHover={{ scale: 1.01 }} className="glass-card p-4 flex items-center justify-between cursor-pointer group">
     <Link to={`/morceau/${track.slug}`} className="flex items-center justify-between w-full">
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-lg bg-accent-primary/10 flex items-center justify-center group-hover:bg-accent-primary/20 transition-colors">
-          <Zap size={20} className="text-accent-primary" />
+          <PlayCircle size={20} className="text-accent-primary" />
         </div>
         <div>
           <h4 className="font-bold text-sm group-hover:text-accent-primary transition-colors">{track.title}</h4>
-          <p className="text-[10px] text-text-muted uppercase font-bold">{track.artist_name} • {track.album_title}</p>
+          <p className="text-[10px] text-text-muted uppercase font-bold">{track.artist_name}</p>
         </div>
       </div>
       <div className="flex items-center gap-4">
@@ -154,14 +149,8 @@ const TrackCard = ({ track }: { track: Track, key?: React.Key }) => (
   </motion.div>
 );
 
-const ReviewCard = ({ review }: { review: Review, key?: string | number }) => (
+const ReviewCard = ({ review }: { review: Review }) => (
   <div className="glass-card p-6 space-y-6 relative overflow-hidden">
-    {review.tone && (
-      <div className="absolute top-0 right-0 px-4 py-1 bg-accent-primary/10 text-accent-primary text-[10px] font-bold uppercase rounded-bl-xl">
-        Ton: {review.tone}
-      </div>
-    )}
-    
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
         <img src={review.user_avatar} alt={review.user_display_name} className="w-12 h-12 rounded-full border-2 border-accent-primary/20" referrerPolicy="no-referrer" />
@@ -186,26 +175,22 @@ const ReviewCard = ({ review }: { review: Review, key?: string | number }) => (
     </div>
 
     <div className="space-y-2">
-      {review.title ? (
-        <h3 className="text-xl font-black tracking-tight text-white">{review.title}</h3>
-      ) : (
-        <h3 className="text-xl font-black tracking-tight text-accent-primary italic">
-          {review.keywords && review.keywords.length > 0 
-            ? `"${review.keywords.join(' • ')}"` 
-            : `"${review.what_i_hear.substring(0, 60)}..."`}
-        </h3>
-      )}
+      {review.title && <h3 className="text-xl font-black tracking-tight text-white">{review.title}</h3>}
+      <div className="flex flex-wrap gap-2">
+        <Badge variant="premium">{review.selections.impression}</Badge>
+        <Badge variant="default">{review.selections.feeling}</Badge>
+        <Badge variant="success">{review.selections.accessibility}</Badge>
+      </div>
     </div>
     
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div className="space-y-4">
-        <ReviewSection label="Ce que j'entends" content={review.what_i_hear} icon={<Info size={14} />} />
-        <ReviewSection label="Ce que ça me fait" content={review.what_it_makes_me_feel} icon={<TrendingUp size={14} />} />
-        <ReviewSection label="Pourquoi ça fonctionne" content={review.why_it_works_or_not} icon={<Zap size={14} />} />
+        <ReviewSection label="Pourquoi ces mots ?" content={review.justifications.why_words} icon={<Info size={14} />} />
+        <ReviewSection label="Élément marquant" content={review.justifications.key_element} icon={<Zap size={14} />} />
       </div>
       <div className="space-y-4">
-        <ReviewSection label="Pour qui c'est" content={review.who_its_for} icon={<Users size={14} />} />
-        <ReviewSection label="La limite ou réserve" content={review.limit_or_reserve} icon={<AlertCircle size={14} />} color="text-warning" />
+        <ReviewSection label="Recommandation" content={review.justifications.recommendation} icon={<Users size={14} />} />
+        <ReviewSection label="Par où commencer ?" content={review.justifications.entry_point} icon={<ArrowRight size={14} />} color="text-accent-secondary" />
       </div>
     </div>
 
@@ -220,9 +205,7 @@ const ReviewCard = ({ review }: { review: Review, key?: string | number }) => (
           <span>Partager</span>
         </button>
       </div>
-      <div className="flex items-center gap-2">
-        <Badge variant="default">Vérifié</Badge>
-      </div>
+      <Badge variant="default">Vérifié</Badge>
     </div>
   </div>
 );
@@ -237,70 +220,12 @@ const ReviewSection = ({ label, content, icon, color = 'text-text-muted' }: { la
   </div>
 );
 
-const AISummaryBlock = ({ summary }: { summary: AISummary }) => (
-  <div className="bg-accent-primary/5 border border-accent-primary/20 rounded-2xl p-6 relative overflow-hidden">
-    <div className="absolute top-0 right-0 p-4 opacity-10">
-      <Zap size={48} className="text-accent-primary" />
-    </div>
-    <div className="flex items-center gap-2 mb-4">
-      <div className="bg-accent-primary p-1.5 rounded-lg">
-        <Zap size={16} className="text-white" />
-      </div>
-      <span className="font-bold text-sm tracking-tight">RÉSUMÉ IA</span>
-      <Badge variant="default">Basé sur {mockReviews.length} avis</Badge>
-    </div>
-    <p className="text-text-main text-lg leading-relaxed mb-6 font-medium">
-      {summary.summary_text}
-    </p>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <h5 className="text-xs font-bold text-success uppercase mb-3 flex items-center gap-2">
-          <ThumbsUp size={14} /> Ce qui ressort le plus
-        </h5>
-        <ul className="space-y-2">
-          {summary.key_points_positive.map((p, i) => (
-            <li key={i} className="text-sm text-text-muted flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-success mt-1.5 flex-shrink-0" />
-              {p}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <h5 className="text-xs font-bold text-warning uppercase mb-3 flex items-center gap-2">
-          <AlertCircle size={14} /> Ce qui divise
-        </h5>
-        <ul className="space-y-2">
-          {summary.key_points_negative.map((p, i) => (
-            <li key={i} className="text-sm text-text-muted flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0" />
-              {p}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </div>
-);
-
 const Gauge = ({ value, label, color = 'accent-primary' }: { value: number, label: string, color?: string }) => (
   <div className="text-center">
     <div className="relative w-20 h-20 mx-auto mb-2">
       <svg className="w-full h-full" viewBox="0 0 36 36">
-        <path
-          className="text-bg-surface-light stroke-current"
-          strokeWidth="3"
-          fill="none"
-          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-        />
-        <path
-          className={`text-${color} stroke-current`}
-          strokeWidth="3"
-          strokeDasharray={`${value}, 100`}
-          strokeLinecap="round"
-          fill="none"
-          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-        />
+        <path className="text-bg-surface-light stroke-current" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        <path className={`text-${color} stroke-current`} strokeWidth="3" strokeDasharray={`${value}, 100`} strokeLinecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-lg font-bold">{value}%</span>
@@ -310,53 +235,52 @@ const Gauge = ({ value, label, color = 'accent-primary' }: { value: number, labe
   </div>
 );
 
-// --- Main App Component ---
+// --- Layout Components ---
 
-export default function App() {
-  return (
-    <Router>
-      <AppLayout />
-    </Router>
-  );
-}
+const NavItem = ({ to, icon, label, active }: { to: string, icon: React.ReactNode, label: string, active: boolean }) => (
+  <Link to={to} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${active ? 'bg-accent-primary/10 text-accent-primary font-bold' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}>
+    {icon}
+    <span className="text-sm">{label}</span>
+  </Link>
+);
+
+const MobileNavItem = ({ to, icon, active }: { to: string, icon: React.ReactNode, active: boolean }) => (
+  <Link to={to} className={`p-2 rounded-xl transition-all ${active ? 'text-accent-primary' : 'text-text-muted'}`}>
+    {icon}
+  </Link>
+);
 
 function AppLayout() {
   const location = useLocation();
   const [isPremium, setIsPremium] = React.useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row bg-bg-main text-text-main">
       {/* Desktop Sidebar */}
-      <nav className="hidden md:flex flex-col w-64 bg-bg-surface border-r border-white/5 p-6 fixed h-full">
+      <nav className="hidden md:flex flex-col w-64 bg-bg-surface border-r border-white/5 p-6 fixed h-full z-40">
         <Link to="/" className="flex items-center gap-2 mb-10 px-2 group">
           <div className="w-8 h-8 rounded-lg premium-gradient flex items-center justify-center group-hover:scale-110 transition-transform">
             <Zap size={20} className="text-white" />
           </div>
           <span className="text-xl font-bold tracking-tighter">ECHO</span>
         </Link>
-        
         <div className="space-y-1">
           <NavItem to="/" icon={<Home size={20} />} label="Accueil" active={location.pathname === '/'} />
-          <NavItem to="/explorer" icon={<Search size={20} />} label="Explorer" active={location.pathname.startsWith('/explorer')} />
-          <NavItem to="/listes" icon={<ListMusic size={20} />} label="Listes" active={location.pathname.startsWith('/listes')} />
-          <NavItem to="/communaute" icon={<Users size={20} />} label="Communauté" active={location.pathname.startsWith('/communaute')} />
+          <NavItem to="/explorer" icon={<Search size={20} />} label="Explorer" active={location.pathname === '/explorer'} />
+          <NavItem to="/listes" icon={<ListMusic size={20} />} label="Listes" active={location.pathname === '/listes'} />
+          <NavItem to="/communaute" icon={<Users size={20} />} label="Communauté" active={location.pathname === '/communaute'} />
+          <NavItem to="/profil" icon={<UserIcon size={20} />} label="Profil" active={location.pathname === '/profil'} />
         </div>
-
         <div className="mt-auto pt-6 border-t border-white/5">
-          <NavItem to="/profil" icon={<UserIcon size={20} />} label="Mon Profil" active={location.pathname.startsWith('/profil')} />
           {!isPremium && (
-            <Link 
-              to="/premium"
-              className="mt-4 w-full premium-gradient p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
-            >
-              <Award size={16} />
-              PASSER AU PREMIUM
+            <Link to="/premium" className="w-full premium-gradient p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-accent-primary/20">
+              <Award size={16} /> PASSER AU PREMIUM
             </Link>
           )}
         </div>
       </nav>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <main className="flex-grow md:ml-64 pb-24 md:pb-0">
         <AnimatePresence mode="wait">
           <motion.div
@@ -384,291 +308,207 @@ function AppLayout() {
         </AnimatePresence>
       </main>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface/90 backdrop-blur-xl border-t border-white/5 px-6 py-3 flex justify-between items-center z-50">
         <MobileNavItem to="/" icon={<Home size={24} />} active={location.pathname === '/'} />
-        <MobileNavItem to="/explorer" icon={<Search size={24} />} active={location.pathname.startsWith('/explorer')} />
-        <MobileNavItem to="/listes" icon={<ListMusic size={24} />} active={location.pathname.startsWith('/listes')} />
-        <MobileNavItem to="/communaute" icon={<Users size={24} />} active={location.pathname.startsWith('/communaute')} />
-        <MobileNavItem to="/profil" icon={<UserIcon size={24} />} active={location.pathname.startsWith('/profil')} />
+        <MobileNavItem to="/explorer" icon={<Search size={24} />} active={location.pathname === '/explorer'} />
+        <MobileNavItem to="/listes" icon={<ListMusic size={24} />} active={location.pathname === '/listes'} />
+        <MobileNavItem to="/communaute" icon={<Users size={24} />} active={location.pathname === '/communaute'} />
+        <MobileNavItem to="/profil" icon={<UserIcon size={24} />} active={location.pathname === '/profil'} />
       </nav>
     </div>
   );
 }
 
-// --- Sub-components ---
-
-const NavItem = ({ to, icon, label, active }: { to: string, icon: React.ReactNode, label: string, active: boolean }) => (
-  <Link 
-    to={to}
-    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${active ? 'bg-accent-primary/10 text-accent-primary font-bold' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}
-  >
-    {icon}
-    <span className="text-sm">{label}</span>
-  </Link>
-);
-
-const MobileNavItem = ({ to, icon, active }: { to: string, icon: React.ReactNode, active: boolean }) => (
-  <Link 
-    to={to}
-    className={`p-2 rounded-xl transition-all ${active ? 'text-accent-primary' : 'text-text-muted'}`}
-  >
-    {icon}
-  </Link>
-);
-
 // --- Screens ---
 
 const HomeScreen = () => (
-  <div className="space-y-12">
-    <header className="space-y-4">
-      <Badge variant="premium">Nouveauté</Badge>
-      <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight">
-        Découvrez par où commencer <br />
-        <span className="text-accent-primary">avec vos artistes préférés.</span>
+  <div className="space-y-16">
+    <header className="space-y-6 pt-10">
+      <Badge variant="premium">Plateforme Culturelle</Badge>
+      <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">
+        DÉCOUVREZ PAR OÙ <br />
+        <span className="text-accent-primary">COMMENCER.</span>
       </h1>
-      <p className="text-text-muted text-lg max-w-2xl">
-        Echo transforme les avis musicaux dispersés en jugements utiles, lisibles et actionnables pour guider votre prochaine écoute.
+      <p className="text-text-muted text-xl max-w-2xl font-medium">
+        Echo centralise les avis structurés et les analyses IA pour vous guider dans l'univers d'un artiste, d'un album ou d'un morceau.
       </p>
+      <div className="flex flex-wrap gap-4 pt-4">
+        <Link to="/explorer" className="premium-gradient px-8 py-4 rounded-2xl font-black text-lg shadow-xl hover:scale-105 transition-transform">Explorer les artistes</Link>
+        <Link to="/communaute" className="bg-bg-surface-light px-8 py-4 rounded-2xl font-black text-lg hover:bg-white/10 transition-colors">Lire les avis utiles</Link>
+      </div>
     </header>
 
     <section>
-      <SectionTitle subtitle="Les artistes qui marquent l'actualité musicale">Tendances du moment</SectionTitle>
+      <SectionTitle subtitle="Les artistes qui redéfinissent la scène actuelle">Tendances du moment</SectionTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockArtists.map(artist => (
-          <ArtistCard key={artist.id} artist={artist} />
-        ))}
+        {mockArtists.map(artist => <div key={artist.id}><ArtistCard artist={artist} /></div>)}
       </div>
     </section>
 
-    <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-      <div className="space-y-6">
-        <SectionTitle subtitle="Sélectionnés pour leur accessibilité">Portes d'entrée idéales</SectionTitle>
+    <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="space-y-8">
+        <SectionTitle subtitle="Sélectionnés pour leur accessibilité immédiate">Par où commencer ?</SectionTitle>
         <div className="space-y-4">
-          {mockAlbums.filter(a => a.is_entry_album).map(album => (
-            <AlbumCard key={album.id} album={album} />
-          ))}
+          {mockAlbums.filter(a => a.is_entry_album).map(album => <div key={album.id}><AlbumCard album={album} /></div>)}
         </div>
       </div>
-      <div className="space-y-6">
-        <SectionTitle subtitle="Les avis les plus constructifs">Dernières critiques</SectionTitle>
+      <div className="space-y-8">
+        <SectionTitle subtitle="Les analyses les plus pertinentes de la semaine">Avis à la une</SectionTitle>
         <ReviewCard review={mockReviews[0]} />
       </div>
     </section>
 
-    <section className="bg-bg-surface rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 border border-white/5">
-      <div className="flex-grow space-y-4">
-        <h2 className="text-3xl font-bold">Prêt à approfondir ?</h2>
-        <p className="text-text-muted">Rejoignez la communauté Echo Premium pour accéder aux avis croisés illimités et aux filtres de découverte avancés.</p>
-        <div className="flex flex-wrap gap-4 pt-4">
-          <Link to="/premium" className="premium-gradient px-8 py-3 rounded-full font-bold hover:opacity-90 transition-opacity">Découvrir Echo Premium</Link>
-          <button className="bg-bg-surface-light px-8 py-3 rounded-full font-bold hover:bg-white/10 transition-colors">En savoir plus</button>
-        </div>
-      </div>
-      <div className="w-full md:w-64 aspect-square premium-gradient rounded-3xl rotate-3 flex items-center justify-center shadow-2xl">
-        <Award size={80} className="text-white" />
+    <section>
+      <SectionTitle subtitle="Des sélections thématiques par nos experts">Listes partagées</SectionTitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {mockLists.map(list => (
+          <Link key={list.id} to={`/liste/${list.slug}`} className="glass-card p-6 flex flex-col justify-between hover:border-accent-primary/30 transition-colors group">
+            <div className="space-y-2">
+              <div className="flex justify-between items-start">
+                <Badge variant="premium">{list.category}</Badge>
+                <div className="flex items-center gap-1 text-text-muted text-xs font-bold">
+                  <ThumbsUp size={14} /> {list.like_count}
+                </div>
+              </div>
+              <h3 className="text-xl font-black group-hover:text-accent-primary transition-colors">{list.title}</h3>
+              <p className="text-text-muted text-sm line-clamp-2">{list.description}</p>
+            </div>
+            <div className="mt-6 flex items-center justify-between">
+              <span className="text-[10px] font-bold text-text-muted uppercase">Par {list.user_display_name}</span>
+              <ArrowRight size={18} className="text-accent-primary group-hover:translate-x-2 transition-transform" />
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   </div>
 );
 
 const ExploreScreen = () => {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [activeFilter, setActiveFilter] = React.useState('Tous');
-
-  const filteredArtists = mockArtists.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredAlbums = mockAlbums.filter(a => a.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  const [search, setSearch] = React.useState('');
+  const filteredArtists = mockArtists.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredAlbums = mockAlbums.filter(a => a.title.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="space-y-10">
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={20} />
+      <div className="relative pt-6">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted mt-3" size={24} />
         <input 
           type="text" 
-          placeholder="Rechercher un artiste, un album ou un morceau..."
-          className="w-full bg-bg-surface border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-lg focus:outline-none focus:border-accent-primary transition-colors"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Rechercher un artiste, un album..." 
+          className="w-full bg-bg-surface border border-white/10 rounded-3xl py-6 pl-14 pr-6 text-xl focus:outline-none focus:border-accent-primary transition-all shadow-2xl"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-
-      <div className="flex flex-wrap gap-2">
-        {['Tous', 'Artistes', 'Albums', 'Morceaux', 'Pop', 'Rock', 'Hip-hop'].map(filter => (
-          <FilterButton 
-            key={filter} 
-            active={activeFilter === filter}
-            onClick={() => setActiveFilter(filter)}
-          >
-            {filter}
-          </FilterButton>
-        ))}
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(activeFilter === 'Tous' || activeFilter === 'Artistes') && filteredArtists.map(artist => (
-          <ArtistCard key={artist.id} artist={artist} />
-        ))}
-        {(activeFilter === 'Tous' || activeFilter === 'Albums') && filteredAlbums.map(album => (
-          <AlbumCard key={album.id} album={album} />
-        ))}
+        {filteredArtists.map(a => <div key={a.id}><ArtistCard artist={a} /></div>)}
+        {filteredAlbums.map(a => <div key={a.id}><AlbumCard album={a} /></div>)}
       </div>
     </div>
   );
 };
 
-const FilterButton = ({ children, active, onClick }: { children: React.ReactNode, active?: boolean, onClick?: () => void, key?: React.Key }) => (
-  <button 
-    onClick={onClick}
-    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${active ? 'bg-accent-primary text-white' : 'bg-bg-surface text-text-muted hover:bg-bg-surface-light'}`}
-  >
-    {children}
-  </button>
-);
-
 const ArtistPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const artist = mockArtists.find(a => a.slug === slug);
+  const aiSummary = mockAISummaries.find(s => s.target_id === artist?.id);
 
   if (!artist) return <div className="text-center py-20">Artiste non trouvé.</div>;
 
   return (
     <div className="space-y-12">
-      <div className="flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-          <ChevronLeft size={20} />
-          RETOUR
-        </button>
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-bold text-text-muted uppercase">Dernière mise à jour: Aujourd'hui</span>
-          <Badge variant="success">Live Data</Badge>
-        </div>
-      </div>
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
+        <ChevronLeft size={20} /> RETOUR
+      </button>
 
-      <header className="relative rounded-[2rem] overflow-hidden aspect-[21/9] md:aspect-[4/1] shadow-2xl group">
+      <header className="relative rounded-[3rem] overflow-hidden aspect-[21/9] md:aspect-[4/1] shadow-2xl group">
         <img src={artist.hero_image_url} alt={artist.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" referrerPolicy="no-referrer" />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-bg-main/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-bg-main/40 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none">{artist.name}</h1>
-              <div className="hidden md:flex flex-col">
-                <Badge variant="premium">{artist.entry_level}</Badge>
-                <span className="text-[10px] font-bold text-text-muted mt-1 uppercase">Niveau d'entrée</span>
-              </div>
+              <Badge variant="premium">{artist.entry_level}</Badge>
             </div>
             <div className="flex flex-wrap gap-3">
-              {artist.primary_genres.map(g => <Badge key={g} variant="default">{g}</Badge>)}
-              {artist.top_tags.map(t => <span key={t} className="text-[10px] font-bold text-accent-secondary uppercase tracking-widest">#{t}</span>)}
+              {artist.primary_genres.map(g => <span key={g}><Badge>{g}</Badge></span>)}
+              {artist.top_tags.map(t => <span key={t} className="text-[10px] font-black text-accent-secondary uppercase tracking-widest">#{t}</span>)}
             </div>
           </div>
-          <div className="flex gap-4">
-            <button className="premium-gradient px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg hover:shadow-accent-primary/20 transition-all hover:-translate-y-1">
-              <PlusCircle size={20} /> SUIVRE L'ARTISTE
-            </button>
-          </div>
+          <button className="premium-gradient px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg hover:scale-105 transition-transform">
+            <PlusCircle size={20} /> SUIVRE L'ARTISTE
+          </button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left Column: Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-8 space-y-12">
-          {/* Start Here Section */}
-          <section className="glass-card p-10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-              <Zap size={120} className="text-accent-primary" />
-            </div>
+          <section className="glass-card p-10 relative overflow-hidden border-l-4 border-accent-primary">
             <div className="flex items-center gap-4 mb-8">
               <div className="w-12 h-12 rounded-2xl premium-gradient flex items-center justify-center shadow-lg">
                 <Zap size={24} className="text-white" />
               </div>
-              <div>
-                <h2 className="text-2xl font-black tracking-tight">PAR OÙ COMMENCER ?</h2>
-                <p className="text-text-muted text-sm font-medium">Le parcours de découverte guidé par Echo</p>
-              </div>
+              <h2 className="text-2xl font-black tracking-tight uppercase">Par où commencer ?</h2>
             </div>
-            
-            <div className="space-y-8">
-              <p className="text-xl text-text-main leading-relaxed font-medium italic border-l-4 border-accent-primary pl-6">
-                "{artist.why_it_matters}"
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockAlbums.filter(a => a.artist_id === artist.id && a.is_entry_album).slice(0, 1).map(album => (
-                  <Link key={album.id} to={`/album/${album.slug}`} className="bg-bg-surface-light p-6 rounded-3xl border border-white/5 hover:border-accent-primary/30 transition-colors cursor-pointer group">
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-[10px] font-black text-accent-primary uppercase tracking-widest">L'Album Pilier</span>
-                      <Award size={20} className="text-accent-primary" />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <img src={album.cover_url} className="w-20 h-20 rounded-2xl shadow-xl group-hover:scale-105 transition-transform" referrerPolicy="no-referrer" />
-                      <div>
-                        <div className="font-black text-lg leading-tight">{album.title}</div>
-                        <div className="text-sm text-text-muted mt-1">Porte d'entrée universelle</div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-                
-                {mockTracks.filter(t => t.artist_id === artist.id && t.is_best_entry_track).slice(0, 1).map(track => (
-                  <Link key={track.id} to={`/morceau/${track.slug}`} className="bg-bg-surface-light p-6 rounded-3xl border border-white/5 hover:border-accent-secondary/30 transition-colors cursor-pointer group">
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-[10px] font-black text-accent-secondary uppercase tracking-widest">Le Son Signature</span>
-                      <TrendingUp size={20} className="text-accent-secondary" />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-20 h-20 rounded-2xl bg-accent-secondary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Zap size={32} className="text-accent-secondary" />
-                      </div>
-                      <div>
-                        <div className="font-black text-lg leading-tight">{track.title}</div>
-                        <div className="text-sm text-text-muted mt-1">L'essence de son univers</div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Cultural Impact */}
-          <section className="space-y-6">
-            <SectionTitle subtitle="L'héritage et l'influence dans la culture musicale">Impact Culturel</SectionTitle>
-            <div className="glass-card p-8 bg-gradient-to-br from-bg-surface to-bg-main">
-              <p className="text-lg text-text-main leading-relaxed">{artist.cultural_impact}</p>
-            </div>
-          </section>
-
-          {/* Discography */}
-          <section className="space-y-8">
-            <div className="flex items-center justify-between">
-              <SectionTitle subtitle="Les œuvres majeures analysées par Echo">Discographie Essentielle</SectionTitle>
-              <button className="text-xs font-black text-accent-primary uppercase tracking-widest hover:underline">Voir tout</button>
-            </div>
+            <p className="text-xl text-text-main leading-relaxed font-medium italic mb-8">"{artist.why_it_matters}"</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockAlbums.filter(a => a.artist_id === artist.id).map(album => (
-                <AlbumCard key={album.id} album={album} />
+              {mockAlbums.filter(a => a.artist_id === artist.id && a.is_entry_album).map(album => (
+                <Link key={album.id} to={`/album/${album.slug}`} className="bg-bg-surface-light p-6 rounded-3xl border border-white/5 hover:border-accent-primary/30 transition-colors group">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-[10px] font-black text-accent-primary uppercase tracking-widest">L'Album Pilier</span>
+                    <Award size={20} className="text-accent-primary" />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <img src={album.cover_url} className="w-20 h-20 rounded-2xl shadow-xl" referrerPolicy="no-referrer" />
+                    <div>
+                      <div className="font-black text-lg leading-tight">{album.title}</div>
+                      <div className="text-sm text-text-muted mt-1">Porte d'entrée universelle</div>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           </section>
 
-          {/* Reviews */}
+          {aiSummary && (
+            <section className="bg-accent-primary/5 border border-accent-primary/20 rounded-[2.5rem] p-10 space-y-8">
+              <div className="flex items-center gap-3">
+                <Zap size={24} className="text-accent-primary" />
+                <h3 className="text-xl font-black uppercase tracking-tight">Synthèse Echo AI</h3>
+              </div>
+              <p className="text-2xl font-medium leading-tight text-text-main">"{aiSummary.summary_text}"</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black text-success uppercase flex items-center gap-2"><ThumbsUp size={14} /> Points Forts</h4>
+                  <ul className="space-y-3">
+                    {aiSummary.key_points_positive.map((p, i) => <li key={i} className="text-sm text-text-muted flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-success mt-1.5 flex-shrink-0" />{p}</li>)}
+                  </ul>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black text-warning uppercase flex items-center gap-2"><AlertCircle size={14} /> Points de Vigilance</h4>
+                  <ul className="space-y-3">
+                    {aiSummary.key_points_negative.map((p, i) => <li key={i} className="text-sm text-text-muted flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0" />{p}</li>)}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          )}
+
           <section className="space-y-8">
             <div className="flex items-center justify-between">
               <SectionTitle subtitle="Analyses approfondies de la communauté">Dernières Critiques</SectionTitle>
               <Link to={`/avis/nouveau/artiste/${artist.id}`} className="bg-accent-primary px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity">Rédiger un avis</Link>
             </div>
             <div className="space-y-8">
-              {mockReviews.filter(r => r.target_id === artist.id || mockAlbums.some(a => a.id === r.target_id && a.artist_id === artist.id)).slice(0, 3).map(review => (
-                <ReviewCard key={review.id} review={review} />
-              ))}
+              {mockReviews.filter(r => r.target_id === artist.id).map(review => <div key={review.id}><ReviewCard review={review} /></div>)}
             </div>
           </section>
         </div>
 
-        {/* Right Column: Dashboard Stats */}
         <div className="lg:col-span-4 space-y-8">
-          {/* Core Stats */}
           <div className="glass-card p-8 space-y-8 sticky top-10">
             <div className="space-y-6">
               <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Signaux Critiques</h3>
@@ -677,21 +517,17 @@ const ArtistPage = () => {
                 <Gauge value={artist.polarization_score} label="Polarisation" color="warning" />
               </div>
             </div>
-
             <div className="pt-8 border-t border-white/5 space-y-6">
               <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Écart Pro vs Communauté</h3>
               <div className="flex items-center gap-4">
-                <div className={`text-3xl font-black ${artist.pro_vs_community_gap >= 0 ? 'text-success' : 'text-warning'}`}>
+                <div className={`text-4xl font-black ${artist.pro_vs_community_gap >= 0 ? 'text-success' : 'text-warning'}`}>
                   {artist.pro_vs_community_gap > 0 ? '+' : ''}{artist.pro_vs_community_gap}%
                 </div>
                 <p className="text-[10px] text-text-muted leading-tight font-bold uppercase">
-                  {artist.pro_vs_community_gap >= 0 
-                    ? "Les critiques pros sont plus enthousiastes que la communauté."
-                    : "La communauté apprécie davantage que la critique pro."}
+                  {artist.pro_vs_community_gap >= 0 ? "Les critiques pros sont plus enthousiastes." : "La communauté apprécie davantage."}
                 </p>
               </div>
             </div>
-
             <div className="pt-8 border-t border-white/5 space-y-6">
               <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Breakdown par Ère</h3>
               <div className="space-y-4">
@@ -702,31 +538,12 @@ const ArtistPage = () => {
                       <span>{era.score}%</span>
                     </div>
                     <div className="h-1.5 bg-bg-surface-light rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${era.score}%` }}
-                        className="h-full bg-accent-primary" 
-                      />
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${era.score}%` }} className="h-full bg-accent-primary" />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="pt-8 border-t border-white/5 space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-text-muted uppercase">Avis vérifiés</span>
-                <span className="font-black text-lg">{artist.review_count}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-text-muted uppercase">Listes Echo</span>
-                <span className="font-black text-lg">42</span>
-              </div>
-            </div>
-
-            <button className="w-full py-4 rounded-2xl bg-bg-surface-light border border-white/5 font-black text-xs uppercase tracking-widest hover:bg-white/5 transition-colors">
-              Comparer avec un autre artiste
-            </button>
           </div>
         </div>
       </div>
@@ -738,181 +555,84 @@ const AlbumPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const album = mockAlbums.find(a => a.slug === slug);
-  const aiSummary = mockAISummaries.find(s => s.target_id === album?.id);
   const albumReviews = mockReviews.filter(r => r.target_type === 'album' && r.target_id === album?.id);
-  const albumTracks = mockTracks.filter(t => t.album_id === album?.id);
 
   if (!album) return <div className="text-center py-20">Album non trouvé.</div>;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-        <ChevronLeft size={20} />
-        RETOUR
+        <ChevronLeft size={20} /> RETOUR
       </button>
-
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        <div className="w-full md:w-80 aspect-square rounded-2xl overflow-hidden shadow-2xl flex-shrink-0">
+      <div className="flex flex-col md:flex-row gap-12 items-start">
+        <div className="w-full md:w-96 aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl flex-shrink-0">
           <img src={album.cover_url} alt={album.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
         </div>
-        <div className="space-y-6 flex-grow">
-          <div className="space-y-2">
+        <div className="space-y-8 flex-grow">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               <Badge variant="success">Album Essentiel</Badge>
-              <span className="text-text-muted text-xs font-bold uppercase">{new Date(album.release_date).getFullYear()}</span>
+              <span className="text-text-muted text-sm font-bold uppercase tracking-widest">{new Date(album.release_date).getFullYear()}</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter">{album.title}</h1>
-            <Link to={`/artiste/${album.artist_slug}`} className="text-2xl font-bold text-accent-primary hover:underline block">
-              {album.artist_name}
-            </Link>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">{album.title}</h1>
+            <Link to={`/artiste/${album.artist_slug}`} className="text-3xl font-bold text-accent-primary hover:underline block">{album.artist_name}</Link>
           </div>
-
-          <div className="flex flex-wrap gap-8 py-4 border-y border-white/5">
+          <div className="flex flex-wrap gap-12 py-8 border-y border-white/5">
             <div className="text-center">
-              <div className="text-3xl font-black text-accent-primary">{album.critic_score}</div>
-              <div className="text-[10px] font-bold text-text-muted uppercase">Score Critiques</div>
+              <div className="text-4xl font-black text-accent-primary">{album.critic_score}</div>
+              <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Score Critiques</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-black text-accent-secondary">{album.community_score}</div>
-              <div className="text-[10px] font-bold text-text-muted uppercase">Score Communauté</div>
+              <div className="text-4xl font-black text-accent-secondary">{album.community_score}</div>
+              <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Score Communauté</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-black text-success">{album.accessibility_score}%</div>
-              <div className="text-[10px] font-bold text-text-muted uppercase">Accessibilité</div>
+              <div className="text-4xl font-black text-success">{album.accessibility_score}%</div>
+              <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Accessibilité</div>
             </div>
           </div>
-
-          <p className="text-text-muted text-lg leading-relaxed">
-            {album.long_description || album.short_description}
-          </p>
+          <p className="text-text-muted text-xl leading-relaxed font-medium">{album.long_description || album.short_description}</p>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-10">
-          {aiSummary && (
-            <section className="glass-card p-8 space-y-6 border-l-4 border-accent-primary">
-              <div className="flex items-center gap-3">
-                <Zap size={24} className="text-accent-primary" />
-                <h3 className="text-xl font-bold">Synthèse Echo AI</h3>
-              </div>
-              <p className="text-text-main leading-relaxed italic">"{aiSummary.summary_text}"</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                <div className="space-y-3">
-                  <div className="text-xs font-bold text-success uppercase flex items-center gap-2">
-                    <CheckCircle2 size={14} /> Points Forts
-                  </div>
-                  <ul className="space-y-2">
-                    {aiSummary.key_points_positive.map((p, i) => (
-                      <li key={i} className="text-sm text-text-muted flex items-start gap-2">
-                        <span className="text-success mt-1">•</span> {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="space-y-3">
-                  <div className="text-xs font-bold text-warning uppercase flex items-center gap-2">
-                    <AlertCircle size={14} /> Points de Vigilance
-                  </div>
-                  <ul className="space-y-2">
-                    {aiSummary.key_points_negative.map((p, i) => (
-                      <li key={i} className="text-sm text-text-muted flex items-start gap-2">
-                        <span className="text-warning mt-1">•</span> {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </section>
-          )}
-
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <SectionTitle subtitle="La structure de l'œuvre">Tracklist & Analyse</SectionTitle>
-              <Badge variant="default">{albumTracks.length} Morceaux</Badge>
-            </div>
-            <div className="space-y-3">
-              {albumTracks.map((track) => (
-                <TrackCard key={track.id} track={track} />
-              ))}
-            </div>
-          </section>
-
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <SectionTitle subtitle="Ce qu'en disent les auditeurs qualifiés">Critiques Détaillées</SectionTitle>
-              <Link 
-                to={`/avis/nouveau/album/${album.id}`}
-                className="bg-accent-primary/10 text-accent-primary px-4 py-2 rounded-xl text-sm font-bold hover:bg-accent-primary/20 transition-colors flex items-center gap-2"
-              >
-                <PlusCircle size={18} /> Écrire un avis
-              </Link>
-            </div>
-            <div className="space-y-6">
-              {albumReviews.length > 0 ? (
-                albumReviews.map(review => (
-                  <ReviewCard key={review.id} review={review} />
-                ))
-              ) : (
-                <div className="glass-card p-10 text-center space-y-4">
-                  <MessageSquare size={40} className="mx-auto text-text-muted opacity-20" />
-                  <p className="text-text-muted">Aucun avis détaillé pour le moment. Soyez le premier à partager votre analyse !</p>
-                </div>
-              )}
-            </div>
-          </section>
+      <section className="space-y-8">
+        <SectionTitle subtitle="Analyses détaillées de l'album">Critiques de la communauté</SectionTitle>
+        <div className="space-y-8">
+          {albumReviews.map(review => <div key={review.id}><ReviewCard review={review} /></div>)}
         </div>
+      </section>
+    </div>
+  );
+};
 
-        <aside className="space-y-8">
-          <div className="glass-card p-6 space-y-6 sticky top-10">
-            <h3 className="font-bold text-lg border-b border-white/5 pb-4">Analyse de l'Album</h3>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold uppercase">
-                  <span className="text-text-muted">Cohérence</span>
-                  <span className="text-accent-primary">88%</span>
-                </div>
-                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '88%' }} className="h-full bg-accent-primary" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold uppercase">
-                  <span className="text-text-muted">Innovation</span>
-                  <span className="text-accent-secondary">72%</span>
-                </div>
-                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '72%' }} className="h-full bg-accent-secondary" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold uppercase">
-                  <span className="text-text-muted">Production</span>
-                  <span className="text-success">94%</span>
-                </div>
-                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '94%' }} className="h-full bg-success" />
-                </div>
-              </div>
-            </div>
+const TrackPage = () => {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const track = mockTracks.find(t => t.slug === slug);
 
-            <div className="pt-6 border-t border-white/5 space-y-4">
-              <h4 className="text-xs font-bold text-text-muted uppercase">Genres</h4>
-              <div className="flex flex-wrap gap-2">
-                {album.genres.map(genre => (
-                  <span key={genre} className="px-3 py-1 bg-white/5 rounded-lg text-xs hover:bg-white/10 transition-colors cursor-default">
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            </div>
+  if (!track) return <div className="text-center py-20">Morceau non trouvé.</div>;
 
-            <button className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
-              <Share2 size={16} /> Partager l'album
-            </button>
-          </div>
-        </aside>
+  return (
+    <div className="space-y-12">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
+        <ChevronLeft size={20} /> RETOUR
+      </button>
+      <div className="glass-card p-12 flex flex-col md:flex-row items-center gap-12">
+        <div className="w-24 h-24 rounded-3xl premium-gradient flex items-center justify-center shadow-2xl">
+          <PlayCircle size={48} className="text-white" />
+        </div>
+        <div className="flex-grow text-center md:text-left space-y-2">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter">{track.title}</h1>
+          <p className="text-2xl font-bold text-text-muted">{track.artist_name} — {track.album_title}</p>
+        </div>
+        <div className="text-center">
+          <div className="text-5xl font-black text-accent-secondary">{track.quick_consensus_score}%</div>
+          <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Consensus Rapide</div>
+        </div>
       </div>
+      <section className="max-w-3xl mx-auto space-y-8">
+        <SectionTitle>À propos de ce morceau</SectionTitle>
+        <p className="text-xl text-text-muted leading-relaxed">{track.description}</p>
+      </section>
     </div>
   );
 };
@@ -922,211 +642,136 @@ const ReviewFormPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = React.useState(1);
   const [formData, setFormData] = React.useState({
+    rating: 0,
     title: '',
-    keywords: [] as string[],
-    what_i_hear: '',
-    what_it_makes_me_feel: '',
-    why_it_works_or_not: '',
-    who_its_for: '',
-    limit_or_reserve: '',
-    rating: 0
+    selections: {
+      impression: '',
+      highlights: [] as string[],
+      feeling: '',
+      accessibility: '',
+      target_audience: [] as string[],
+      limitations: [] as string[]
+    },
+    justifications: {
+      why_words: '',
+      key_element: '',
+      dividing_factor: '',
+      recommendation: '',
+      entry_point: ''
+    }
   });
 
-  const availableKeywords = [
-    "Froid", "Chaleureux", "Complexe", "Minimaliste", "Épique", 
-    "Intime", "Brut", "Produit", "Mélancolique", "Énergique",
-    "Expérimental", "Accessible", "Sombre", "Lumineux", "Nostalgique"
-  ];
+  const options = {
+    impression: ['marquant', 'accessible', 'exigeant', 'captivant', 'inégal', 'surévalué', 'singulier', 'efficace', 'ambitieux', 'répétitif', 'maîtrisé', 'polarisant'],
+    highlights: ['production', 'voix', 'écriture', 'flow', 'mélodie', 'émotion', 'énergie', 'cohérence', 'originalité', 'ambiance', 'structure', 'instrumentation'],
+    feeling: ['intense', 'mélancolique', 'euphorique', 'introspectif', 'brut', 'aérien', 'sombre', 'chaleureux', 'nerveux', 'immersif', 'frontal', 'apaisant'],
+    accessibility: ['immédiat', 'accessible', 'intermédiaire', 'exigeant', 'réservé aux amateurs'],
+    target_audience: ['curieux', 'grand public', 'amateurs du genre', 'fans de production', 'amateurs de textes', 'auditeurs émotionnels', 'chercheurs de nouveautés', 'fans d\'univers marqués'],
+    limitations: ['trop long', 'trop répétitif', 'trop lisse', 'trop dense', 'trop froid', 'trop technique', 'manque de relief', 'manque d\'originalité', 'difficile d\'accès', 'inégal', 'peu mémorable']
+  };
 
-  const targetName = type === 'artist' 
-    ? mockArtists.find(a => a.id === id)?.name 
-    : mockAlbums.find(a => a.id === id)?.title || mockTracks.find(t => t.id === id)?.title;
+  const isStep1Valid = formData.rating > 0 && formData.selections.impression && formData.selections.highlights.length > 0 && formData.selections.feeling && formData.selections.accessibility && formData.selections.target_audience.length > 0;
+  const isStep2Valid = formData.justifications.why_words.length > 20 && formData.justifications.key_element.length > 20;
 
-  const totalChars = formData.what_i_hear.length + 
-                     formData.what_it_makes_me_feel.length + 
-                     formData.why_it_works_or_not.length + 
-                     formData.who_its_for.length + 
-                     formData.limit_or_reserve.length;
-  
-  const isStep1Valid = formData.rating > 0 && formData.keywords.length > 0;
-  const isStep2Valid = totalChars >= 350;
-
-  const toggleKeyword = (kw: string) => {
-    if (formData.keywords.includes(kw)) {
-      setFormData({ ...formData, keywords: formData.keywords.filter(k => k !== kw) });
-    } else if (formData.keywords.length < 3) {
-      setFormData({ ...formData, keywords: [...formData.keywords, kw] });
+  const toggleMulti = (category: 'highlights' | 'target_audience' | 'limitations', val: string) => {
+    const current = formData.selections[category];
+    if (current.includes(val)) {
+      setFormData({ ...formData, selections: { ...formData.selections, [category]: current.filter(v => v !== val) } });
+    } else {
+      setFormData({ ...formData, selections: { ...formData.selections, [category]: [...current, val] } });
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-10">
+    <div className="max-w-4xl mx-auto space-y-12 py-10">
       <div className="flex items-center justify-between">
-        <button onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-          <ChevronLeft size={20} />
-          {step > 1 ? 'RETOUR' : 'ANNULER'}
+        <button onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main font-bold uppercase text-xs tracking-widest">
+          <ChevronLeft size={20} /> {step > 1 ? 'Retour' : 'Annuler'}
         </button>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           {[1, 2, 3].map(s => (
-            <div key={s} className={`w-8 h-1 rounded-full transition-colors ${step >= s ? 'bg-accent-primary' : 'bg-white/10'}`} />
+            <div key={s} className={`w-12 h-1.5 rounded-full transition-all ${step >= s ? 'bg-accent-primary shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'bg-white/10'}`} />
           ))}
         </div>
       </div>
 
-      <header className="space-y-2">
+      <header className="space-y-4">
         <Badge variant="premium">Étape {step} sur 3</Badge>
-        <h1 className="text-3xl font-bold">
-          {step === 1 && "Premières impressions"}
-          {step === 2 && "Approfondissement"}
-          {step === 3 && "Vérification finale"}
+        <h1 className="text-4xl font-black tracking-tighter">
+          {step === 1 && "Vos premières impressions"}
+          {step === 2 && "Justifiez votre analyse"}
+          {step === 3 && "Vérification et publication"}
         </h1>
-        <p className="text-text-muted">
-          {step === 1 && `Comment décririez-vous ${targetName} en quelques mots ?`}
-          {step === 2 && "Développez votre analyse pour la communauté."}
+        <p className="text-text-muted text-lg">
+          {step === 1 && "Construisez votre avis en sélectionnant les mots les plus justes."}
+          {step === 2 && "Développez vos arguments pour aider la communauté."}
           {step === 3 && "Relisez votre avis avant de le rendre public."}
         </p>
       </header>
 
       <AnimatePresence mode="wait">
         {step === 1 && (
-          <motion.div 
-            key="step1"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-10"
-          >
-            <div className="glass-card p-8 space-y-6">
-              <label className="block text-sm font-bold text-text-muted uppercase">Note globale</label>
-              <div className="flex gap-2">
+          <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-10">
+            <div className="glass-card p-10 space-y-8">
+              <label className="block text-xs font-black text-text-muted uppercase tracking-widest">Note globale</label>
+              <div className="flex gap-3">
                 {[1, 2, 3, 4, 5].map(star => (
-                  <button 
-                    key={star} 
-                    onClick={() => setFormData({ ...formData, rating: star })}
-                    className={`p-4 rounded-2xl transition-all ${formData.rating >= star ? 'text-warning bg-warning/10' : 'text-text-muted bg-bg-surface'}`}
-                  >
-                    <Star size={40} fill={formData.rating >= star ? 'currentColor' : 'none'} />
+                  <button key={star} onClick={() => setFormData({ ...formData, rating: star })} className={`p-5 rounded-2xl transition-all ${formData.rating >= star ? 'text-warning bg-warning/10 shadow-lg' : 'text-text-muted bg-bg-surface-light hover:bg-white/5'}`}>
+                    <Star size={48} fill={formData.rating >= star ? 'currentColor' : 'none'} />
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="glass-card p-8 space-y-6">
-              <div className="flex justify-between items-end">
-                <label className="block text-sm font-bold text-text-muted uppercase">Mots-clés (1 à 3)</label>
-                <span className="text-xs text-text-muted font-bold">{formData.keywords.length}/3</span>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {availableKeywords.map(kw => (
-                  <button
-                    key={kw}
-                    onClick={() => toggleKeyword(kw)}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${formData.keywords.includes(kw) ? 'bg-accent-primary border-accent-primary text-white' : 'bg-bg-surface border-white/5 text-text-muted hover:border-white/20'}`}
-                  >
-                    {kw}
-                  </button>
-                ))}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <SelectionGroup label="Impression globale" options={options.impression} selected={formData.selections.impression} onSelect={(v) => setFormData({ ...formData, selections: { ...formData.selections, impression: v } })} />
+              <SelectionGroup label="Ce qui ressort le plus" options={options.highlights} selected={formData.selections.highlights} onSelect={(v) => toggleMulti('highlights', v)} multi />
+              <SelectionGroup label="Ressenti dominant" options={options.feeling} selected={formData.selections.feeling} onSelect={(v) => setFormData({ ...formData, selections: { ...formData.selections, feeling: v } })} />
+              <SelectionGroup label="Niveau d'accès" options={options.accessibility} selected={formData.selections.accessibility} onSelect={(v) => setFormData({ ...formData, selections: { ...formData.selections, accessibility: v } })} />
+              <SelectionGroup label="Pour qui c'est" options={options.target_audience} selected={formData.selections.target_audience} onSelect={(v) => toggleMulti('target_audience', v)} multi />
+              <SelectionGroup label="Limites perçues" options={options.limitations} selected={formData.selections.limitations} onSelect={(v) => toggleMulti('limitations', v)} multi />
             </div>
 
-            <button 
-              disabled={!isStep1Valid}
-              onClick={() => setStep(2)}
-              className={`w-full py-5 rounded-2xl font-black text-lg transition-all ${isStep1Valid ? 'premium-gradient text-white shadow-xl hover:scale-[1.02]' : 'bg-white/5 text-text-muted cursor-not-allowed'}`}
-            >
+            <button disabled={!isStep1Valid} onClick={() => setStep(2)} className={`w-full py-6 rounded-[2rem] font-black text-xl transition-all ${isStep1Valid ? 'premium-gradient text-white shadow-2xl hover:scale-[1.02]' : 'bg-white/5 text-text-muted cursor-not-allowed'}`}>
               CONTINUER L'ANALYSE
             </button>
           </motion.div>
         )}
 
         {step === 2 && (
-          <motion.div 
-            key="step2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-8"
-          >
-            <div className="glass-card p-8 space-y-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-text-muted uppercase">Titre de votre avis (optionnel)</label>
+          <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-10">
+            <div className="glass-card p-10 space-y-8">
+              <div className="space-y-4">
+                <label className="block text-xs font-black text-text-muted uppercase tracking-widest">Titre de votre avis (optionnel)</label>
                 <input 
-                  type="text"
+                  type="text" 
                   maxLength={60}
                   placeholder="Exemple : Une entrée froide mais fascinante"
-                  className="w-full bg-bg-surface border border-white/10 rounded-xl p-4 focus:outline-none focus:border-accent-primary transition-colors text-text-main font-bold"
+                  className="w-full bg-bg-surface-light border border-white/10 rounded-2xl p-5 text-xl font-bold focus:outline-none focus:border-accent-primary transition-all"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
-                <div className="flex justify-between items-center">
-                  <p className="text-[10px] text-text-muted uppercase font-bold italic">Un bon titre résume votre ressenti global.</p>
-                  <span className="text-[10px] text-text-muted font-bold">{formData.title.length}/60</span>
-                </div>
               </div>
             </div>
 
             <div className="space-y-8">
-              <ReviewField 
-                label="Ce que j'entends" 
-                placeholder="Décrivez les sons, les instruments, la production..." 
-                value={formData.what_i_hear}
-                onChange={(v) => setFormData({ ...formData, what_i_hear: v })}
-              />
-              <ReviewField 
-                label="Ce que ça me fait" 
-                placeholder="Quelles émotions cet objet musical provoque-t-il ?" 
-                value={formData.what_it_makes_me_feel}
-                onChange={(v) => setFormData({ ...formData, what_it_makes_me_feel: v })}
-              />
-              <ReviewField 
-                label="Pourquoi ça fonctionne ou pas" 
-                placeholder="Analysez la structure, l'originalité, l'exécution..." 
-                value={formData.why_it_works_or_not}
-                onChange={(v) => setFormData({ ...formData, why_it_works_or_not: v })}
-              />
-              <ReviewField 
-                label="Pour qui c'est" 
-                placeholder="À quel type d'auditeur recommanderiez-vous cela ?" 
-                value={formData.who_its_for}
-                onChange={(v) => setFormData({ ...formData, who_its_for: v })}
-              />
-              <ReviewField 
-                label="La limite ou réserve" 
-                placeholder="Qu'est-ce qui pourrait freiner un auditeur ?" 
-                value={formData.limit_or_reserve}
-                onChange={(v) => setFormData({ ...formData, limit_or_reserve: v })}
-              />
+              <TextArea label="Pourquoi avez-vous choisi ces mots ?" value={formData.justifications.why_words} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, why_words: v } })} />
+              <TextArea label="Quel élément vous a le plus marqué ?" value={formData.justifications.key_element} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, key_element: v } })} />
+              <TextArea label="Qu'est-ce qui peut freiner ou diviser ?" value={formData.justifications.dividing_factor} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, dividing_factor: v } })} />
+              <TextArea label="À qui le recommanderiez-vous ?" value={formData.justifications.recommendation} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, recommendation: v } })} />
+              <TextArea label="Par quoi faudrait-il commencer ?" value={formData.justifications.entry_point} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, entry_point: v } })} />
             </div>
 
-            <div className="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${totalChars >= 350 ? 'bg-success' : 'bg-warning'}`} />
-                  <span className="text-sm font-bold">{totalChars} / 350 caractères minimum</span>
-                </div>
-                <p className="text-xs text-text-muted">La qualité de l'avis dépend de sa précision.</p>
-              </div>
-              <button 
-                disabled={!isStep2Valid}
-                onClick={() => setStep(3)}
-                className={`px-10 py-4 rounded-full font-bold text-lg transition-all ${isStep2Valid ? 'premium-gradient text-white shadow-xl hover:scale-105' : 'bg-bg-surface-light text-text-muted cursor-not-allowed'}`}
-              >
-                VOIR L'APERÇU
-              </button>
-            </div>
+            <button disabled={!isStep2Valid} onClick={() => setStep(3)} className={`w-full py-6 rounded-[2rem] font-black text-xl transition-all ${isStep2Valid ? 'premium-gradient text-white shadow-2xl hover:scale-[1.02]' : 'bg-white/5 text-text-muted cursor-not-allowed'}`}>
+              VOIR L'APERÇU
+            </button>
           </motion.div>
         )}
 
         {step === 3 && (
-          <motion.div 
-            key="step3"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-10"
-          >
+          <motion.div key="s3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-12">
             <div className="space-y-6">
-              <SectionTitle subtitle="Voici comment votre avis apparaîtra">Aperçu final</SectionTitle>
+              <SectionTitle subtitle="Voici comment votre avis apparaîtra dans la communauté">Aperçu de votre carte</SectionTitle>
               <ReviewCard review={{
                 id: 'preview',
                 user_id: 'me',
@@ -1135,34 +780,20 @@ const ReviewFormPage = () => {
                 user_expertise: 'Contributeur Qualifié',
                 target_type: type as EntityType,
                 target_id: id || '',
+                target_name: 'Objet Musical',
                 rating_overall: formData.rating,
                 title: formData.title,
-                keywords: formData.keywords,
-                what_i_hear: formData.what_i_hear,
-                what_it_makes_me_feel: formData.what_it_makes_me_feel,
-                why_it_works_or_not: formData.why_it_works_or_not,
-                who_its_for: formData.who_its_for,
-                limit_or_reserve: formData.limit_or_reserve,
+                selections: formData.selections,
+                justifications: formData.justifications,
                 quality_score: 95,
                 helpful_count: 0,
                 published_at: new Date().toISOString(),
                 tone: 'Analytique'
               }} />
             </div>
-
             <div className="flex flex-col md:flex-row gap-4">
-              <button 
-                onClick={() => setStep(2)}
-                className="flex-1 py-4 rounded-2xl border border-white/10 font-bold hover:bg-white/5 transition-colors"
-              >
-                MODIFIER
-              </button>
-              <button 
-                onClick={() => navigate(-1)}
-                className="flex-[2] py-4 rounded-2xl premium-gradient text-white font-black text-lg shadow-2xl hover:scale-[1.02] transition-transform"
-              >
-                PUBLIER MON ANALYSE
-              </button>
+              <button onClick={() => setStep(2)} className="flex-1 py-5 rounded-2xl border border-white/10 font-bold hover:bg-white/5 transition-colors">MODIFIER</button>
+              <button onClick={() => navigate('/')} className="flex-[2] py-5 rounded-2xl premium-gradient text-white font-black text-xl shadow-2xl hover:scale-[1.02] transition-transform">PUBLIER MON ANALYSE</button>
             </div>
           </motion.div>
         )}
@@ -1171,372 +802,196 @@ const ReviewFormPage = () => {
   );
 };
 
-const ReviewField = ({ label, placeholder, value, onChange }: { label: string, placeholder: string, value: string, onChange: (v: string) => void }) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-bold text-text-muted uppercase">{label}</label>
+const SelectionGroup = ({ label, options, selected, onSelect, multi }: { label: string, options: string[], selected: any, onSelect: (v: string) => void, multi?: boolean }) => (
+  <div className="glass-card p-8 space-y-6">
+    <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">{label}</label>
+    <div className="flex flex-wrap gap-2">
+      {options.map(opt => {
+        const isSelected = multi ? selected.includes(opt) : selected === opt;
+        return (
+          <button 
+            key={opt} 
+            onClick={() => onSelect(opt)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${isSelected ? 'bg-accent-primary border-accent-primary text-white shadow-lg shadow-accent-primary/20' : 'bg-bg-surface-light border-white/5 text-text-muted hover:border-white/20'}`}
+          >
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const TextArea = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
+  <div className="glass-card p-10 space-y-6">
+    <label className="block text-xs font-black text-text-muted uppercase tracking-widest">{label}</label>
     <textarea 
-      placeholder={placeholder}
-      className="w-full bg-bg-surface border border-white/10 rounded-2xl p-4 min-h-[120px] focus:outline-none focus:border-accent-primary transition-colors text-text-main"
+      className="w-full bg-bg-surface-light border border-white/10 rounded-2xl p-6 text-lg font-medium focus:outline-none focus:border-accent-primary transition-all min-h-[150px] resize-none"
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      placeholder="Développez votre pensée ici..."
     />
   </div>
 );
 
-const ProReviewLink = ({ source, score, excerpt }: { source: string, score: string, excerpt: string }) => (
-  <div className="p-4 bg-bg-surface-light rounded-2xl space-y-2 border border-white/5 hover:border-accent-secondary/30 transition-colors cursor-pointer group">
-    <div className="flex justify-between items-center">
-      <span className="font-bold text-sm group-hover:text-accent-secondary transition-colors">{source}</span>
-      <span className="text-xs font-mono font-bold text-accent-secondary">{score}</span>
-    </div>
-    <p className="text-xs text-text-muted line-clamp-2 italic">"{excerpt}"</p>
-    <div className="pt-2 flex items-center gap-1 text-[10px] font-bold text-text-muted group-hover:text-text-main">
-      LIRE LA CRITIQUE <ArrowRight size={10} />
-    </div>
-  </div>
-);
-
 const ListsPage = () => (
-  <div className="space-y-10">
-    <SectionTitle subtitle="Découvrez la musique à travers des sélections thématiques">Listes Partagées</SectionTitle>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {mockLists.map(list => (
-        <div key={list.id} className="glass-card p-6 space-y-4 group cursor-pointer">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold group-hover:text-accent-primary transition-colors">{list.title}</h3>
-              <p className="text-text-muted text-sm">{list.description}</p>
-            </div>
-            <div className="flex items-center gap-1 text-accent-primary">
-              <ThumbsUp size={16} />
-              <span className="text-sm font-bold">{list.like_count}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <img src={mockUsers[0].avatar_url} className="w-6 h-6 rounded-full" referrerPolicy="no-referrer" />
-            <span className="text-xs text-text-muted">Par <span className="text-text-main font-medium">{list.user_display_name}</span></span>
-          </div>
-          <div className="pt-4 flex gap-3">
-            {list.items.slice(0, 3).map((item, i) => (
-              <div key={i} className="w-12 h-12 rounded-lg bg-bg-surface-light border border-white/5" />
-            ))}
-            <div className="w-12 h-12 rounded-lg bg-bg-surface-light border border-white/5 flex items-center justify-center text-xs font-bold text-text-muted">
-              +{list.items.length - 3}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const CommunityPage = () => (
-  <div className="space-y-10">
-    <SectionTitle subtitle="Les contributeurs les plus actifs et qualifiés">Communauté Echo</SectionTitle>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {mockUsers.map(user => (
-        <div key={user.id} className="glass-card p-6 flex flex-col items-center text-center space-y-4">
-          <div className="relative">
-            <img src={user.avatar_url} className="w-20 h-20 rounded-full border-2 border-accent-primary" referrerPolicy="no-referrer" />
-            {user.credibility_level === 'qualifie' && (
-              <div className="absolute -bottom-1 -right-1 bg-accent-primary p-1 rounded-full border-2 border-bg-surface">
-                <ShieldCheck size={16} className="text-white" />
-              </div>
-            )}
-          </div>
-          <div>
-            <h3 className="font-bold text-lg">{user.display_name}</h3>
-            <p className="text-xs text-text-muted">@{user.username}</p>
-          </div>
-          <p className="text-sm text-text-muted line-clamp-2">{user.bio_short}</p>
-          <div className="flex gap-4 pt-2">
-            <div className="text-center">
-              <div className="font-bold">124</div>
-              <div className="text-[10px] text-text-muted uppercase">Avis</div>
-            </div>
-            <div className="text-center">
-              <div className="font-bold">850</div>
-              <div className="text-[10px] text-text-muted uppercase">Followers</div>
-            </div>
-          </div>
-          <button className="w-full bg-bg-surface-light py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition-colors">Voir le profil</button>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPremium: (b: boolean) => void }) => (
-  <div className="space-y-10">
-    <div className="glass-card p-8 flex flex-col md:flex-row items-center gap-8">
-      <img src={mockUsers[0].avatar_url} className="w-32 h-32 rounded-full border-4 border-accent-primary" referrerPolicy="no-referrer" />
-      <div className="flex-grow text-center md:text-left space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center gap-3">
-          <h1 className="text-3xl font-bold">{mockUsers[0].display_name}</h1>
-          <div className="flex justify-center md:justify-start gap-2">
-            <Badge variant="premium">Qualifié</Badge>
-            {isPremium && <Badge variant="success">Premium</Badge>}
-          </div>
-        </div>
-        <p className="text-text-muted max-w-xl">{mockUsers[0].bio_short}</p>
-        <div className="flex flex-wrap justify-center md:justify-start gap-6 pt-2">
-          <div className="flex items-center gap-2">
-            <MessageSquare size={18} className="text-accent-primary" />
-            <span className="font-bold">124</span> <span className="text-text-muted text-sm">Avis</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThumbsUp size={18} className="text-accent-primary" />
-            <span className="font-bold">1.2k</span> <span className="text-text-muted text-sm">Utiles</span>
-          </div>
-        </div>
-      </div>
-      <button className="bg-bg-surface-light px-6 py-3 rounded-xl font-bold hover:bg-white/10 transition-colors">Modifier le profil</button>
-    </div>
-
-    {!isPremium && (
-      <div className="premium-gradient rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center gap-10">
-        <div className="flex-grow space-y-6">
-          <h2 className="text-4xl font-bold tracking-tighter">Passez à Echo Premium</h2>
-          <ul className="space-y-3">
-            <li className="flex items-center gap-3 font-medium">
-              <ShieldCheck size={20} /> Lecture illimitée des avis détaillés
-            </li>
-            <li className="flex items-center gap-3 font-medium">
-              <Zap size={20} /> Filtres de découverte avancés
-            </li>
-            <li className="flex items-center gap-3 font-medium">
-              <Users size={20} /> Comparaison avec des profils similaires
-            </li>
-            <li className="flex items-center gap-3 font-medium">
-              <Lock size={20} /> Aucune publicité
-            </li>
-          </ul>
-          <button 
-            onClick={() => setIsPremium(true)}
-            className="bg-white text-accent-primary px-10 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-xl"
-          >
-            S'abonner pour 4,99€ / mois
-          </button>
-        </div>
-        <Award size={120} className="opacity-20 hidden md:block" />
-      </div>
-    )}
-
-    <section>
-      <SectionTitle>Mes derniers avis</SectionTitle>
-      <div className="space-y-6">
-        <ReviewCard review={mockReviews[0]} />
-      </div>
-    </section>
-  </div>
-);
-
-const PremiumPage = () => (
   <div className="space-y-12">
-    <header className="text-center space-y-4 max-w-3xl mx-auto">
-      <Badge variant="premium">Echo Premium</Badge>
-      <h1 className="text-4xl md:text-7xl font-black tracking-tighter">L'expérience culturelle <br /><span className="text-accent-primary">sans compromis.</span></h1>
-      <p className="text-text-muted text-xl">Accédez à la profondeur totale de notre base de données et rejoignez l'élite des contributeurs.</p>
-    </header>
-
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <PremiumFeatureCard 
-        icon={<Zap className="text-accent-primary" size={32} />}
-        title="Analyses AI Illimitées"
-        description="Accédez aux synthèses générées par IA pour chaque artiste, album et morceau de notre catalogue."
-      />
-      <PremiumFeatureCard 
-        icon={<ShieldCheck className="text-accent-secondary" size={32} />}
-        title="Statut Certifié"
-        description="Vos avis sont mis en avant et votre score de crédibilité augmente plus rapidement."
-      />
-      <PremiumFeatureCard 
-        icon={<Users className="text-success" size={32} />}
-        title="Filtres Experts"
-        description="Filtrez les avis par niveau d'expertise des contributeurs pour ne lire que le meilleur."
-      />
-    </div>
-
-    <div className="glass-card p-10 md:p-20 text-center space-y-8 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 premium-gradient" />
-      <div className="space-y-2">
-        <div className="text-5xl font-black">4,99€ <span className="text-xl text-text-muted font-bold">/ mois</span></div>
-        <p className="text-text-muted">Sans engagement, annulation en un clic.</p>
-      </div>
-      <button className="premium-gradient px-12 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl">
-        COMMENCER L'ESSAI GRATUIT
-      </button>
-      <p className="text-[10px] text-text-muted uppercase font-bold tracking-widest">7 jours d'essai offerts • Puis 4,99€/mois</p>
-    </div>
-  </div>
-);
-
-const PremiumFeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-  <div className="glass-card p-8 space-y-4 hover:border-accent-primary/30 transition-colors">
-    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4">
-      {icon}
-    </div>
-    <h3 className="text-xl font-bold">{title}</h3>
-    <p className="text-text-muted text-sm leading-relaxed">{description}</p>
-  </div>
-);
-
-const TrackPage = () => {
-  const { slug } = useParams();
-  const navigate = useNavigate();
-  const track = mockTracks.find(t => t.slug === slug);
-  const album = mockAlbums.find(a => a.id === track?.album_id);
-  const trackReviews = mockReviews.filter(r => r.target_type === 'track' && r.target_id === track?.id);
-
-  if (!track) return <div className="text-center py-20">Morceau non trouvé.</div>;
-
-  return (
-    <div className="space-y-10">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-        <ChevronLeft size={20} />
-        RETOUR
-      </button>
-
-      <div className="glass-card p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
-        <div className="w-48 h-48 rounded-2xl premium-gradient flex items-center justify-center shadow-2xl flex-shrink-0">
-          <Zap size={80} className="text-white" />
-        </div>
-        <div className="space-y-4 flex-grow text-center md:text-left">
-          <div className="flex flex-wrap justify-center md:justify-start gap-3">
-            <Badge variant="premium">Morceau</Badge>
-            {track.is_best_entry_track && <Badge variant="success">Meilleur Point d'Entrée</Badge>}
-          </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter">{track.title}</h1>
-          <div className="text-xl md:text-2xl font-bold space-x-2">
-            <Link to={`/artiste/${track.artist_slug}`} className="text-accent-primary hover:underline">{track.artist_name}</Link>
-            <span className="text-text-muted">•</span>
-            <Link to={`/album/${track.album_slug}`} className="text-text-main hover:underline">{track.album_title}</Link>
-          </div>
-          <div className="flex items-center justify-center md:justify-start gap-6 pt-4">
-            <div className="text-center">
-              <div className="text-3xl font-black text-accent-secondary">{track.quick_consensus_score}%</div>
-              <div className="text-[10px] font-bold text-text-muted uppercase">Consensus Rapide</div>
+    <SectionTitle subtitle="Les sélections thématiques de la communauté">Listes Partagées</SectionTitle>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {mockLists.map(list => (
+        <Link key={list.id} to={`/liste/${list.slug}`} className="glass-card p-10 space-y-6 hover:border-accent-primary/30 transition-all group">
+          <div className="flex justify-between items-start">
+            <Badge variant="premium">{list.category}</Badge>
+            <div className="flex items-center gap-2 text-text-muted font-bold">
+              <ThumbsUp size={16} /> {list.like_count}
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-black text-text-muted">
-                {Math.floor(track.duration_seconds / 60)}:{(track.duration_seconds % 60).toString().padStart(2, '0')}
+          </div>
+          <h2 className="text-3xl font-black group-hover:text-accent-primary transition-colors">{list.title}</h2>
+          <p className="text-text-muted text-lg leading-relaxed">{list.description}</p>
+          <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center text-accent-primary font-bold text-xs">
+                {list.user_display_name[0]}
               </div>
-              <div className="text-[10px] font-bold text-text-muted uppercase">Durée</div>
+              <span className="text-sm font-bold text-text-muted">{list.user_display_name}</span>
             </div>
+            <ArrowRight size={24} className="text-accent-primary group-hover:translate-x-2 transition-transform" />
           </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-10">
-          <section className="space-y-6">
-            <SectionTitle subtitle="Pourquoi ce morceau est important">Analyse du Morceau</SectionTitle>
-            <div className="glass-card p-8 text-lg leading-relaxed text-text-muted">
-              {track.description || "Ce morceau représente une facette essentielle de l'univers de l'artiste. Son impact se mesure à travers sa capacité à condenser l'esthétique de l'album tout en proposant une expérience immédiate et mémorable."}
-            </div>
-          </section>
-
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <SectionTitle subtitle="L'avis de la communauté Echo">Critiques Flash</SectionTitle>
-              <Link 
-                to={`/avis/nouveau/track/${track.id}`}
-                className="bg-accent-primary/10 text-accent-primary px-4 py-2 rounded-xl text-sm font-bold hover:bg-accent-primary/20 transition-colors flex items-center gap-2"
-              >
-                <PlusCircle size={18} /> Écrire un avis
-              </Link>
-            </div>
-            <div className="space-y-6">
-              {trackReviews.length > 0 ? (
-                trackReviews.map(review => (
-                  <ReviewCard key={review.id} review={review} />
-                ))
-              ) : (
-                <div className="glass-card p-10 text-center space-y-4">
-                  <MessageSquare size={40} className="mx-auto text-text-muted opacity-20" />
-                  <p className="text-text-muted">Aucune critique flash pour ce morceau. Partagez votre ressenti !</p>
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
-
-        <aside className="space-y-8">
-          {album && (
-            <div className="glass-card p-6 space-y-6">
-              <h3 className="font-bold text-lg border-b border-white/5 pb-4">Issu de l'album</h3>
-              <Link to={`/album/${album.slug}`} className="group block space-y-4">
-                <div className="aspect-square rounded-xl overflow-hidden">
-                  <img src={album.cover_url} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" referrerPolicy="no-referrer" />
-                </div>
-                <div>
-                  <h4 className="font-bold group-hover:text-accent-primary transition-colors">{album.title}</h4>
-                  <p className="text-xs text-text-muted">{album.artist_name}</p>
-                </div>
-              </Link>
-              <Link to={`/album/${album.slug}`} className="w-full py-3 bg-accent-primary/10 text-accent-primary rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
-                Voir l'album complet <ArrowRight size={16} />
-              </Link>
-            </div>
-          )}
-        </aside>
-      </div>
+        </Link>
+      ))}
     </div>
-  );
-};
+  </div>
+);
 
 const ListPage = () => {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const list = mockLists.find(l => l.slug === slug);
-
   if (!list) return <div className="text-center py-20">Liste non trouvée.</div>;
-
   return (
-    <div className="space-y-10">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-        <ChevronLeft size={20} />
-        RETOUR
-      </button>
-
+    <div className="space-y-12">
       <header className="space-y-4">
-        <Badge variant="default">{list.category}</Badge>
-        <h1 className="text-4xl md:text-6xl font-black tracking-tighter">{list.title}</h1>
-        <div className="flex items-center gap-3">
-          <img src={mockUsers[0].avatar_url} className="w-6 h-6 rounded-full" referrerPolicy="no-referrer" />
-          <span className="text-sm font-bold">Par {list.user_display_name}</span>
-          <span className="text-text-muted">•</span>
-          <span className="text-sm text-text-muted">{list.like_count} J'aime</span>
-        </div>
-        <p className="text-text-muted text-lg max-w-3xl">{list.description}</p>
+        <Badge variant="premium">{list.category}</Badge>
+        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">{list.title}</h1>
+        <p className="text-text-muted text-xl max-w-3xl">{list.description}</p>
       </header>
-
       <div className="space-y-6">
-        {list.items.map((item, index) => (
-          <div key={item.id} className="glass-card p-6 flex flex-col md:flex-row gap-6 group">
-            <div className="text-4xl font-black text-white/10 group-hover:text-accent-primary/20 transition-colors w-12 flex-shrink-0">
-              {(index + 1).toString().padStart(2, '0')}
+        {list.items.map((item, i) => (
+          <div key={i} className="glass-card p-8 flex flex-col md:flex-row gap-8 items-center">
+            <div className="text-4xl font-black text-accent-primary opacity-50">#{i + 1}</div>
+            <div className="flex-grow space-y-2">
+              <h3 className="text-2xl font-black">{item.title}</h3>
+              <p className="text-text-muted italic">"{item.why}"</p>
             </div>
-            <div className="flex-grow space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-bold group-hover:text-accent-primary transition-colors">{item.title}</h3>
-                  <Link 
-                    to={item.type === 'artist' ? `/artiste/${item.slug}` : `/album/${item.slug}`}
-                    className="text-sm text-text-muted hover:text-accent-secondary transition-colors"
-                  >
-                    Voir la fiche complète
-                  </Link>
-                </div>
-                <Badge variant={item.type === 'artist' ? 'premium' : 'success'}>{item.type}</Badge>
-              </div>
-              <div className="bg-white/5 p-4 rounded-xl border-l-2 border-accent-secondary">
-                <p className="text-sm text-text-muted italic">"{item.why}"</p>
-              </div>
-            </div>
+            <Link to={`/${item.type}/${item.slug}`} className="bg-bg-surface-light px-6 py-3 rounded-xl font-bold text-sm hover:bg-white/5 transition-colors">Voir la fiche</Link>
           </div>
         ))}
       </div>
     </div>
   );
 };
+
+const CommunityPage = () => (
+  <div className="space-y-12">
+    <SectionTitle subtitle="Rencontrez les contributeurs les plus actifs">Communauté Echo</SectionTitle>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {mockUsers.map(user => (
+        <div key={user.id} className="glass-card p-8 text-center space-y-6">
+          <img src={user.avatar_url} className="w-24 h-24 rounded-full mx-auto border-4 border-accent-primary/20" referrerPolicy="no-referrer" />
+          <div>
+            <h3 className="text-xl font-black">{user.display_name}</h3>
+            <Badge variant={user.credibility_level === 'qualifie' ? 'premium' : 'default'}>{user.credibility_level}</Badge>
+          </div>
+          <p className="text-text-muted text-sm line-clamp-2">{user.bio_short}</p>
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/5">
+            <div><div className="font-black text-lg">{user.stats.reviews_count}</div><div className="text-[8px] font-bold text-text-muted uppercase">Avis</div></div>
+            <div><div className="font-black text-lg">{user.stats.followers_count}</div><div className="text-[8px] font-bold text-text-muted uppercase">Followers</div></div>
+            <div><div className="font-black text-lg">{user.stats.helpful_votes}</div><div className="text-[8px] font-bold text-text-muted uppercase">Utiles</div></div>
+          </div>
+          <button className="w-full py-3 rounded-xl bg-bg-surface-light font-bold text-xs hover:bg-white/5 transition-colors">VOIR LE PROFIL</button>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPremium: (v: boolean) => void }) => {
+  const user = mockUsers[0];
+  return (
+    <div className="space-y-12">
+      <header className="glass-card p-12 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-12 opacity-5"><UserIcon size={200} /></div>
+        <img src={user.avatar_url} className="w-40 h-40 rounded-[2.5rem] border-4 border-accent-primary/30 shadow-2xl z-10" referrerPolicy="no-referrer" />
+        <div className="space-y-4 z-10 text-center md:text-left">
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <h1 className="text-5xl font-black tracking-tighter">{user.display_name}</h1>
+            <Badge variant="premium">{user.credibility_level}</Badge>
+          </div>
+          <p className="text-text-muted text-xl max-w-xl">{user.bio_short}</p>
+          <div className="flex gap-8 justify-center md:justify-start">
+            <div className="text-center"><div className="text-3xl font-black">{user.stats.reviews_count}</div><div className="text-[10px] font-bold text-text-muted uppercase">Avis</div></div>
+            <div className="text-center"><div className="text-3xl font-black">{user.stats.followers_count}</div><div className="text-[10px] font-bold text-text-muted uppercase">Abonnés</div></div>
+            <div className="text-center"><div className="text-3xl font-black">{user.stats.helpful_votes}</div><div className="text-[10px] font-bold text-text-muted uppercase">Votes</div></div>
+          </div>
+        </div>
+      </header>
+      <section className="space-y-8">
+        <SectionTitle>Mes derniers avis</SectionTitle>
+        <div className="space-y-8">
+          {mockReviews.filter(r => r.user_id === user.id).map(review => <div key={review.id}><ReviewCard review={review} /></div>)}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const PremiumPage = () => (
+  <div className="max-w-5xl mx-auto space-y-16 py-10">
+    <header className="text-center space-y-6">
+      <Badge variant="premium">Echo Premium</Badge>
+      <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none">
+        L'EXPÉRIENCE <br />
+        <span className="text-accent-primary">SANS LIMITES.</span>
+      </h1>
+      <p className="text-text-muted text-xl max-w-2xl mx-auto">
+        Approfondissez votre culture musicale avec des outils d'analyse avancés et une communauté d'experts.
+      </p>
+    </header>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="glass-card p-10 space-y-8 border-white/5">
+        <h3 className="text-2xl font-black uppercase tracking-tight">Version Gratuite</h3>
+        <ul className="space-y-4">
+          <li className="flex items-center gap-3 text-text-muted"><CheckCircle2 size={20} className="text-success" /> Accès à l'accueil et Explorer</li>
+          <li className="flex items-center gap-3 text-text-muted"><CheckCircle2 size={20} className="text-success" /> Résumés IA principaux</li>
+          <li className="flex items-center gap-3 text-text-muted"><CheckCircle2 size={20} className="text-success" /> Publication d'avis</li>
+          <li className="flex items-center gap-3 text-text-muted opacity-50"><Lock size={20} /> 10 sauvegardes max</li>
+          <li className="flex items-center gap-3 text-text-muted opacity-50"><Lock size={20} /> Publicité légère</li>
+        </ul>
+        <div className="pt-6"><div className="text-4xl font-black">0€<span className="text-sm text-text-muted">/mois</span></div></div>
+        <button className="w-full py-4 rounded-2xl bg-bg-surface-light font-bold">Actuel</button>
+      </div>
+
+      <div className="glass-card p-10 space-y-8 border-accent-primary/30 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-6"><Badge variant="premium">Recommandé</Badge></div>
+        <h3 className="text-2xl font-black uppercase tracking-tight text-accent-primary">Echo Premium</h3>
+        <ul className="space-y-4">
+          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Lecture illimitée des avis</li>
+          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Filtres de découverte avancés</li>
+          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Parcours "Par où commencer" enrichis</li>
+          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Sauvegardes & Listes illimitées</li>
+          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Zéro publicité</li>
+        </ul>
+        <div className="pt-6"><div className="text-4xl font-black">4.99€<span className="text-sm text-text-muted">/mois</span></div></div>
+        <button className="w-full py-4 rounded-2xl premium-gradient text-white font-black shadow-xl shadow-accent-primary/20 hover:scale-[1.02] transition-transform">S'ABONNER MAINTENANT</button>
+      </div>
+    </div>
+  </div>
+);
+
+export default function App() {
+  return (
+    <Router>
+      <AppLayout />
+    </Router>
+  );
+}
