@@ -149,66 +149,96 @@ const TrackCard = ({ track }: { track: Track }) => (
   </motion.div>
 );
 
-const ReviewCard = ({ review }: { review: Review }) => (
-  <div className="glass-card p-6 space-y-6 relative overflow-hidden">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <img src={review.user_avatar} alt={review.user_display_name} className="w-12 h-12 rounded-full border-2 border-accent-primary/20" referrerPolicy="no-referrer" />
-        <div>
-          <div className="font-bold text-base flex items-center gap-2">
-            {review.user_display_name}
-            <ShieldCheck size={16} className="text-accent-secondary" />
-          </div>
-          <div className="flex items-center gap-2 text-[10px] text-text-muted">
-            <span className="font-bold text-accent-primary">{review.user_expertise || 'Contributeur'}</span>
-            <span>•</span>
-            <span>{new Date(review.published_at).toLocaleDateString('fr-FR')}</span>
+const ReviewCard = ({ review, isReaderPremium = false }: { review: Review, isReaderPremium?: boolean }) => {
+  const isLocked = !isReaderPremium && review.quality_score > 90; // Logic: high quality reviews are partially locked for free readers
+
+  return (
+    <div className="glass-card p-6 space-y-6 relative overflow-hidden group">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <img src={review.user_avatar} alt={review.user_display_name} className="w-12 h-12 rounded-full border-2 border-accent-primary/20" referrerPolicy="no-referrer" />
+          <div>
+            <div className="font-bold text-base flex items-center gap-2">
+              {review.user_display_name}
+              <ShieldCheck size={16} className="text-accent-secondary" />
+              {review.user_premium_status ? (
+                <Badge variant="premium">Membre Payant</Badge>
+              ) : (
+                <Badge variant="default">Membre Gratuit</Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-text-muted">
+              <span className="font-bold text-accent-primary">{review.user_expertise || 'Contributeur'}</span>
+              <span>•</span>
+              <span>{new Date(review.published_at).toLocaleDateString('fr-FR')}</span>
+              <span>•</span>
+              <Link to={`/${review.target_type === 'artist' ? 'artiste' : review.target_type === 'album' ? 'album' : 'morceau'}/${review.target_slug}`} className="text-accent-secondary uppercase hover:underline">
+                {review.target_type}: {review.target_name}
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="flex flex-col items-end">
-        <div className="text-2xl font-black text-accent-primary leading-none">
-          {review.rating_overall}<span className="text-sm text-text-muted">/5</span>
+        <div className="flex flex-col items-end">
+          <div className="text-2xl font-black text-accent-primary leading-none">
+            {review.rating_overall}<span className="text-sm text-text-muted">/5</span>
+          </div>
+          <div className="text-[10px] font-bold text-text-muted uppercase mt-1">Score Qualité: {review.quality_score}%</div>
         </div>
-        <div className="text-[10px] font-bold text-text-muted uppercase mt-1">Score Qualité: {review.quality_score}%</div>
       </div>
-    </div>
 
-    <div className="space-y-2">
-      {review.title && <h3 className="text-xl font-black tracking-tight text-white">{review.title}</h3>}
-      <div className="flex flex-wrap gap-2">
-        <Badge variant="premium">{review.selections.impression}</Badge>
-        <Badge variant="default">{review.selections.feeling}</Badge>
-        <Badge variant="success">{review.selections.accessibility}</Badge>
+      <div className="space-y-2">
+        {review.title && <h3 className="text-xl font-black tracking-tight text-white">{review.title}</h3>}
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="premium">{review.selections.impression}</Badge>
+          <Badge variant="default">{review.selections.feeling}</Badge>
+          <Badge variant="success">{review.selections.accessibility}</Badge>
+          {review.tone && <Badge variant="warning">{review.tone}</Badge>}
+          {review.angle && <Badge variant="default">Angle: {review.angle}</Badge>}
+        </div>
       </div>
-    </div>
-    
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="space-y-4">
-        <ReviewSection label="Pourquoi ces mots ?" content={review.justifications.why_words} icon={<Info size={14} />} />
-        <ReviewSection label="Élément marquant" content={review.justifications.key_element} icon={<Zap size={14} />} />
-      </div>
-      <div className="space-y-4">
-        <ReviewSection label="Recommandation" content={review.justifications.recommendation} icon={<Users size={14} />} />
-        <ReviewSection label="Par où commencer ?" content={review.justifications.entry_point} icon={<ArrowRight size={14} />} color="text-accent-secondary" />
-      </div>
-    </div>
+      
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 relative ${isLocked ? 'max-h-40 overflow-hidden' : ''}`}>
+        <div className="space-y-4">
+          <ReviewSection label="Pourquoi ces mots ?" content={review.justifications.why_words} icon={<Info size={14} />} />
+          <ReviewSection label="Élément marquant" content={review.justifications.key_element} icon={<Zap size={14} />} />
+        </div>
+        <div className="space-y-4">
+          <ReviewSection label="Recommandation" content={review.justifications.recommendation} icon={<Users size={14} />} />
+          <ReviewSection label="Par où commencer ?" content={review.justifications.entry_point} icon={<ArrowRight size={14} />} color="text-accent-secondary" />
+        </div>
 
-    <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-      <div className="flex items-center gap-6">
-        <button className="flex items-center gap-2 text-xs font-bold text-text-muted hover:text-accent-primary transition-colors group">
-          <ThumbsUp size={16} className="group-hover:scale-110 transition-transform" />
-          <span>Utile ({review.helpful_count})</span>
-        </button>
-        <button className="flex items-center gap-2 text-xs font-bold text-text-muted hover:text-accent-primary transition-colors group">
-          <Share2 size={16} className="group-hover:scale-110 transition-transform" />
-          <span>Partager</span>
-        </button>
+        {isLocked && (
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-bg-surface/80 to-transparent flex items-end justify-center pb-4">
+            <Link to="/premium" className="premium-gradient px-6 py-2 rounded-xl text-xs font-black flex items-center gap-2 shadow-xl">
+              <Lock size={14} /> DÉBLOQUER L'ANALYSE COMPLÈTE
+            </Link>
+          </div>
+        )}
       </div>
-      <Badge variant="default">Vérifié</Badge>
+
+      <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <button className="flex items-center gap-2 text-xs font-bold text-text-muted hover:text-accent-primary transition-colors group">
+            <ThumbsUp size={16} className="group-hover:scale-110 transition-transform" />
+            <span>Utile ({review.helpful_count})</span>
+          </button>
+          <button className="flex items-center gap-2 text-xs font-bold text-text-muted hover:text-accent-primary transition-colors group">
+            <Share2 size={16} className="group-hover:scale-110 transition-transform" />
+            <span>Partager</span>
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          {isLocked ? (
+            <Badge variant="warning">Extrait</Badge>
+          ) : (
+            <Badge variant="success">Avis complet</Badge>
+          )}
+          <Badge variant="default">Vérifié</Badge>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ReviewSection = ({ label, content, icon, color = 'text-text-muted' }: { label: string, content: string, icon: React.ReactNode, color?: string }) => (
   <div className="space-y-2">
@@ -267,6 +297,7 @@ function AppLayout() {
         <div className="space-y-1">
           <NavItem to="/" icon={<Home size={20} />} label="Accueil" active={location.pathname === '/'} />
           <NavItem to="/explorer" icon={<Search size={20} />} label="Explorer" active={location.pathname === '/explorer'} />
+          <NavItem to="/avis" icon={<MessageSquare size={20} />} label="Avis" active={location.pathname === '/avis'} />
           <NavItem to="/listes" icon={<ListMusic size={20} />} label="Listes" active={location.pathname === '/listes'} />
           <NavItem to="/communaute" icon={<Users size={20} />} label="Communauté" active={location.pathname === '/communaute'} />
           <NavItem to="/profil" icon={<UserIcon size={20} />} label="Profil" active={location.pathname === '/profil'} />
@@ -294,6 +325,7 @@ function AppLayout() {
             <Routes>
               <Route path="/" element={<HomeScreen />} />
               <Route path="/explorer" element={<ExploreScreen />} />
+              <Route path="/avis" element={<ReviewsPage isPremium={isPremium} />} />
               <Route path="/listes" element={<ListsPage />} />
               <Route path="/communaute" element={<CommunityPage />} />
               <Route path="/profil" element={<ProfilePage isPremium={isPremium} setIsPremium={setIsPremium} />} />
@@ -312,6 +344,7 @@ function AppLayout() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface/90 backdrop-blur-xl border-t border-white/5 px-6 py-3 flex justify-between items-center z-50">
         <MobileNavItem to="/" icon={<Home size={24} />} active={location.pathname === '/'} />
         <MobileNavItem to="/explorer" icon={<Search size={24} />} active={location.pathname === '/explorer'} />
+        <MobileNavItem to="/avis" icon={<MessageSquare size={24} />} active={location.pathname === '/avis'} />
         <MobileNavItem to="/listes" icon={<ListMusic size={24} />} active={location.pathname === '/listes'} />
         <MobileNavItem to="/communaute" icon={<Users size={24} />} active={location.pathname === '/communaute'} />
         <MobileNavItem to="/profil" icon={<UserIcon size={24} />} active={location.pathname === '/profil'} />
@@ -322,6 +355,124 @@ function AppLayout() {
 
 // --- Screens ---
 
+const ReviewsPage = ({ isPremium }: { isPremium: boolean }) => {
+  const [search, setSearch] = React.useState('');
+  const [filters, setFilters] = React.useState({
+    type: 'all',
+    genre: 'all',
+    tone: 'all',
+    angle: 'all',
+    status: 'all',
+    account: 'all',
+    sort: 'recent'
+  });
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const filteredReviews = mockReviews.filter(review => {
+    const matchesSearch = review.target_name.toLowerCase().includes(search.toLowerCase()) || 
+                         review.title?.toLowerCase().includes(search.toLowerCase()) ||
+                         review.user_display_name.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesType = filters.type === 'all' || review.target_type === filters.type;
+    const matchesGenre = filters.genre === 'all' || review.genre === filters.genre;
+    const matchesTone = filters.tone === 'all' || review.tone === filters.tone;
+    const matchesAngle = filters.angle === 'all' || review.angle === filters.angle;
+    const matchesStatus = filters.status === 'all' || 
+                         (filters.status === 'qualifie' && review.user_expertise?.includes('Qualifié')) ||
+                         (filters.status === 'confirme' && review.user_expertise?.includes('Confirmé'));
+    const matchesAccount = filters.account === 'all' || 
+                          (filters.account === 'premium' && review.user_premium_status) ||
+                          (filters.account === 'free' && !review.user_premium_status);
+
+    return matchesSearch && matchesType && matchesGenre && matchesTone && matchesAngle && matchesStatus && matchesAccount;
+  }).sort((a, b) => {
+    if (filters.sort === 'recent') return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+    if (filters.sort === 'useful') return b.helpful_count - a.helpful_count;
+    if (filters.sort === 'loved') return b.quality_score - a.quality_score;
+    return 0;
+  });
+
+  return (
+    <div className="space-y-10">
+      <header className="space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter">Avis de la communauté</h1>
+          <p className="text-text-muted text-xl font-medium">Des avis structurés, utiles et nuancés pour mieux découvrir la musique</p>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={20} />
+          <input 
+            type="text" 
+            placeholder="Rechercher un avis, un artiste, un contributeur..." 
+            className="w-full bg-bg-surface border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-lg focus:outline-none focus:border-accent-primary transition-all shadow-xl"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="glass-card p-6 space-y-6">
+          <div className="flex flex-wrap gap-6">
+            <FilterGroup label="Type" value={filters.type} options={[{id: 'all', label: 'Tout'}, {id: 'artist', label: 'Artiste'}, {id: 'album', label: 'Album'}, {id: 'track', label: 'Morceau'}]} onChange={(v) => setFilters({...filters, type: v})} />
+            <FilterGroup label="Genre" value={filters.genre} options={[{id: 'all', label: 'Tout'}, {id: 'Pop', label: 'Pop'}, {id: 'Rock-Indie', label: 'Rock-Indie'}, {id: 'Hip-hop-Rap', label: 'Hip-hop-Rap'}]} onChange={(v) => setFilters({...filters, genre: v})} />
+            <FilterGroup label="Tonalité" value={filters.tone} options={[{id: 'all', label: 'Tout'}, {id: 'positif', label: 'Positif'}, {id: 'nuancé', label: 'Nuancé'}, {id: 'critique', label: 'Critique'}]} onChange={(v) => setFilters({...filters, tone: v})} />
+            <FilterGroup label="Angle" value={filters.angle} options={[{id: 'all', label: 'Tout'}, {id: 'production', label: 'Production'}, {id: 'écriture', label: 'Écriture'}, {id: 'émotion', label: 'Émotion'}, {id: 'accessibilité', label: 'Accessibilité'}, {id: 'cohérence', label: 'Cohérence'}]} onChange={(v) => setFilters({...filters, angle: v})} />
+            <FilterGroup label="Contributeur" value={filters.status} options={[{id: 'all', label: 'Tout'}, {id: 'confirme', label: 'Confirmé'}, {id: 'qualifie', label: 'Qualifié'}]} onChange={(v) => setFilters({...filters, status: v})} />
+            <FilterGroup label="Compte Auteur" value={filters.account} options={[{id: 'all', label: 'Tout'}, {id: 'free', label: 'Gratuit'}, {id: 'premium', label: 'Payant'}]} onChange={(v) => setFilters({...filters, account: v})} />
+            <FilterGroup label="Trier par" value={filters.sort} options={[{id: 'recent', label: 'Plus récents'}, {id: 'useful', label: 'Plus utiles'}, {id: 'loved', label: 'Les plus aimés'}]} onChange={(v) => setFilters({...filters, sort: v})} />
+          </div>
+        </div>
+      </header>
+
+      <div className="bg-accent-primary/5 border border-accent-primary/20 rounded-2xl p-6 flex items-start gap-4">
+        <Info className="text-accent-primary flex-shrink-0 mt-1" size={20} />
+        <p className="text-sm text-text-muted leading-relaxed">
+          Tous les membres peuvent publier des avis. L’abonnement payant débloque davantage de lecture, de comparaison et de personnalisation, mais ne donne pas automatiquement plus de valeur à un avis.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 space-y-4">
+          <div className="w-12 h-12 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-text-muted font-bold uppercase tracking-widest text-xs">Chargement des avis...</p>
+        </div>
+      ) : filteredReviews.length > 0 ? (
+        <div className="grid grid-cols-1 gap-8">
+          {filteredReviews.map(review => (
+            <div key={review.id}>
+              <ReviewCard review={review} isReaderPremium={isPremium} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-20 space-y-4 glass-card">
+          <AlertCircle size={48} className="mx-auto text-text-muted" />
+          <h3 className="text-xl font-bold">Aucun avis trouvé</h3>
+          <p className="text-text-muted">Essayez de modifier vos filtres ou votre recherche.</p>
+          <button onClick={() => {setSearch(''); setFilters({type: 'all', genre: 'all', tone: 'all', angle: 'all', status: 'all', account: 'all', sort: 'recent'})}} className="text-accent-primary font-bold hover:underline">Réinitialiser les filtres</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FilterGroup = ({ label, value, options, onChange }: { label: string, value: string, options: {id: string, label: string}[], onChange: (v: string) => void }) => (
+  <div className="space-y-2">
+    <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest">{label}</label>
+    <select 
+      value={value} 
+      onChange={(e) => onChange(e.target.value)}
+      className="bg-bg-surface-light border border-white/5 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-accent-primary transition-all cursor-pointer"
+    >
+      {options.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+    </select>
+  </div>
+);
 const HomeScreen = () => (
   <div className="space-y-16">
     <header className="space-y-6 pt-10">
@@ -780,6 +931,7 @@ const ReviewFormPage = () => {
                 user_expertise: 'Contributeur Qualifié',
                 target_type: type as EntityType,
                 target_id: id || '',
+                target_slug: id || '',
                 target_name: 'Objet Musical',
                 rating_overall: formData.rating,
                 title: formData.title,
@@ -788,7 +940,7 @@ const ReviewFormPage = () => {
                 quality_score: 95,
                 helpful_count: 0,
                 published_at: new Date().toISOString(),
-                tone: 'Analytique'
+                tone: 'nuancé'
               }} />
             </div>
             <div className="flex flex-col md:flex-row gap-4">

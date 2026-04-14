@@ -88,6 +88,7 @@ export interface Review {
   user_expertise?: string;
   target_type: EntityType;
   target_id: string;
+  target_slug: string;
   target_name: string;
   rating_overall: number; // 1-5
   title?: string;
@@ -114,7 +115,10 @@ export interface Review {
   quality_score: number;
   helpful_count: number;
   published_at: string;
-  tone?: string;
+  tone?: 'positif' | 'nuancé' | 'critique';
+  angle?: 'production' | 'écriture' | 'émotion' | 'accessibilité' | 'cohérence';
+  genre?: string;
+  user_premium_status?: boolean;
 }
 
 export interface AISummary {
