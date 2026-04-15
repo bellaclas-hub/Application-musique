@@ -7,7 +7,8 @@ import {
   useNavigate, 
   useParams, 
   useLocation,
-  useSearchParams 
+  useSearchParams,
+  Navigate
 } from 'react-router-dom';
 import { 
   Home, 
@@ -62,6 +63,104 @@ import {
 
 // --- Reusable UI Components ---
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+  return null;
+};
+
+const SafeImage = ({ 
+  src, 
+  alt, 
+  className, 
+  fallbackType = 'album',
+  ...props 
+}: { 
+  src?: string, 
+  alt?: string, 
+  className?: string, 
+  fallbackType?: 'artist' | 'album' | 'track' | 'user'
+} & React.ImgHTMLAttributes<HTMLImageElement>) => {
+  const [isError, setIsError] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // Varied premium placeholders from Unsplash
+  const fallbackCollections = {
+    artist: [
+      'https://images.unsplash.com/photo-1493225255756-d9584f8606e9',
+      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4',
+      'https://images.unsplash.com/photo-1514525253361-bee8a187499b',
+      'https://images.unsplash.com/photo-1459749411177-042180ce673c'
+    ],
+    album: [
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745',
+      'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad',
+      'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17',
+      'https://images.unsplash.com/photo-1514525253361-bee8a187499b'
+    ],
+    track: [
+      'https://images.unsplash.com/photo-1459749411177-042180ce673c',
+      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4',
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745',
+      'https://images.unsplash.com/photo-1514525253361-bee8a187499b'
+    ],
+    user: [
+      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
+      'https://images.unsplash.com/photo-1527980965255-d3b416303d12',
+      'https://images.unsplash.com/photo-1599566150163-29194dcaad36',
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80'
+    ]
+  };
+
+  const getFallback = () => {
+    const collection = fallbackCollections[fallbackType];
+    const str = alt || src || 'echo';
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    const index = Math.abs(hash) % collection.length;
+    return `${collection[index]}?auto=format&fit=crop&q=80&w=800`;
+  };
+
+  const finalSrc = isError || !src ? getFallback() : src;
+
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div 
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-bg-surface-light animate-pulse flex items-center justify-center z-10"
+          >
+            <Zap size={24} className="text-accent-primary/20" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <motion.img
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 0.5 }}
+        src={finalSrc}
+        alt={alt}
+        className="w-full h-full object-cover"
+        onError={() => {
+          setIsError(true);
+          setIsLoading(false);
+        }}
+        onLoad={() => setIsLoading(false)}
+        referrerPolicy="no-referrer"
+        {...props}
+      />
+    </div>
+  );
+};
+
 const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'premium' | 'success' | 'warning' }) => {
   const styles = {
     default: 'bg-bg-surface-light text-text-muted',
@@ -87,11 +186,11 @@ const ArtistCard = ({ artist }: { artist: Artist }) => (
   <motion.div whileHover={{ y: -8 }} className="glass-card overflow-hidden cursor-pointer group flex flex-col h-full">
     <Link to={`/artiste/${artist.slug}`} className="flex flex-col h-full">
       <div className="aspect-[16/10] overflow-hidden relative">
-        <img 
-          src={artist.cover_image_url || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800'} 
+        <SafeImage 
+          src={artist.cover_image_url} 
           alt={artist.name} 
+          fallbackType="artist"
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-          referrerPolicy="no-referrer" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-bg-main/20 to-transparent opacity-60" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
@@ -126,11 +225,11 @@ const AlbumCard = ({ album, compact = false }: { album: Album, compact?: boolean
   <motion.div whileHover={{ scale: 1.02 }} className={`glass-card cursor-pointer group overflow-hidden ${compact ? 'p-3' : 'p-4'}`}>
     <Link to={`/album/${album.slug}`} className="flex gap-4 items-center">
       <div className={`${compact ? 'w-16 h-16' : 'w-24 h-24'} rounded-xl overflow-hidden flex-shrink-0 shadow-lg`}>
-        <img 
-          src={album.cover_url || 'https://images.unsplash.com/photo-1459749411177-042180ce673c?auto=format&fit=crop&q=80&w=600'} 
+        <SafeImage 
+          src={album.cover_url} 
           alt={album.title} 
+          fallbackType="album"
           className="w-full h-full object-cover transition-transform group-hover:scale-110" 
-          referrerPolicy="no-referrer" 
         />
       </div>
       <div className="flex-grow min-w-0">
@@ -192,7 +291,12 @@ const ReviewCard = ({ review, isReaderPremium = false, compact = false }: { revi
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
         <div className="flex items-center gap-5">
           <div className="relative">
-            <img src={review.user_avatar} alt={review.user_display_name} className="w-14 h-14 rounded-2xl object-cover border-2 border-white/5 shadow-2xl" referrerPolicy="no-referrer" />
+            <SafeImage 
+              src={review.user_avatar} 
+              alt={review.user_display_name} 
+              fallbackType="user"
+              className="w-14 h-14 rounded-2xl object-cover border-2 border-white/5 shadow-2xl" 
+            />
             {review.user_premium_status && (
               <div className="absolute -top-2 -right-2 w-6 h-6 rounded-lg premium-gradient flex items-center justify-center shadow-lg">
                 <Award size={12} className="text-white" />
@@ -340,275 +444,6 @@ const Gauge = ({ value, label, color = 'accent-primary' }: { value: number, labe
 
 // --- Layout Components ---
 
-const NavItem = ({ to, icon, label, active }: { to: string, icon: React.ReactNode, label: string, active: boolean }) => (
-  <Link to={to} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${active ? 'bg-accent-primary/10 text-accent-primary font-bold' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}>
-    {icon}
-    <span className="text-sm">{label}</span>
-  </Link>
-);
-
-const MobileNavItem = ({ to, icon, active }: { to: string, icon: React.ReactNode, active: boolean }) => (
-  <Link to={to} className={`p-2 rounded-xl transition-all ${active ? 'text-accent-primary' : 'text-text-muted'}`}>
-    {icon}
-  </Link>
-);
-
-function AppLayout() {
-  const location = useLocation();
-  const [isPremium, setIsPremium] = React.useState(false);
-
-  return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-bg-main text-text-main">
-      {/* Desktop Sidebar */}
-      <nav className="hidden md:flex flex-col w-64 bg-bg-surface border-r border-white/5 p-6 fixed h-full z-40">
-        <Link to="/" className="flex items-center gap-2 mb-10 px-2 group">
-          <div className="w-8 h-8 rounded-lg premium-gradient flex items-center justify-center group-hover:scale-110 transition-transform">
-            <Zap size={20} className="text-white" />
-          </div>
-          <span className="text-xl font-bold tracking-tighter">ECHO</span>
-        </Link>
-        <div className="space-y-1">
-          <NavItem to="/" icon={<Home size={20} />} label="Accueil" active={location.pathname === '/'} />
-          <NavItem to="/explorer" icon={<Search size={20} />} label="Explorer" active={location.pathname === '/explorer'} />
-          <NavItem to="/avis" icon={<MessageSquare size={20} />} label="Avis" active={location.pathname === '/avis'} />
-          <NavItem to="/listes" icon={<ListMusic size={20} />} label="Listes" active={location.pathname === '/listes'} />
-          <NavItem to="/communaute" icon={<Users size={20} />} label="Communauté" active={location.pathname === '/communaute'} />
-          <NavItem to="/profil" icon={<UserIcon size={20} />} label="Profil" active={location.pathname === '/profil'} />
-        </div>
-
-        <div className="mt-10 space-y-6">
-          <div className="px-2">
-            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4">Récemment vus</h3>
-            <div className="space-y-3">
-              {mockArtists.slice(0, 2).map(artist => (
-                <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-3 group">
-                  <img src={artist.cover_image_url} className="w-8 h-8 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all" referrerPolicy="no-referrer" />
-                  <span className="text-xs font-bold text-text-muted group-hover:text-text-main transition-colors truncate">{artist.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="px-2">
-            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4">Vos Listes</h3>
-            <div className="space-y-3">
-              <button className="flex items-center gap-3 text-text-muted hover:text-text-main transition-colors group w-full text-left">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                  <PlusCircle size={16} />
-                </div>
-                <span className="text-xs font-bold">Créer une liste</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-auto pt-6 border-t border-white/5">
-          {!isPremium && (
-            <Link to="/premium" className="w-full premium-gradient p-4 rounded-2xl text-[10px] font-black flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-accent-primary/20 tracking-widest uppercase">
-              <Award size={16} /> PASSER AU PREMIUM
-            </Link>
-          )}
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="flex-grow md:ml-64 pb-24 md:pb-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="p-6 md:p-10 max-w-6xl mx-auto"
-          >
-            <Routes>
-              <Route path="/" element={<HomeScreen />} />
-              <Route path="/explorer" element={<ExploreScreen />} />
-              <Route path="/avis" element={<ReviewsPage isPremium={isPremium} />} />
-              <Route path="/listes" element={<ListsPage />} />
-              <Route path="/communaute" element={<CommunityPage />} />
-              <Route path="/profil" element={<ProfilePage isPremium={isPremium} setIsPremium={setIsPremium} />} />
-              <Route path="/premium" element={<PremiumPage />} />
-              <Route path="/artiste/:slug" element={<ArtistPage />} />
-              <Route path="/album/:slug" element={<AlbumPage />} />
-              <Route path="/morceau/:slug" element={<TrackPage />} />
-              <Route path="/avis/nouveau/:type/:id" element={<ReviewFormPage />} />
-              <Route path="/liste/:slug" element={<ListPage />} />
-            </Routes>
-          </motion.div>
-        </AnimatePresence>
-      </main>
-
-      {/* Mobile Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface/90 backdrop-blur-xl border-t border-white/5 px-6 py-3 flex justify-between items-center z-50">
-        <MobileNavItem to="/" icon={<Home size={24} />} active={location.pathname === '/'} />
-        <MobileNavItem to="/explorer" icon={<Search size={24} />} active={location.pathname === '/explorer'} />
-        <MobileNavItem to="/avis" icon={<MessageSquare size={24} />} active={location.pathname === '/avis'} />
-        <MobileNavItem to="/listes" icon={<ListMusic size={24} />} active={location.pathname === '/listes'} />
-        <MobileNavItem to="/communaute" icon={<Users size={24} />} active={location.pathname === '/communaute'} />
-        <MobileNavItem to="/profil" icon={<UserIcon size={24} />} active={location.pathname === '/profil'} />
-      </nav>
-    </div>
-  );
-}
-
-// --- Screens ---
-
-const ReviewsPage = ({ isPremium }: { isPremium: boolean }) => {
-  const [search, setSearch] = React.useState('');
-  const [viewMode, setViewMode] = React.useState<'detailed' | 'compact'>('detailed');
-  const [filters, setFilters] = React.useState({
-    type: 'all',
-    genre: 'all',
-    tone: 'all',
-    angle: 'all',
-    status: 'all',
-    account: 'all',
-    sort: 'recent'
-  });
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const filteredReviews = mockReviews.filter(review => {
-    const matchesSearch = review.target_name.toLowerCase().includes(search.toLowerCase()) || 
-                         review.title?.toLowerCase().includes(search.toLowerCase()) ||
-                         review.user_display_name.toLowerCase().includes(search.toLowerCase());
-    
-    const matchesType = filters.type === 'all' || review.target_type === filters.type;
-    const matchesGenre = filters.genre === 'all' || review.genre === filters.genre;
-    const matchesTone = filters.tone === 'all' || review.tone === filters.tone;
-    const matchesAngle = filters.angle === 'all' || review.angle === filters.angle;
-    const matchesStatus = filters.status === 'all' || 
-                         (filters.status === 'qualifie' && review.user_expertise?.includes('Qualifié')) ||
-                         (filters.status === 'confirme' && review.user_expertise?.includes('Confirmé'));
-    const matchesAccount = filters.account === 'all' || 
-                          (filters.account === 'premium' && review.user_premium_status) ||
-                          (filters.account === 'free' && !review.user_premium_status);
-
-    return matchesSearch && matchesType && matchesGenre && matchesTone && matchesAngle && matchesStatus && matchesAccount;
-  }).sort((a, b) => {
-    if (filters.sort === 'recent') return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
-    if (filters.sort === 'useful') return b.helpful_count - a.helpful_count;
-    if (filters.sort === 'loved') return b.quality_score - a.quality_score;
-    return 0;
-  });
-
-  return (
-    <div className="space-y-12">
-      <header className="space-y-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div className="space-y-4">
-            <Badge variant="premium">Communauté Echo</Badge>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">Avis de la <br /><span className="text-accent-primary">COMMUNAUTÉ.</span></h1>
-            <p className="text-text-muted text-xl font-medium max-w-xl">Des avis structurés, utiles et nuancés pour mieux découvrir la musique</p>
-          </div>
-          <div className="flex gap-4">
-            <div className="glass-card px-6 py-4 text-center border-white/5">
-              <div className="text-2xl font-black text-accent-primary">{mockReviews.length}</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Avis publiés</div>
-            </div>
-            <div className="glass-card px-6 py-4 text-center border-white/5">
-              <div className="text-2xl font-black text-accent-secondary">12</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Auteurs actifs</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-2xl blur opacity-10 group-focus-within:opacity-30 transition duration-500"></div>
-            <div className="relative">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent-primary transition-colors" size={24} />
-              <input 
-                type="text" 
-                placeholder="Rechercher un avis, un artiste, un contributeur..." 
-                className="w-full bg-bg-surface border border-white/10 rounded-2xl py-6 pl-16 pr-8 text-xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="flex flex-wrap gap-4">
-              <FilterGroup label="Type" value={filters.type} options={[{id: 'all', label: 'Tout'}, {id: 'artist', label: 'Artiste'}, {id: 'album', label: 'Album'}, {id: 'track', label: 'Morceau'}]} onChange={(v) => setFilters({...filters, type: v})} />
-              <FilterGroup label="Genre" value={filters.genre} options={[{id: 'all', label: 'Tout'}, {id: 'Pop', label: 'Pop'}, {id: 'Rock-Indie', label: 'Rock-Indie'}, {id: 'Hip-hop-Rap', label: 'Hip-hop-Rap'}]} onChange={(v) => setFilters({...filters, genre: v})} />
-              <FilterGroup label="Tonalité" value={filters.tone} options={[{id: 'all', label: 'Tout'}, {id: 'positif', label: 'Positif'}, {id: 'nuancé', label: 'Nuancé'}, {id: 'critique', label: 'Critique'}]} onChange={(v) => setFilters({...filters, tone: v})} />
-              <FilterGroup label="Angle" value={filters.angle} options={[{id: 'all', label: 'Tout'}, {id: 'production', label: 'Production'}, {id: 'écriture', label: 'Écriture'}, {id: 'émotion', label: 'Émotion'}]} onChange={(v) => setFilters({...filters, angle: v})} />
-            </div>
-            
-            <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-2xl border border-white/5">
-              <button 
-                onClick={() => setViewMode('detailed')}
-                className={`p-2.5 rounded-xl transition-all ${viewMode === 'detailed' ? 'bg-accent-primary text-white shadow-lg' : 'text-text-muted hover:text-text-main'}`}
-                title="Vue détaillée"
-              >
-                <LayoutList size={20} />
-              </button>
-              <button 
-                onClick={() => setViewMode('compact')}
-                className={`p-2.5 rounded-xl transition-all ${viewMode === 'compact' ? 'bg-accent-primary text-white shadow-lg' : 'text-text-muted hover:text-text-main'}`}
-                title="Vue compacte"
-              >
-                <LayoutGrid size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="bg-accent-primary/5 border border-accent-primary/20 rounded-3xl p-6 flex items-start gap-4">
-        <div className="w-10 h-10 rounded-2xl bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
-          <Info className="text-accent-primary" size={20} />
-        </div>
-        <p className="text-sm text-text-muted leading-relaxed font-medium">
-          Tous les membres peuvent publier des avis. L’abonnement payant débloque davantage de lecture, de comparaison et de personnalisation, mais ne donne pas automatiquement plus de valeur à un avis.
-        </p>
-      </div>
-
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-32 space-y-6">
-          <div className="w-16 h-16 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-text-muted font-black uppercase tracking-[0.2em] text-xs">Analyse de la communauté en cours...</p>
-        </div>
-      ) : filteredReviews.length > 0 ? (
-        <div className={`grid gap-10 ${viewMode === 'compact' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-          {filteredReviews.map(review => (
-            <motion.div 
-              layout
-              key={review.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ReviewCard review={review} isReaderPremium={isPremium} compact={viewMode === 'compact'} />
-            </motion.div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-32 space-y-6 glass-card border-white/5">
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle size={40} className="text-text-muted" />
-          </div>
-          <h3 className="text-2xl font-black uppercase tracking-tight">Aucun avis trouvé</h3>
-          <p className="text-text-muted font-medium">Essayez de modifier vos filtres ou votre recherche.</p>
-          <button 
-            onClick={() => {setSearch(''); setFilters({type: 'all', genre: 'all', tone: 'all', angle: 'all', status: 'all', account: 'all', sort: 'recent'})}} 
-            className="bg-accent-primary/10 text-accent-primary px-8 py-3 rounded-2xl font-black text-sm hover:bg-accent-primary/20 transition-all"
-          >
-            RÉINITIALISER LES FILTRES
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const FilterGroup = ({ label, value, options, onChange }: { label: string, value: string, options: {id: string, label: string}[], onChange: (v: string) => void }) => (
   <div className="space-y-2">
     <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest">{label}</label>
@@ -621,147 +456,31 @@ const FilterGroup = ({ label, value, options, onChange }: { label: string, value
     </select>
   </div>
 );
-const HomeScreen = () => {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/explorer?q=${encodeURIComponent(searchQuery)}`);
-    }
-  };
+const TabButton = ({ active, onClick, label, count }: { active: boolean, onClick: () => void, label: string, count: number }) => (
+  <button 
+    onClick={onClick}
+    className={`pb-4 text-sm font-black uppercase tracking-widest transition-all relative ${active ? 'text-text-main' : 'text-text-muted hover:text-text-main'}`}
+  >
+    <span className="flex items-center gap-2">
+      {label}
+      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${active ? 'bg-accent-primary text-white' : 'bg-white/5 text-text-muted'}`}>
+        {count}
+      </span>
+    </span>
+    {active && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-1 bg-accent-primary rounded-full" />}
+  </button>
+);
 
-  return (
-    <div className="space-y-20">
-      <header className="space-y-8 pt-10 relative">
-        <div className="space-y-6">
-          <Badge variant="premium">Plateforme Culturelle & Communautaire</Badge>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase">
-            DÉCOUVREZ PAR OÙ <br />
-            <span className="text-accent-primary">COMMENCER.</span>
-          </h1>
-          <p className="text-text-muted text-xl md:text-2xl max-w-2xl font-medium leading-relaxed">
-            Echo centralise les avis structurés et les analyses IA pour vous guider dans l'univers d'un artiste, d'un album ou d'un morceau.
-          </p>
-        </div>
-
-        {/* Home Search Bar */}
-        <form onSubmit={handleSearch} className="relative max-w-4xl group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-          <div className="relative">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent-primary transition-colors" size={24} />
-            <input 
-              type="text" 
-              placeholder="Rechercher un artiste, un album ou un morceau..." 
-              className="w-full bg-bg-surface border border-white/10 rounded-[2rem] py-6 pl-16 pr-8 text-xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 bg-accent-primary hover:bg-accent-primary/80 text-white px-6 py-3 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95">
-              RECHERCHER
-            </button>
-          </div>
-        </form>
-
-        <div className="flex flex-wrap gap-4 pt-4">
-          <Link to="/explorer" className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors flex items-center gap-2">
-            <TrendingUp size={18} className="text-accent-secondary" /> VOIR LES TENDANCES
-          </Link>
-          <Link to="/avis" className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors flex items-center gap-2">
-            <MessageSquare size={18} className="text-accent-primary" /> LIRE LES DERNIERS AVIS
-          </Link>
-        </div>
-      </header>
-
-      <section>
-        <div className="flex items-end justify-between mb-8">
-          <SectionTitle subtitle="Les artistes qui redéfinissent la scène actuelle">Tendances du moment</SectionTitle>
-          <Link to="/explorer" className="text-accent-secondary font-black text-xs uppercase tracking-widest hover:underline mb-8 flex items-center gap-2">
-            Tout explorer <ArrowRight size={14} />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockArtists.slice(0, 6).map(artist => <div key={artist.id}><ArtistCard artist={artist} /></div>)}
-        </div>
-      </section>
-
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-        <div className="lg:col-span-7 space-y-12">
-          <SectionTitle subtitle="Les analyses les plus pertinentes de la semaine">Avis à la une</SectionTitle>
-          <div className="space-y-8">
-            <ReviewCard review={mockReviews[0]} />
-            <ReviewCard review={mockReviews[1]} />
-          </div>
-          <Link to="/avis" className="premium-gradient w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl hover:opacity-90 transition-opacity">
-            <MessageSquare size={20} /> DÉCOUVRIR TOUS LES AVIS DE LA COMMUNAUTÉ
-          </Link>
-        </div>
-        
-        <div className="lg:col-span-5 space-y-12">
-          <SectionTitle subtitle="Sélectionnés pour leur accessibilité immédiate">Par où commencer ?</SectionTitle>
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-4">Albums Incontournables</h3>
-              {mockAlbums.filter(a => a.is_entry_album).map(album => <div key={album.id}><AlbumCard album={album} /></div>)}
-            </div>
-            <div className="space-y-4 pt-6">
-              <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-4">Morceaux Clés</h3>
-              {mockTracks.filter(t => t.is_best_entry_track).map(track => <div key={track.id}><TrackCard track={track} /></div>)}
-            </div>
-          </div>
-          
-          <div className="glass-card p-8 bg-accent-primary/5 border-accent-primary/20 space-y-6">
-            <div className="w-12 h-12 rounded-2xl premium-gradient flex items-center justify-center shadow-lg">
-              <Zap size={24} className="text-white" />
-            </div>
-            <h3 className="text-xl font-black leading-tight">Vous ne savez toujours pas quoi écouter ?</h3>
-            <p className="text-text-muted text-sm font-medium leading-relaxed">
-              Laissez notre IA analyser vos goûts et vous proposer le point d'entrée parfait dans n'importe quel genre musical.
-            </p>
-            <button className="text-accent-primary font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
-              Lancer l'assistant Echo <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden rounded-[3rem] bg-bg-surface border border-white/5 p-12 md:p-20">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent-primary/10 to-transparent pointer-events-none" />
-        <div className="relative z-10 max-w-2xl space-y-8">
-          <Badge variant="premium">Listes de la communauté</Badge>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
-            DES MILLIERS DE <br />
-            <span className="text-accent-secondary">SÉLECTIONS.</span>
-          </h2>
-          <p className="text-text-muted text-lg font-medium leading-relaxed">
-            Explorez les listes thématiques créées par nos membres les plus qualifiés. De la "Synth-pop obscure" aux "Classiques du Rap Belge".
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-            {mockLists.map(list => (
-              <Link key={list.id} to={`/liste/${list.slug}`} className="bg-bg-main/50 backdrop-blur-md p-6 rounded-3xl border border-white/5 hover:border-accent-primary/30 transition-all group">
-                <div className="flex justify-between items-start mb-4">
-                  <Badge variant="premium">{list.category}</Badge>
-                  <div className="flex items-center gap-1 text-text-muted text-[10px] font-black">
-                    <ThumbsUp size={12} /> {list.like_count}
-                  </div>
-                </div>
-                <h3 className="text-lg font-black group-hover:text-accent-primary transition-colors mb-2">{list.title}</h3>
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-[9px] font-black text-text-muted uppercase tracking-widest">Par {list.user_display_name}</span>
-                  <ArrowRight size={16} className="text-accent-primary group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            ))}
-          </div>
-          <Link to="/listes" className="inline-flex items-center gap-2 text-accent-secondary font-black text-xs uppercase tracking-widest hover:underline pt-4">
-            Voir toutes les listes <ArrowRight size={14} />
-          </Link>
-        </div>
-      </section>
+const EmptyResults = () => (
+  <div className="col-span-full py-20 text-center space-y-4">
+    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+      <Search size={32} className="text-text-muted" />
     </div>
-  );
-};
+    <h3 className="text-xl font-black uppercase tracking-tight">Aucun résultat trouvé</h3>
+    <p className="text-text-muted font-medium">Essayez d'ajuster vos filtres ou votre recherche.</p>
+  </div>
+);
 
 const ExploreScreen = () => {
   const [searchParams] = useSearchParams();
@@ -938,7 +657,7 @@ const ExploreScreen = () => {
             <div className="flex flex-wrap gap-4">
               {mockArtists.filter(a => a.id !== filteredArtists[0].id).slice(0, 2).map(a => (
                 <Link key={a.id} to={`/artiste/${a.slug}`} className="bg-bg-main/50 px-6 py-4 rounded-2xl border border-white/10 hover:border-accent-secondary transition-all flex items-center gap-4 group">
-                  <img src={a.cover_image_url} className="w-10 h-10 rounded-full object-cover" referrerPolicy="no-referrer" />
+                  <SafeImage src={a.cover_image_url} className="w-10 h-10 rounded-full object-cover" fallbackType="artist" />
                   <div>
                     <div className="font-black text-sm group-hover:text-accent-secondary transition-colors">{a.name}</div>
                     <div className="text-[10px] text-text-muted uppercase font-black">{a.primary_genres[0]}</div>
@@ -953,30 +672,420 @@ const ExploreScreen = () => {
   );
 };
 
-const TabButton = ({ active, onClick, label, count }: { active: boolean, onClick: () => void, label: string, count: number }) => (
-  <button 
-    onClick={onClick}
-    className={`pb-4 text-sm font-black uppercase tracking-widest transition-all relative ${active ? 'text-text-main' : 'text-text-muted hover:text-text-main'}`}
-  >
-    <span className="flex items-center gap-2">
-      {label}
-      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${active ? 'bg-accent-primary text-white' : 'bg-white/5 text-text-muted'}`}>
-        {count}
-      </span>
-    </span>
-    {active && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-1 bg-accent-primary rounded-full" />}
-  </button>
+const NavItem = ({ to, icon, label, active }: { to: string, icon: React.ReactNode, label: string, active: boolean }) => (
+  <Link to={to} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${active ? 'bg-accent-primary/10 text-accent-primary font-bold' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}>
+    {icon}
+    <span className="text-sm">{label}</span>
+  </Link>
 );
 
-const EmptyResults = () => (
-  <div className="col-span-full py-20 text-center space-y-4">
-    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-      <Search size={32} className="text-text-muted" />
-    </div>
-    <h3 className="text-xl font-black uppercase tracking-tight">Aucun résultat trouvé</h3>
-    <p className="text-text-muted font-medium">Essayez d'ajuster vos filtres ou votre recherche.</p>
-  </div>
+const MobileNavItem = ({ to, icon, active }: { to: string, icon: React.ReactNode, active: boolean }) => (
+  <Link to={to} className={`p-2 rounded-xl transition-all ${active ? 'text-accent-primary' : 'text-text-muted'}`}>
+    {icon}
+  </Link>
 );
+
+function AppLayout() {
+  const location = useLocation();
+  const [isPremium, setIsPremium] = React.useState(false);
+
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row bg-bg-main text-text-main">
+      {/* Desktop Sidebar */}
+      <nav className="hidden md:flex flex-col w-64 bg-bg-surface border-r border-white/5 p-6 fixed h-full z-40">
+        <Link to="/" className="flex items-center gap-2 mb-10 px-2 group">
+          <div className="w-8 h-8 rounded-lg premium-gradient flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Zap size={20} className="text-white" />
+          </div>
+          <span className="text-xl font-bold tracking-tighter">ECHO</span>
+        </Link>
+        <div className="space-y-1">
+          <NavItem to="/" icon={<Home size={20} />} label="Accueil" active={location.pathname === '/'} />
+          <NavItem to="/explorer" icon={<Search size={20} />} label="Explorer" active={location.pathname.startsWith('/explorer')} />
+          <NavItem to="/avis" icon={<MessageSquare size={20} />} label="Avis" active={location.pathname.startsWith('/avis')} />
+          <NavItem to="/listes" icon={<ListMusic size={20} />} label="Listes" active={location.pathname.startsWith('/listes')} />
+          <NavItem to="/communaute" icon={<Users size={20} />} label="Communauté" active={location.pathname.startsWith('/communaute')} />
+          <NavItem to="/profil" icon={<UserIcon size={20} />} label="Profil" active={location.pathname.startsWith('/profil')} />
+        </div>
+
+        <div className="mt-10 space-y-6">
+          <div className="px-2">
+            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4">Récemment vus</h3>
+            <div className="space-y-3">
+              {mockArtists.slice(0, 2).map(artist => (
+                <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-3 group">
+                  <SafeImage src={artist.cover_image_url} className="w-8 h-8 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all" fallbackType="artist" />
+                  <span className="text-xs font-bold text-text-muted group-hover:text-text-main transition-colors truncate">{artist.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="px-2">
+            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4">Vos Listes</h3>
+            <div className="space-y-3">
+              <button className="flex items-center gap-3 text-text-muted hover:text-text-main transition-colors group w-full text-left">
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                  <PlusCircle size={16} />
+                </div>
+                <span className="text-xs font-bold">Créer une liste</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-auto pt-6 border-t border-white/5">
+          {!isPremium && (
+            <Link to="/premium" className="w-full premium-gradient p-4 rounded-2xl text-[10px] font-black flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-accent-primary/20 tracking-widest uppercase">
+              <Award size={16} /> PASSER AU PREMIUM
+            </Link>
+          )}
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex-grow md:ml-64 pb-24 md:pb-0">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="p-6 md:p-10 max-w-6xl mx-auto"
+          >
+            <Routes>
+              <Route path="/" element={<HomeScreen />} />
+              <Route path="/explorer" element={<ExploreScreen />} />
+              <Route path="/explore" element={<Navigate to="/explorer" replace />} />
+              <Route path="/avis" element={<ReviewsPage isPremium={isPremium} />} />
+              <Route path="/listes" element={<ListsPage />} />
+              <Route path="/communaute" element={<CommunityPage />} />
+              <Route path="/profil" element={<ProfilePage isPremium={isPremium} setIsPremium={setIsPremium} />} />
+              <Route path="/premium" element={<PremiumPage />} />
+              <Route path="/artiste/:slug" element={<ArtistPage />} />
+              <Route path="/album/:slug" element={<AlbumPage />} />
+              <Route path="/morceau/:slug" element={<TrackPage />} />
+              <Route path="/avis/nouveau/:type/:id" element={<ReviewFormPage />} />
+              <Route path="/liste/:slug" element={<ListPage />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Mobile Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-surface/90 backdrop-blur-xl border-t border-white/5 px-6 py-3 flex justify-between items-center z-50">
+        <MobileNavItem to="/" icon={<Home size={24} />} active={location.pathname === '/'} />
+        <MobileNavItem to="/explorer" icon={<Search size={24} />} active={location.pathname.startsWith('/explorer')} />
+        <MobileNavItem to="/avis" icon={<MessageSquare size={24} />} active={location.pathname.startsWith('/avis')} />
+        <MobileNavItem to="/listes" icon={<ListMusic size={24} />} active={location.pathname.startsWith('/listes')} />
+        <MobileNavItem to="/communaute" icon={<Users size={24} />} active={location.pathname.startsWith('/communaute')} />
+        <MobileNavItem to="/profil" icon={<UserIcon size={24} />} active={location.pathname.startsWith('/profil')} />
+      </nav>
+    </div>
+  );
+}
+
+// --- Screens ---
+
+const ReviewsPage = ({ isPremium }: { isPremium: boolean }) => {
+  const [search, setSearch] = React.useState('');
+  const [viewMode, setViewMode] = React.useState<'detailed' | 'compact'>('detailed');
+  const [filters, setFilters] = React.useState({
+    type: 'all',
+    genre: 'all',
+    tone: 'all',
+    angle: 'all',
+    status: 'all',
+    account: 'all',
+    sort: 'recent'
+  });
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const filteredReviews = mockReviews.filter(review => {
+    const matchesSearch = review.target_name.toLowerCase().includes(search.toLowerCase()) || 
+                         review.title?.toLowerCase().includes(search.toLowerCase()) ||
+                         review.user_display_name.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesType = filters.type === 'all' || review.target_type === filters.type;
+    const matchesGenre = filters.genre === 'all' || review.genre === filters.genre;
+    const matchesTone = filters.tone === 'all' || review.tone === filters.tone;
+    const matchesAngle = filters.angle === 'all' || review.angle === filters.angle;
+    const matchesStatus = filters.status === 'all' || 
+                         (filters.status === 'qualifie' && review.user_expertise?.includes('Qualifié')) ||
+                         (filters.status === 'confirme' && review.user_expertise?.includes('Confirmé'));
+    const matchesAccount = filters.account === 'all' || 
+                          (filters.account === 'premium' && review.user_premium_status) ||
+                          (filters.account === 'free' && !review.user_premium_status);
+
+    return matchesSearch && matchesType && matchesGenre && matchesTone && matchesAngle && matchesStatus && matchesAccount;
+  }).sort((a, b) => {
+    if (filters.sort === 'recent') return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+    if (filters.sort === 'useful') return b.helpful_count - a.helpful_count;
+    if (filters.sort === 'loved') return b.quality_score - a.quality_score;
+    return 0;
+  });
+
+  return (
+    <div className="space-y-12">
+      <header className="space-y-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <Badge variant="premium">Communauté Echo</Badge>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">Avis de la <br /><span className="text-accent-primary">COMMUNAUTÉ.</span></h1>
+            <p className="text-text-muted text-xl font-medium max-w-xl">Des avis structurés, utiles et nuancés pour mieux découvrir la musique</p>
+          </div>
+          <div className="flex gap-4">
+            <div className="glass-card px-6 py-4 text-center border-white/5">
+              <div className="text-2xl font-black text-accent-primary">{mockReviews.length}</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Avis publiés</div>
+            </div>
+            <div className="glass-card px-6 py-4 text-center border-white/5">
+              <div className="text-2xl font-black text-accent-secondary">12</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Auteurs actifs</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-2xl blur opacity-10 group-focus-within:opacity-30 transition duration-500"></div>
+            <div className="relative">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent-primary transition-colors" size={24} />
+              <input 
+                type="text" 
+                placeholder="Rechercher un avis, un artiste, un contributeur..." 
+                className="w-full bg-bg-surface border border-white/10 rounded-2xl py-6 pl-16 pr-8 text-xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+            <div className="flex flex-wrap gap-4">
+              <FilterGroup label="Type" value={filters.type} options={[{id: 'all', label: 'Tout'}, {id: 'artist', label: 'Artiste'}, {id: 'album', label: 'Album'}, {id: 'track', label: 'Morceau'}]} onChange={(v) => setFilters({...filters, type: v})} />
+              <FilterGroup label="Genre" value={filters.genre} options={[{id: 'all', label: 'Tout'}, {id: 'Pop', label: 'Pop'}, {id: 'Rock-Indie', label: 'Rock-Indie'}, {id: 'Hip-hop-Rap', label: 'Hip-hop-Rap'}]} onChange={(v) => setFilters({...filters, genre: v})} />
+              <FilterGroup label="Tonalité" value={filters.tone} options={[{id: 'all', label: 'Tout'}, {id: 'positif', label: 'Positif'}, {id: 'nuancé', label: 'Nuancé'}, {id: 'critique', label: 'Critique'}]} onChange={(v) => setFilters({...filters, tone: v})} />
+              <FilterGroup label="Angle" value={filters.angle} options={[{id: 'all', label: 'Tout'}, {id: 'production', label: 'Production'}, {id: 'écriture', label: 'Écriture'}, {id: 'émotion', label: 'Émotion'}]} onChange={(v) => setFilters({...filters, angle: v})} />
+            </div>
+            
+            <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-2xl border border-white/5">
+              <button 
+                onClick={() => setViewMode('detailed')}
+                className={`p-2.5 rounded-xl transition-all ${viewMode === 'detailed' ? 'bg-accent-primary text-white shadow-lg' : 'text-text-muted hover:text-text-main'}`}
+                title="Vue détaillée"
+              >
+                <LayoutList size={20} />
+              </button>
+              <button 
+                onClick={() => setViewMode('compact')}
+                className={`p-2.5 rounded-xl transition-all ${viewMode === 'compact' ? 'bg-accent-primary text-white shadow-lg' : 'text-text-muted hover:text-text-main'}`}
+                title="Vue compacte"
+              >
+                <LayoutGrid size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="bg-accent-primary/5 border border-accent-primary/20 rounded-3xl p-6 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-2xl bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
+          <Info className="text-accent-primary" size={20} />
+        </div>
+        <p className="text-sm text-text-muted leading-relaxed font-medium">
+          Tous les membres peuvent publier des avis. L’abonnement payant débloque davantage de lecture, de comparaison et de personnalisation, mais ne donne pas automatiquement plus de valeur à un avis.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-32 space-y-6">
+          <div className="w-16 h-16 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-text-muted font-black uppercase tracking-[0.2em] text-xs">Analyse de la communauté en cours...</p>
+        </div>
+      ) : filteredReviews.length > 0 ? (
+        <div className={`grid gap-10 ${viewMode === 'compact' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+          {filteredReviews.map(review => (
+            <motion.div 
+              layout
+              key={review.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ReviewCard review={review} isReaderPremium={isPremium} compact={viewMode === 'compact'} />
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-32 space-y-6 glass-card border-white/5">
+          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle size={40} className="text-text-muted" />
+          </div>
+          <h3 className="text-2xl font-black uppercase tracking-tight">Aucun avis trouvé</h3>
+          <p className="text-text-muted font-medium">Essayez de modifier vos filtres ou votre recherche.</p>
+          <button 
+            onClick={() => {setSearch(''); setFilters({type: 'all', genre: 'all', tone: 'all', angle: 'all', status: 'all', account: 'all', sort: 'recent'})}} 
+            className="bg-accent-primary/10 text-accent-primary px-8 py-3 rounded-2xl font-black text-sm hover:bg-accent-primary/20 transition-all"
+          >
+            RÉINITIALISER LES FILTRES
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const HomeScreen = () => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/explorer?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  return (
+    <div className="space-y-20">
+      <header className="space-y-8 pt-10 relative">
+        <div className="space-y-6">
+          <Badge variant="premium">Plateforme Culturelle & Communautaire</Badge>
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase">
+            DÉCOUVREZ PAR OÙ <br />
+            <span className="text-accent-primary">COMMENCER.</span>
+          </h1>
+          <p className="text-text-muted text-xl md:text-2xl max-w-2xl font-medium leading-relaxed">
+            Echo centralise les avis structurés et les analyses IA pour vous guider dans l'univers d'un artiste, d'un album ou d'un morceau.
+          </p>
+        </div>
+
+        {/* Home Search Bar */}
+        <form onSubmit={handleSearch} className="relative max-w-4xl group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent-primary transition-colors" size={24} />
+            <input 
+              type="text" 
+              placeholder="Rechercher un artiste, un album ou un morceau..." 
+              className="w-full bg-bg-surface border border-white/10 rounded-[2rem] py-6 pl-16 pr-8 text-xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 bg-accent-primary hover:bg-accent-primary/80 text-white px-6 py-3 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95">
+              RECHERCHER
+            </button>
+          </div>
+        </form>
+
+        <div className="flex flex-wrap gap-4 pt-4">
+          <Link to="/explorer" className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors flex items-center gap-2">
+            <TrendingUp size={18} className="text-accent-secondary" /> VOIR LES TENDANCES
+          </Link>
+          <Link to="/avis" className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors flex items-center gap-2">
+            <MessageSquare size={18} className="text-accent-primary" /> LIRE LES DERNIERS AVIS
+          </Link>
+        </div>
+      </header>
+
+      <section>
+        <div className="flex items-end justify-between mb-8">
+          <SectionTitle subtitle="Les artistes qui redéfinissent la scène actuelle">Tendances du moment</SectionTitle>
+          <Link to="/explorer" className="text-accent-secondary font-black text-xs uppercase tracking-widest hover:underline mb-8 flex items-center gap-2">
+            Tout explorer <ArrowRight size={14} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {mockArtists.slice(0, 6).map(artist => <div key={artist.id}><ArtistCard artist={artist} /></div>)}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <div className="lg:col-span-7 space-y-12">
+          <SectionTitle subtitle="Les analyses les plus pertinentes de la semaine">Avis à la une</SectionTitle>
+          <div className="space-y-8">
+            <ReviewCard review={mockReviews[0]} />
+            <ReviewCard review={mockReviews[1]} />
+          </div>
+          <Link to="/avis" className="premium-gradient w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl hover:opacity-90 transition-opacity">
+            <MessageSquare size={20} /> DÉCOUVRIR TOUS LES AVIS DE LA COMMUNAUTÉ
+          </Link>
+        </div>
+        
+        <div className="lg:col-span-5 space-y-12">
+          <SectionTitle subtitle="Sélectionnés pour leur accessibilité immédiate">Par où commencer ?</SectionTitle>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-4">Albums Incontournables</h3>
+              {mockAlbums.filter(a => a.is_entry_album).map(album => <div key={album.id}><AlbumCard album={album} /></div>)}
+            </div>
+            <div className="space-y-4 pt-6">
+              <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-4">Morceaux Clés</h3>
+              {mockTracks.filter(t => t.is_best_entry_track).map(track => <div key={track.id}><TrackCard track={track} /></div>)}
+            </div>
+          </div>
+          
+          <div className="glass-card p-8 bg-accent-primary/5 border-accent-primary/20 space-y-6">
+            <div className="w-12 h-12 rounded-2xl premium-gradient flex items-center justify-center shadow-lg">
+              <Zap size={24} className="text-white" />
+            </div>
+            <h3 className="text-xl font-black leading-tight">Vous ne savez toujours pas quoi écouter ?</h3>
+            <p className="text-text-muted text-sm font-medium leading-relaxed">
+              Laissez notre IA analyser vos goûts et vous proposer le point d'entrée parfait dans n'importe quel genre musical.
+            </p>
+            <button className="text-accent-primary font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
+              Lancer l'assistant Echo <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden rounded-[3rem] bg-bg-surface border border-white/5 p-12 md:p-20">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent-primary/10 to-transparent pointer-events-none" />
+        <div className="relative z-10 max-w-2xl space-y-8">
+          <Badge variant="premium">Listes de la communauté</Badge>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
+            DES MILLIERS DE <br />
+            <span className="text-accent-secondary">SÉLECTIONS.</span>
+          </h2>
+          <p className="text-text-muted text-lg font-medium leading-relaxed">
+            Explorez les listes thématiques créées par nos membres les plus qualifiés. De la "Synth-pop obscure" aux "Classiques du Rap Belge".
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+            {mockLists.map(list => (
+              <Link key={list.id} to={`/liste/${list.slug}`} className="bg-bg-main/50 backdrop-blur-md p-6 rounded-3xl border border-white/5 hover:border-accent-primary/30 transition-all group">
+                <div className="flex justify-between items-start mb-4">
+                  <Badge variant="premium">{list.category}</Badge>
+                  <div className="flex items-center gap-1 text-text-muted text-[10px] font-black">
+                    <ThumbsUp size={12} /> {list.like_count}
+                  </div>
+                </div>
+                <h3 className="text-lg font-black group-hover:text-accent-primary transition-colors mb-2">{list.title}</h3>
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-[9px] font-black text-text-muted uppercase tracking-widest">Par {list.user_display_name}</span>
+                  <ArrowRight size={16} className="text-accent-primary group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+          <Link to="/listes" className="inline-flex items-center gap-2 text-accent-secondary font-black text-xs uppercase tracking-widest hover:underline pt-4">
+            Voir toutes les listes <ArrowRight size={14} />
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+
+
 
 const ArtistPage = () => {
   const { slug } = useParams();
@@ -993,7 +1102,12 @@ const ArtistPage = () => {
       </button>
 
       <header className="relative rounded-[3rem] overflow-hidden aspect-[21/9] md:aspect-[4/1] shadow-2xl group">
-        <img src={artist.hero_image_url} alt={artist.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" referrerPolicy="no-referrer" />
+        <SafeImage 
+          src={artist.hero_image_url} 
+          alt={artist.name} 
+          fallbackType="artist"
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-bg-main/40 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
@@ -1030,7 +1144,7 @@ const ArtistPage = () => {
                     <Award size={20} className="text-accent-primary" />
                   </div>
                   <div className="flex items-center gap-4">
-                    <img src={album.cover_url} className="w-20 h-20 rounded-2xl shadow-xl" referrerPolicy="no-referrer" />
+                    <SafeImage src={album.cover_url} className="w-20 h-20 rounded-2xl shadow-xl" fallbackType="album" />
                     <div>
                       <div className="font-black text-lg leading-tight">{album.title}</div>
                       <div className="text-sm text-text-muted mt-1">Porte d'entrée universelle</div>
@@ -1134,7 +1248,7 @@ const AlbumPage = () => {
       </button>
       <div className="flex flex-col md:flex-row gap-12 items-start">
         <div className="w-full md:w-96 aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl flex-shrink-0">
-          <img src={album.cover_url} alt={album.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          <SafeImage src={album.cover_url} alt={album.title} className="w-full h-full object-cover" fallbackType="album" />
         </div>
         <div className="space-y-8 flex-grow">
           <div className="space-y-4">
@@ -1495,11 +1609,11 @@ const ListCard = ({ list, featured = false, compact = false }: { list: SharedLis
   >
     <Link to={`/liste/${list.slug}`} className={`flex flex-col h-full ${featured ? 'md:flex-row' : ''}`}>
       <div className={`relative overflow-hidden ${featured ? 'md:w-1/2 aspect-video md:aspect-auto' : 'aspect-video'}`}>
-        <img 
+        <SafeImage 
           src={list.image_url} 
           alt={list.title} 
+          fallbackType="album"
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-          referrerPolicy="no-referrer" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent opacity-60" />
         <div className="absolute top-4 left-4 flex flex-wrap gap-2">
@@ -1535,7 +1649,7 @@ const ListCard = ({ list, featured = false, compact = false }: { list: SharedLis
         
         <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={list.user_avatar} className="w-8 h-8 rounded-full border border-white/10" referrerPolicy="no-referrer" />
+            <SafeImage src={list.user_avatar} className="w-8 h-8 rounded-full border border-white/10" fallbackType="user" />
             <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Par {list.user_display_name}</span>
           </div>
           <ArrowRight size={20} className="text-accent-secondary group-hover:translate-x-2 transition-transform" />
@@ -1559,7 +1673,7 @@ const ListPage = () => {
         <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">{list.title}</h1>
         <p className="text-text-muted text-xl max-w-3xl font-medium leading-relaxed">{list.description}</p>
         <div className="flex items-center gap-4 pt-4">
-          <img src={list.user_avatar} className="w-10 h-10 rounded-full border-2 border-accent-secondary/20" referrerPolicy="no-referrer" />
+          <SafeImage src={list.user_avatar} className="w-10 h-10 rounded-full border-2 border-accent-secondary/20" fallbackType="user" />
           <div>
             <div className="text-xs font-black uppercase tracking-widest text-text-muted">Créée par</div>
             <div className="font-black text-accent-secondary">{list.user_display_name}</div>
@@ -1654,10 +1768,10 @@ const CommunityUserCard = ({ user, featured = false, compact = false }: { user: 
     <div className="p-8 space-y-6 flex-grow">
       <div className="flex items-center gap-6">
         <div className="relative">
-          <img 
+          <SafeImage 
             src={user.avatar_url} 
             className={`${compact ? 'w-16 h-16' : 'w-20 h-20'} rounded-2xl border-2 border-white/10 object-cover shadow-xl`} 
-            referrerPolicy="no-referrer" 
+            fallbackType="user"
           />
           {user.premium_status && (
             <div className="absolute -top-2 -right-2 bg-accent-primary text-bg-main p-1 rounded-lg shadow-lg">
@@ -1737,10 +1851,10 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
       <header className="glass-card p-12 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden border-white/5">
         <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><UserIcon size={240} /></div>
         <div className="relative z-10">
-          <img 
+          <SafeImage 
             src={user.avatar_url} 
             className="w-48 h-48 rounded-[3rem] border-4 border-accent-primary/30 shadow-2xl object-cover" 
-            referrerPolicy="no-referrer" 
+            fallbackType="user"
           />
           {user.premium_status && (
             <div className="absolute -bottom-2 -right-2 bg-accent-primary text-bg-main p-3 rounded-2xl shadow-xl">
@@ -1810,7 +1924,7 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
               <div className="space-y-4">
                 {favoriteArtists.map(artist => (
                   <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-4 group">
-                    <img src={artist.cover_image_url} className="w-12 h-12 rounded-xl object-cover border border-white/10" referrerPolicy="no-referrer" />
+                    <SafeImage src={artist.cover_image_url} className="w-12 h-12 rounded-xl object-cover border border-white/10" fallbackType="artist" />
                     <div className="flex-grow">
                       <div className="font-bold group-hover:text-accent-primary transition-colors">{artist.name}</div>
                       <div className="text-[10px] text-text-muted uppercase font-black">{artist.primary_genres[0]}</div>
@@ -1836,7 +1950,7 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
                 <h4 className="text-[10px] font-black text-text-muted uppercase tracking-widest">Profils Proches</h4>
                 <div className="flex -space-x-3">
                   {similarProfiles.map(u => (
-                    <img key={u.id} src={u.avatar_url} className="w-10 h-10 rounded-full border-2 border-bg-main object-cover" title={u.display_name} referrerPolicy="no-referrer" />
+                    <SafeImage key={u.id} src={u.avatar_url} className="w-10 h-10 rounded-full border-2 border-bg-main object-cover" title={u.display_name} fallbackType="user" />
                   ))}
                 </div>
               </div>
@@ -1851,7 +1965,7 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
             <div className="grid grid-cols-2 gap-4">
               {followedArtists.map(artist => (
                 <Link key={artist.id} to={`/artiste/${artist.slug}`} className="space-y-2 group">
-                  <img src={artist.cover_image_url} className="w-full aspect-square rounded-2xl object-cover border border-white/10 group-hover:border-accent-primary/30 transition-all" referrerPolicy="no-referrer" />
+                  <SafeImage src={artist.cover_image_url} className="w-full aspect-square rounded-2xl object-cover border border-white/10 group-hover:border-accent-primary/30 transition-all" fallbackType="artist" />
                   <div className="text-[10px] font-black text-center truncate group-hover:text-accent-primary transition-colors">{artist.name.toUpperCase()}</div>
                 </Link>
               ))}
@@ -1932,6 +2046,7 @@ const PremiumPage = () => (
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AppLayout />
     </Router>
   );
