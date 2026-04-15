@@ -18,6 +18,15 @@ export interface User {
   avatar_url: string;
   credibility_level: 'visiteur' | 'confirme' | 'qualifie';
   premium_status: boolean;
+  favorite_genre?: string;
+  critical_specialty?: string;
+  discovery_style?: string;
+  follow_reason?: string;
+  signature?: string;
+  favorite_artists_ids?: string[];
+  taste_tones?: string[];
+  similar_profiles_ids?: string[];
+  followed_artists_ids?: string[];
   stats: {
     reviews_count: number;
     followers_count: number;
@@ -133,11 +142,16 @@ export interface SharedList {
   slug: string;
   user_id: string;
   user_display_name: string;
+  user_avatar?: string;
   title: string;
   description: string;
   items: { type: EntityType; id: string; slug: string; title: string; why: string }[];
   like_count: number;
-  category: 'Curated' | 'Community' | 'Thematic';
+  category: string;
+  selection_type: 'Débutant' | 'Expert' | 'Thématique' | 'Humeur';
+  discovery_promise: string;
+  image_url: string;
+  created_at: string;
 }
 
 export interface ProReview {
