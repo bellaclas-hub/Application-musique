@@ -65,8 +65,19 @@ import {
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  React.useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  React.useLayoutEffect(() => {
+    const scrollTarget = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTo(0, 0);
+      document.body.scrollTo(0, 0);
+      const main = document.querySelector('main');
+      if (main) main.scrollTo(0, 0);
+    };
+
+    scrollTarget();
+    // Small timeout as a fallback for complex layout shifts during animation
+    const timer = setTimeout(scrollTarget, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
   return null;
 };
@@ -85,51 +96,56 @@ const SafeImage = ({
 } & React.ImgHTMLAttributes<HTMLImageElement>) => {
   const [isError, setIsError] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
-
-  // Varied premium placeholders from Unsplash
-  const fallbackCollections = {
-    artist: [
-      'https://images.unsplash.com/photo-1493225255756-d9584f8606e9',
-      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4',
-      'https://images.unsplash.com/photo-1514525253361-bee8a187499b',
-      'https://images.unsplash.com/photo-1459749411177-042180ce673c'
-    ],
-    album: [
-      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745',
-      'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad',
-      'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17',
-      'https://images.unsplash.com/photo-1514525253361-bee8a187499b'
-    ],
-    track: [
-      'https://images.unsplash.com/photo-1459749411177-042180ce673c',
-      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4',
-      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745',
-      'https://images.unsplash.com/photo-1514525253361-bee8a187499b'
-    ],
-    user: [
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
-      'https://images.unsplash.com/photo-1527980965255-d3b416303d12',
-      'https://images.unsplash.com/photo-1599566150163-29194dcaad36',
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80'
-    ]
-  };
+  const [retryCount, setRetryCount] = React.useState(0);
 
   const getFallback = () => {
-    const collection = fallbackCollections[fallbackType];
+    const musicFallbacks = [
+      '1493225255756-d9584f8606e9', // Singer
+      '1511671782779-c97d3d27a1d4', // Microphone
+      '1514525253361-bee8a187499b', // Concert
+      '1459749411177-042180ce673c', // Guitar
+      '1470225620780-dba8ba36b745', // Concert crowd
+      '1508700115892-45ecd05ae2ad', // Vinyl
+      '1614613535308-eb5fbd3d2c17', // Studio
+      '1504608524841-42fe6f032b4b', // Piano
+      '1487180144669-ebf7df964979', // Headphones
+      '1511379938547-c03674d01896', // Music notes
+      '1510915361894-db8b60106cb1', // Guitar player
+      '1526218626217-dc65a29bb444', // Music background
+      '1453090927415-5f45085b65c0', // Turntable
+      '1420181910359-05665bbf00b1', // Cassette
+      '1516280440614-37939bbacd81', // Singing
+      '1501386761578-eac5c94b800a', // Concert
+      '1465821185615-20b3c2fbf41b', // Studio gear
+      '1514533212735-5df27d970db0', // Piano keys
+      '1511671782779-c97d3d27a1d4', // Mic
+      '1459231978203-b7d0c47a3ecf'  // Cello
+    ];
+
     const str = alt || src || 'echo';
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       hash = ((hash << 5) - hash) + str.charCodeAt(i);
       hash |= 0;
     }
-    const index = Math.abs(hash) % collection.length;
-    return `${collection[index]}?auto=format&fit=crop&q=80&w=800`;
+    
+    // Add fallbackType to hash to further differentiate
+    const typeHash = fallbackType.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const index = Math.abs(hash + typeHash + retryCount) % musicFallbacks.length;
+    
+    return `https://images.unsplash.com/photo-${musicFallbacks[index]}?auto=format&fit=crop&q=80&w=800`;
   };
+
+  React.useEffect(() => {
+    setIsLoading(true);
+    setIsError(false);
+    setRetryCount(0);
+  }, [src]);
 
   const finalSrc = isError || !src ? getFallback() : src;
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={`relative overflow-hidden bg-bg-surface-light ${className}`}>
       <AnimatePresence>
         {isLoading && (
           <motion.div 
@@ -142,16 +158,28 @@ const SafeImage = ({
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Last resort fallback: a stylized gradient if everything fails */}
+      <div className="absolute inset-0 premium-gradient opacity-10" />
+      
       <motion.img
+        key={finalSrc}
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoading ? 0 : 1 }}
         transition={{ duration: 0.5 }}
         src={finalSrc}
         alt={alt}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover relative z-0"
         onError={() => {
-          setIsError(true);
-          setIsLoading(false);
+          if (!isError) {
+            setIsError(true);
+            setIsLoading(true);
+          } else if (retryCount < 2) {
+            setRetryCount(prev => prev + 1);
+            setIsLoading(true);
+          } else {
+            setIsLoading(false);
+          }
         }}
         onLoad={() => setIsLoading(false)}
         referrerPolicy="no-referrer"
@@ -754,6 +782,7 @@ function AppLayout() {
             transition={{ duration: 0.2 }}
             className="p-6 md:p-10 max-w-6xl mx-auto"
           >
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<HomeScreen />} />
               <Route path="/explorer" element={<ExploreScreen />} />
@@ -957,7 +986,6 @@ const HomeScreen = () => {
     <div className="space-y-20">
       <header className="space-y-8 pt-10 relative">
         <div className="space-y-6">
-          <Badge variant="premium">Plateforme Culturelle & Communautaire</Badge>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase">
             DÉCOUVREZ PAR OÙ <br />
             <span className="text-accent-primary">COMMENCER.</span>
@@ -2046,7 +2074,6 @@ const PremiumPage = () => (
 export default function App() {
   return (
     <Router>
-      <ScrollToTop />
       <AppLayout />
     </Router>
   );
