@@ -116,7 +116,7 @@ export const mockArtists: Artist[] = [
     long_bio: 'Angèle est une autrice-compositrice-interprète belge qui a révolutionné la pop francophone avec son premier album "Brol". Son style mêle humour, mélancolie et productions léchées.',
     hero_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8718a74a7?auto=format&fit=crop&q=80&w=1920',
     cover_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8718a74a7?auto=format&fit=crop&q=80&w=800',
-    entry_level: 'Accessible',
+    entry_level: 'Immédiat',
     consensus_score: 85,
     polarization_score: 20,
     review_count: 1240,
@@ -127,7 +127,35 @@ export const mockArtists: Artist[] = [
     era_breakdown: [
       { era: 'Brol (2018)', score: 88 },
       { era: 'Nonante-Cinq (2021)', score: 82 }
-    ]
+    ],
+    similar_artists_ids: ['art8', 'art9', 'art10'],
+    essential_works_ids: [
+      { type: 'album', id: 'alb1', label: 'L\'album culte' },
+      { type: 'track', id: 'tr1', label: 'Le hit mondial' }
+    ],
+    evolution_description: 'D\'une pop bricolée et ironique vers des productions plus denses et une mélancolie assumée.',
+    pro_consensus: 'Une écriture fine et une efficacité mélodique redoutable.',
+    community_consensus: 'Une artiste authentique qui parle de sa génération sans filtre.',
+    pro_score: 82,
+    community_score: 88,
+    consensus_data: {
+      pros: ['Efficacité mélodique', 'Textes ancrés dans le réel', 'Production moderne'],
+      cons: ['Voix parfois trop uniforme', 'Lissage excessif sur certains titres'],
+      dividing_points: ['Récupération politique/sociétale', 'Omniprésence médiatique'],
+      consensus_summary: 'Angèle est la porte d\'entrée idéale vers la pop actuelle, mêlant accessibilité et fond.',
+      recommended_for: ['Amateurs de pop', 'Ceux qui cherchent des textes actuels', 'Pour commencer la pop FR']
+    },
+    summary: {
+      why_it_pleases: ['Mélodies entêtantes', 'Humour et autodérision', 'Univers visuel fort'],
+      friction_points: ['Production parfois trop clinique', 'Thèmes récurrents'],
+      ideal_for: 'Les auditeurs cherchant une pop intelligente et immédiate.',
+      starting_point: {
+        type: 'album',
+        id: 'alb1',
+        title: 'Brol',
+        description: 'La base absolue pour comprendre son univers.'
+      }
+    }
   },
   {
     id: 'art2',
@@ -138,7 +166,7 @@ export const mockArtists: Artist[] = [
     long_bio: 'Phoenix est un groupe de rock alternatif français originaire de Versailles. Ils sont l\'un des rares groupes français à avoir remporté un Grammy Award pour leur album "Wolfgang Amadeus Phoenix".',
     hero_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8a187499b?auto=format&fit=crop&q=80&w=1920',
     cover_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8a187499b?auto=format&fit=crop&q=80&w=800',
-    entry_level: 'Intermédiaire',
+    entry_level: 'Accessible',
     consensus_score: 92,
     polarization_score: 15,
     review_count: 850,
@@ -150,7 +178,35 @@ export const mockArtists: Artist[] = [
       { era: 'Débuts (2000-2006)', score: 75 },
       { era: 'Âge d\'Or (2009-2013)', score: 95 },
       { era: 'Moderne (2017-Présent)', score: 80 }
-    ]
+    ],
+    similar_artists_ids: ['art11', 'art12'],
+    essential_works_ids: [
+      { type: 'album', id: 'alb2', label: 'Le chef-d\'œuvre global' },
+      { type: 'track', id: 'tr2', label: 'L\'hymne indie' }
+    ],
+    evolution_description: 'Passage d\'un rock garage teinté de soul vers une pop synthétique raffinée et internationale.',
+    pro_consensus: 'Une maîtrise de la production et un sens inné de la mélodie intemporelle.',
+    community_consensus: 'Le groupe parfait pour les fins d\'après-midi d\'été.',
+    pro_score: 94,
+    community_score: 92,
+    consensus_data: {
+      pros: ['Sonnique unique', 'Énergie live communicative', 'Élégance française'],
+      cons: ['Parfois un peu trop distant/chic', 'Manque de renouvellement récent'],
+      dividing_points: ['L\'aspect "Versailles" un peu élitiste', 'L\'usage intensif des synthés'],
+      consensus_summary: 'Un consensus massif sur leur période 2009, unanimement saluée comme un sommet du genre.',
+      recommended_for: ['Amateurs d\'Indie Rock', 'Fans de production léchée', 'Ceux qui aiment danser sur du rock']
+    },
+    summary: {
+      why_it_pleases: ['Rythmiques entraînantes', 'Mélodies accrocheuses', 'Atmosphère solaire'],
+      friction_points: ['Voix parfois trop vocodée', 'Structure de morceaux classique'],
+      ideal_for: 'Pour ceux qui cherchent l\'équilibre parfait entre rock et pop électronique.',
+      starting_point: {
+        type: 'track',
+        id: 'tr2',
+        title: '1901',
+        description: '3 minutes de pur bonheur indie qui résument parfaitement leur talent.'
+      }
+    }
   },
   {
     id: 'art3',
@@ -161,7 +217,7 @@ export const mockArtists: Artist[] = [
     long_bio: 'Damso est un rappeur et auteur-compositeur belgo-congolais. Connu pour ses textes crus, sombres et une introspection rare dans le milieu du rap.',
     hero_image_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=1920',
     cover_image_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800',
-    entry_level: 'Expérimental',
+    entry_level: 'Exigeant',
     consensus_score: 89,
     polarization_score: 45,
     review_count: 2100,
@@ -173,7 +229,41 @@ export const mockArtists: Artist[] = [
       { era: 'Ipséité (2017)', score: 96 },
       { era: 'Lithopédion (2018)', score: 85 },
       { era: 'QALF (2020)', score: 90 }
-    ]
+    ],
+    similar_artists_ids: ['art13', 'art14'],
+    essential_works_ids: [
+      { type: 'album', id: 'alb3', label: 'Le classique instantané' },
+      { type: 'track', id: 'tr3', label: 'La mélancolie pure' }
+    ],
+    evolution_description: 'D\'une noirceur absolue et violente vers une introspection plus apaisée et musicale.',
+    discography_matrix: {
+      entry_point_id: 'alb3', // Ipséité
+      masterpiece_id: 'alb3', // Ipséité
+      experimental_id: 'alb11', // Lithopédion (supposé pour l'exemple)
+      hidden_gem_id: 'alb12' // Batterie Faible (supposé pour l'exemple)
+    },
+    pro_consensus: 'Un flow technique et une écriture d\'une densité rare.',
+    community_consensus: 'Le rappeur le plus profond de sa génération, malgré ses sorties clivantes.',
+    pro_score: 91,
+    community_score: 89,
+    consensus_data: {
+      pros: ['Qualité des textes', 'Univers sonore unique', 'Réinvention constante'],
+      cons: ['Paroles parfois trop crues', 'Communication mystérieuse'],
+      dividing_points: ['Ses prises de position', 'Le virage musical de Lithopédion'],
+      consensus_summary: 'Damso divise sur la forme mais fait l\'unanimité sur le fond et son importance culturelle.',
+      recommended_for: ['Amateurs de textes', 'Fans de rap introspectif', 'Ceux qui cherchent de la profondeur']
+    },
+    summary: {
+      why_it_pleases: ['Complexité lyrical', 'Ambiance immersive', 'Authenticité'],
+      friction_points: ['Violence verbale', 'Accès parfois difficile'],
+      ideal_for: 'Les auditeurs qui aiment décortiquer les paroles et les ambiances sombres.',
+      starting_point: {
+        type: 'album',
+        id: 'alb3',
+        title: 'Ipséité',
+        description: 'L\'album qui a défini son style et marqué le rap français.'
+      }
+    }
   },
   {
     id: 'art4',
@@ -196,7 +286,35 @@ export const mockArtists: Artist[] = [
       { era: 'Born to Die (2012)', score: 92 },
       { era: 'Norman Fucking Rockwell! (2019)', score: 98 },
       { era: 'Did You Know... (2023)', score: 85 }
-    ]
+    ],
+    similar_artists_ids: ['art15', 'art16'],
+    essential_works_ids: [
+      { type: 'album', id: 'alb4', label: 'La genèse iconique' },
+      { type: 'track', id: 'tr4', label: 'Le hit viral' }
+    ],
+    evolution_description: 'D\'une pop orchestrale et vintage vers un songwriting folk complexe et dépouillé.',
+    pro_consensus: 'Une icône culturelle avec un sens du récit exceptionnel.',
+    community_consensus: 'Sa voix et son univers sont un refuge pour toute une génération.',
+    pro_score: 95,
+    community_score: 90,
+    consensus_data: {
+      pros: ['Esthétique inégalée', 'Voix captivante', 'Songwriting de haut vol'],
+      cons: ['Parois un peu répétitif', 'Image parfois trop construite'],
+      dividing_points: ['Son romantisme tragique', 'Sa période de débuts controversée'],
+      consensus_summary: 'Lana Del Rey est passée du statut de curiosité web à celui d\'une des plus grandes musiciennes US.',
+      recommended_for: ['Amateurs d\'atmosphères', 'Fans de pop alternative', 'Auditeurs sensibles à la mélancolie']
+    },
+    summary: {
+      why_it_pleases: ['Immersion totale', 'Beauté formelle', 'Émotion'],
+      friction_points: ['Lenteur rythmique', 'Thèmes récurrents'],
+      ideal_for: 'S\'évader dans un univers cinématographique et nostalgique.',
+      starting_point: {
+        type: 'album',
+        id: 'alb2',
+        title: 'Born to Die',
+        description: 'L\'entrée fracassante dans son univers vintage.'
+      }
+    }
   },
   {
     id: 'art5',
@@ -219,7 +337,35 @@ export const mockArtists: Artist[] = [
       { era: '† (Cross) (2007)', score: 99 },
       { era: 'Audio, Video, Disco (2011)', score: 78 },
       { era: 'Hyperdrama (2024)', score: 92 }
-    ]
+    ],
+    similar_artists_ids: ['art17', 'art18'],
+    essential_works_ids: [
+      { type: 'album', id: 'alb5', label: 'Le monument électronique' },
+      { type: 'track', id: 'tr5', label: 'Le hit disco-electro' }
+    ],
+    evolution_description: 'D\'une saturation maximale et d\'une violence "disco-metal" vers une pop de stade orchestrale et raffinée.',
+    pro_consensus: 'Une science hors pair de la compression et du gimmick sonore.',
+    community_consensus: 'Le groupe qui a rendu l\'électro aussi cool que le rock pour toute une génération.',
+    pro_score: 96,
+    community_score: 94,
+    consensus_data: {
+      pros: ['Sonnique surpuissante', 'Mélange des genres osé', 'Identité visuelle forte'],
+      cons: ['Peut fatiguer par sa grandiloquence', 'Production parfois trop agressive'],
+      dividing_points: ['Leur virage rock progressif', 'La simplicité de certains thèmes'],
+      consensus_summary: 'Justice fait consensus sur son importance historique pour la French Touch 2.0.',
+      recommended_for: ['Fans d\'électro', 'Amateurs d\'énergie brute', 'Ceux qui aiment le mélange rock/dance']
+    },
+    summary: {
+      why_it_pleases: ['Efficacité redoutable', 'Sens du spectacle', 'Innovation sonore'],
+      friction_points: ['Saturation auditive', 'Esthétique parfois sombre'],
+      ideal_for: 'Les auditeurs cherchant une expérience sonore intense et monumentale.',
+      starting_point: {
+        type: 'album',
+        id: 'alb5',
+        title: '† (Cross)',
+        description: 'La pierre angulaire de leur discographie.'
+      }
+    }
   }
 ];
 
@@ -239,7 +385,31 @@ export const mockAlbums: Album[] = [
     accessibility_score: 95,
     is_entry_album: true,
     short_description: 'Le premier album phénomène qui a tout changé.',
-    long_description: 'Brol est un album rafraîchissant qui explore les thèmes de la célébrité, des réseaux sociaux et de l\'amour avec une honnêteté désarmante.'
+    long_description: 'Brol est un album rafraîchissant qui explore les thèmes de la célébrité, des réseaux sociaux et de l\'amour avec une honnêteté désarmante.',
+    track_list: [
+      { id: 'tr1', title: 'Balance ton quoi', duration: '3:09', is_entry_track: true, is_community_favorite: true, sentiment: 'Revendicatif' },
+      { id: 'tr11', title: 'Tout oublier', duration: '3:22', is_community_favorite: true, sentiment: 'Mélancolique' },
+      { id: 'tr12', title: 'La Loi de Murphy', duration: '3:15', sentiment: 'Ironique' },
+      { id: 'tr13', title: 'Jalousie', duration: '3:45', sentiment: 'Introspectif' },
+      { id: 'tr14', title: 'Ta Reine', duration: '3:33', is_community_favorite: true, sentiment: 'Émotionnel' }
+    ],
+    coherence_score: 85,
+    pro_highlights: ['Efficacité mélodique', 'Fraîcheur des textes'],
+    community_highlights: ['Titres accrocheurs', 'Identité belge'],
+    pro_vs_community_analysis: 'La critique a salué le vent de fraîcheur tandis que la communauté s\'est reconnue dans les thèmes quotidiens.',
+    consensus_data: {
+      pros: ['Pas de remplissage', 'Sonorités modernes', 'Facile d\'écoute'],
+      cons: ['Parfois un peu répétitif'],
+      dividing_points: ['Usage intensif de l\'autotune'],
+      consensus_summary: 'Un des meilleurs premiers albums pop de ces dernières années.',
+      recommended_for: ['Débutants', 'Amateurs de pop actuelle']
+    },
+    summary: {
+      why_it_pleases: ['Accessibilité totale', 'Modernité', 'Humour'],
+      friction_points: ['Production parfois trop clinique'],
+      ideal_for: 'Découvrir la nouvelle scène pop francophone.',
+      starting_point: { type: 'track', id: 'tr1', title: 'Balance ton quoi', description: 'Le hit incontournable.' }
+    }
   },
   {
     id: 'alb2',
@@ -256,7 +426,31 @@ export const mockAlbums: Album[] = [
     accessibility_score: 80,
     is_entry_album: true,
     short_description: 'Le chef-d\'œuvre absolu de l\'indie pop française.',
-    long_description: 'Un album parfait de bout en bout, mêlant énergie rock et sens de la mélodie pop imparable.'
+    long_description: 'Un album parfait de bout en bout, mêlant énergie rock et sens de la mélodie pop imparable.',
+    track_list: [
+      { id: 'tr21', title: 'Lisztomania', duration: '4:01', is_entry_track: true, is_community_favorite: true, sentiment: 'Énergique' },
+      { id: 'tr2', title: '1901', duration: '3:13', is_community_favorite: true, sentiment: 'Électrique' },
+      { id: 'tr22', title: 'Fences', duration: '3:45', sentiment: 'Vaporeux' },
+      { id: 'tr23', title: 'Lasso', duration: '2:48', sentiment: 'Rapide' },
+      { id: 'tr24', title: 'Rome', duration: '5:38', sentiment: 'Épique' }
+    ],
+    coherence_score: 98,
+    pro_highlights: ['Précision rythmique', 'Élégance de la production'],
+    community_highlights: ['Sonnique unique', 'Énergie constante'],
+    pro_vs_community_analysis: 'Considéré comme un sans-faute historique par les deux camps.',
+    consensus_data: {
+      pros: ['Production cristalline', 'Écriture ciselée', 'Zéro déchet'],
+      cons: ['Durée un peu courte'],
+      dividing_points: ['Sonorités très 2010'],
+      consensus_summary: 'Un pilier de l\'indie rock mondial.',
+      recommended_for: ['Amateurs de rock', 'Chercheurs de sons parfaits']
+    },
+    summary: {
+      why_it_pleases: ['Énergie solaire', 'Mastering exemplaire'],
+      friction_points: ['Parfois trop policé'],
+      ideal_for: 'Une immersion dans ce que le rock français a produit de plus exportable.',
+      starting_point: { type: 'track', id: 'tr21', title: 'Lisztomania', description: 'Une ouverture magistrale.' }
+    }
   }
 ];
 
@@ -274,7 +468,33 @@ export const mockTracks: Track[] = [
     duration_seconds: 189,
     is_best_entry_track: true,
     quick_consensus_score: 96,
-    description: 'Un hymne féministe porté par une mélodie pop entêtante.'
+    description: 'Un hymne féministe porté par une mélodie pop entêtante.',
+    community_keywords: ['Féminisme', 'Ironie', 'Pop-Jazz', 'Générationnel'],
+    dominant_feeling: 'Revendicatif',
+    access_level: 'Immédiat',
+    perceived_limits: ['Sur-diffusion radio', 'Structure couplet-refrain prévisible'],
+    cross_reviews_excerpts: [
+      { user_id: 'u1', user_name: 'Thomas R.', text: 'Une écriture qui tape juste sans être moralisatrice.' },
+      { user_id: 'u7', user_name: 'Alexandre K.', text: 'Le beat est simple mais ça reste en tête tout de suite.' }
+    ],
+    listen_next_ids: [
+      { type: 'track', id: 'tr11', title: 'Tout oublier', reason: 'Pour la suite de son univers pop solaire.' },
+      { type: 'track', id: 'tr3', title: 'Macarena', reason: 'Pour une autre facette de la mélancolie belge (rap).' }
+    ],
+    coherence_context: 'C\'est le morceau qui a ouvert les portes du grand public à Angèle, résumant son équilibre entre fond et forme.',
+    consensus_data: {
+      pros: ['Message clair et fort', 'Production fraîche'],
+      cons: ['Répétitif à la longue'],
+      dividing_points: ['Sujet de société clivant'],
+      consensus_summary: 'Un classique de la pop française moderne.',
+      recommended_for: ['Tout le monde', 'Auditeurs engagés']
+    },
+    summary: {
+      why_it_pleases: ['Mélodie entêtante', 'Clarté du propos'],
+      friction_points: ['Un peu trop entendu'],
+      ideal_for: 'Les auditeurs qui veulent une pop intelligente.',
+      starting_point: { type: 'track', id: 'tr1', title: 'Balance ton quoi', description: 'Le titre lui-même.' }
+    }
   },
   {
     id: 'tr2',
@@ -289,7 +509,33 @@ export const mockTracks: Track[] = [
     duration_seconds: 197,
     is_best_entry_track: true,
     quick_consensus_score: 98,
-    description: 'L\'energy pure du groupe concentrée dans un morceau de 3 minutes.'
+    description: 'L\'energy pure du groupe concentrée dans un morceau de 3 minutes.',
+    community_keywords: ['Électrique', 'Festival', 'Indie', 'Versailles'],
+    dominant_feeling: 'Euphorique',
+    access_level: 'Accessible',
+    perceived_limits: ['Voix très traitée', 'Manque de "vrai" solo'],
+    cross_reviews_excerpts: [
+      { user_id: 'u3', user_name: 'Lucas B.', text: 'La production est un modèle de clarté rythmique.' },
+      { user_id: 'u2', user_name: 'Justine M.', text: 'L\'essence même de Phoenix en 3 minutes.' }
+    ],
+    listen_next_ids: [
+      { type: 'track', id: 'tr21', title: 'Lisztomania', reason: 'L\'autre pilier de l\'album.' },
+      { type: 'artist', id: 'art5', title: 'Justice', reason: 'Pour l\'énergie French Touch commune.' }
+    ],
+    coherence_context: 'Le morceau qui a défini le son Phoenix pour le monde entier.',
+    consensus_data: {
+      pros: ['Dynamisme incroyable', 'Synthés iconiques'],
+      cons: ['Un peu court'],
+      dividing_points: ['Production trop léchée pour les puristes rock'],
+      consensus_summary: 'Un des meilleurs morceaux d\'indie rock des années 2000.',
+      recommended_for: ['Fans de rock alternatif', 'Fans d\'électro-pop']
+    },
+    summary: {
+      why_it_pleases: ['Énergie brute', 'Gimmicks mémorables'],
+      friction_points: ['Structure très pop'],
+      ideal_for: 'Se donner un coup de boost matinal.',
+      starting_point: { type: 'track', id: 'tr2', title: '1901', description: 'Le titre lui-même.' }
+    }
   },
   {
     id: 'tr3',
@@ -304,7 +550,32 @@ export const mockTracks: Track[] = [
     duration_seconds: 206,
     is_best_entry_track: true,
     quick_consensus_score: 92,
-    description: 'Une ballade sombre et mélancolique qui a marqué le rap français.'
+    description: 'Une ballade sombre et mélancolique qui a marqué le rap français par sa justesse et sa crudité.',
+    community_keywords: ['Mélancolie', 'Culte', 'Lyrisme', 'Rap belge'],
+    dominant_feeling: 'Mélancolie Profonde',
+    access_level: 'Accessible',
+    perceived_limits: ['Paroles crues', 'Beat minimaliste'],
+    cross_reviews_excerpts: [
+      { user_id: 'u1', user_name: 'Thomas R.', text: 'Une écriture chirurgicale qui ne laisse personne indifférent.' },
+      { user_id: 'u4', user_name: 'Sophie L.', text: 'Le sample de guitare est d\'une simplicité géniale.' }
+    ],
+    listen_next_ids: [
+      { type: 'track', id: 'tr13', title: 'Amnésie', reason: 'Pour explorer encore plus loin la noirceur introspective.' }
+    ],
+    coherence_context: 'Le pivot émotionnel de l\'album Ipséité.',
+    consensus_data: {
+      pros: ['Sincérité brute', 'Mélodie entêtante'],
+      cons: ['Vulgarité gratuite pour certains'],
+      dividing_points: ['Le second degré des paroles'],
+      consensus_summary: 'Un morceau qui fait l\'unanimité sur sa production mais divise sur son texte.',
+      recommended_for: ['Fans de storytelling', 'Auditeurs nocturnes']
+    },
+    summary: {
+      why_it_pleases: ['Vibes mélancoliques', 'Flow parfaitement maîtrisé'],
+      friction_points: ['Crudité verbale'],
+      ideal_for: 'Les fins de soirées introspectives.',
+      starting_point: { type: 'artist', id: 'art3', title: 'Damso', description: 'Le créateur du morceau.' }
+    }
   },
   {
     id: 'tr4',

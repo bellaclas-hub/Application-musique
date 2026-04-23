@@ -35,6 +35,26 @@ export interface User {
   };
 }
 
+export interface ConsensusData {
+  pros: string[];
+  cons: string[];
+  dividing_points: string[];
+  consensus_summary: string;
+  recommended_for: string[];
+}
+
+export interface SummaryBlock {
+  why_it_pleases: string[];
+  friction_points: string[];
+  ideal_for: string;
+  starting_point: {
+    type: EntityType;
+    id: string;
+    title: string;
+    description: string;
+  };
+}
+
 export interface Artist {
   id: string;
   name: string;
@@ -44,15 +64,32 @@ export interface Artist {
   long_bio: string;
   hero_image_url: string;
   cover_image_url: string;
-  entry_level: 'Accessible' | 'Intermédiaire' | 'Expérimental';
-  consensus_score: number; // 0-100
-  polarization_score: number; // 0-100
+  entry_level: 'Immédiat' | 'Accessible' | 'Intermédiaire' | 'Exigeant';
+  consensus_score: number;
+  polarization_score: number;
   review_count: number;
   why_it_matters: string;
   cultural_impact: string;
   top_tags: string[];
-  pro_vs_community_gap: number; // -100 to 100
+  pro_vs_community_gap: number;
   era_breakdown: { era: string, score: number }[];
+  
+  // New features
+  similar_artists_ids: string[];
+  essential_works_ids: { type: 'album' | 'track', id: string, label: string }[];
+  evolution_description: string;
+  discography_matrix?: {
+    entry_point_id: string; // ID de l'album idéal pour commencer
+    masterpiece_id: string; // Chef d'œuvre technique
+    experimental_id?: string; // Pour les auditeurs avertis
+    hidden_gem_id?: string; // La pépite méconnue
+  };
+  pro_consensus: string;
+  community_consensus: string;
+  pro_score: number;
+  community_score: number;
+  consensus_data: ConsensusData;
+  summary: SummaryBlock;
 }
 
 export interface Album {
@@ -71,6 +108,22 @@ export interface Album {
   is_entry_album: boolean;
   short_description: string;
   long_description?: string;
+  
+  // New features
+  track_list: {
+    id: string;
+    title: string;
+    duration: string;
+    is_entry_track?: boolean;
+    is_community_favorite?: boolean;
+    sentiment?: string;
+  }[];
+  coherence_score: number; // 0-100
+  pro_highlights: string[];
+  community_highlights: string[];
+  pro_vs_community_analysis: string;
+  consensus_data: ConsensusData;
+  summary: SummaryBlock;
 }
 
 export interface Track {
@@ -87,6 +140,17 @@ export interface Track {
   is_best_entry_track: boolean;
   quick_consensus_score: number;
   description?: string;
+  
+  // New features
+  community_keywords?: string[];
+  dominant_feeling?: string;
+  access_level?: 'Immédiat' | 'Accessible' | 'Intermédiaire' | 'Exigeant';
+  perceived_limits?: string[];
+  cross_reviews_excerpts?: { user_id: string, user_name: string, text: string }[];
+  listen_next_ids?: { type: EntityType, id: string, title: string, reason: string }[];
+  coherence_context?: string; // How it fits in the artist/album journey
+  consensus_data?: ConsensusData;
+  summary?: SummaryBlock;
 }
 
 export interface Review {

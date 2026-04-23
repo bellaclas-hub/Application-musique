@@ -36,7 +36,8 @@ import {
   ExternalLink,
   PlayCircle,
   LayoutGrid,
-  LayoutList
+  LayoutList,
+  MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -48,7 +49,9 @@ import {
   AISummary, 
   SharedList,
   EntityType,
-  ProReview
+  ProReview,
+  ConsensusData,
+  SummaryBlock
 } from './types';
 import { 
   mockArtists, 
@@ -62,6 +65,243 @@ import {
 } from './mockData';
 
 // --- Reusable UI Components ---
+
+const AccessLevelBadge = ({ level }: { level: 'Immédiat' | 'Accessible' | 'Intermédiaire' | 'Exigeant' }) => {
+  const config = {
+    'Immédiat': { color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', label: 'Immédiat' },
+    'Accessible': { color: 'bg-sky-500/20 text-sky-400 border-sky-500/30', label: 'Accessible' },
+    'Intermédiaire': { color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', label: 'Intermédiaire' },
+    'Exigeant': { color: 'bg-rose-500/20 text-rose-400 border-rose-500/30', label: 'Exigeant' }
+  };
+  const { color, label } = config[level] || config['Accessible'];
+  return (
+    <div className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${color} flex items-center gap-1.5`}>
+      <ShieldCheck size={10} />
+      {label}
+    </div>
+  );
+};
+
+const PolarizationMeter = ({ score }: { score: number }) => {
+  const getLevel = (s: number) => {
+    if (s < 20) return { label: 'Unanimité Totale', color: 'text-success', bg: 'bg-success/10' };
+    if (s < 45) return { label: 'Consensus Large', color: 'text-success', bg: 'bg-success/10' };
+    if (s < 70) return { label: 'Points de Friction', color: 'text-warning', bg: 'bg-warning/10' };
+    return { label: 'Clivage Majeur', color: 'text-accent-secondary', bg: 'bg-accent-secondary/10' };
+  };
+  const level = getLevel(score);
+  
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between items-end">
+        <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Indice de Clivage</span>
+        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${level.bg} ${level.color}`}>{level.label}</span>
+      </div>
+      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+        <motion.div 
+          initial={{ width: 0 }}
+          whileInView={{ width: `${score}%` }}
+          className={`h-full ${score > 70 ? 'bg-accent-secondary' : 'bg-accent-primary'}`}
+        />
+      </div>
+    </div>
+  );
+};
+
+const ProVsCommunityBlock = ({ 
+  proScore, 
+  communityScore, 
+  proConcensus, 
+  communityConcensus, 
+  gap 
+}: { 
+  proScore: number, 
+  communityScore: number, 
+  proConcensus: string, 
+  communityConcensus: string,
+  gap: number
+}) => {
+  const gapType = proScore > communityScore + 10 ? 'Elite' : communityScore > proScore + 10 ? 'Public' : 'Equilibre';
+  
+  const insights = {
+    Elite: "Ce projet est plus valorisé par la critique technique que par l'auditeur moyen. Souvent signe d'une complexité qui nécessite plusieurs écoutes.",
+    Public: "Un véritable plébiscite populaire qui dépasse les réserves parfois techniques de la critique pro.",
+    Equilibre: "Une rare harmonie entre l'exigence critique et le plaisir d'écoute globale."
+  };
+
+  return (
+    <div className="glass-card overflow-hidden border-accent-primary/20 relative">
+      <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+        <TrendingUp size={120} />
+      </div>
+      
+      <div className="premium-gradient p-4 text-center relative z-10">
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">Analyse de Perception : Pro vs Communauté</h3>
+      </div>
+      
+      <div className="p-8 md:p-12 space-y-12 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="flex justify-around items-center relative">
+             <div className="hidden md:block absolute left-1/2 -translate-x-1/2 w-px h-12 bg-white/10" />
+             
+             <div className="text-center space-y-2">
+               <div className="text-[10px] font-black text-accent-primary uppercase tracking-widest">Score Pro</div>
+               <div className="text-6xl font-black text-white">{proScore}</div>
+             </div>
+             
+             <div className="text-center space-y-2">
+               <div className="text-[10px] font-black text-accent-secondary uppercase tracking-widest">Communauté</div>
+               <div className="text-6xl font-black text-white">{communityScore}</div>
+             </div>
+          </div>
+
+          <div className="bg-bg-surface-light p-6 rounded-3xl border border-white/5 space-y-4">
+             <div className="flex items-center gap-3">
+               <Badge variant={gapType === 'Equilibre' ? 'success' : 'premium'}>
+                Écart : {Math.abs(gap)} pts
+               </Badge>
+               <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Type : {gapType}</span>
+             </div>
+             <p className="text-sm text-text-main leading-relaxed font-bold italic">
+               &ldquo;{insights[gapType]}&rdquo;
+             </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8 border-t border-white/5">
+          <div className="space-y-4">
+            <h4 className="text-[11px] font-black text-accent-primary uppercase tracking-widest flex items-center gap-2">
+              <Award size={14} /> Le Regard Expert
+            </h4>
+            <div className="p-5 bg-white/5 rounded-2xl border border-white/5 border-l-4 border-l-accent-primary">
+              <p className="text-xs text-text-muted leading-relaxed italic">"{proConcensus}"</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h4 className="text-[11px] font-black text-accent-secondary uppercase tracking-widest flex items-center gap-2">
+              <Users size={14} /> L'Avis du Public
+            </h4>
+            <div className="p-5 bg-white/5 rounded-2xl border border-white/5 border-l-4 border-l-accent-secondary">
+              <p className="text-xs text-text-muted leading-relaxed italic">"{communityConcensus}"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ConsensusBlock = ({ data }: { data: ConsensusData }) => (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="glass-card p-6 border-success/20">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+          <CheckCircle2 size={18} />
+        </div>
+        <h4 className="text-[11px] font-black uppercase tracking-widest text-success">Ce qui fait consensus</h4>
+      </div>
+      <ul className="space-y-3">
+        {data.pros.map((item, i) => (
+          <li key={i} className="text-sm text-text-main flex items-start gap-2 leading-relaxed">
+            <span className="text-success mt-1">•</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div className="glass-card p-6 border-warning/20">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+          <Zap size={18} />
+        </div>
+        <h4 className="text-[11px] font-black uppercase tracking-widest text-warning">Ce qui divise</h4>
+      </div>
+      <ul className="space-y-3">
+        {data.dividing_points.map((item, i) => (
+          <li key={i} className="text-sm text-text-main flex items-start gap-2 leading-relaxed">
+            <span className="text-warning mt-1">•</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div className="glass-card p-6 border-white/5 bg-bg-surface-light">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white">
+          <ShieldCheck size={18} />
+        </div>
+        <h4 className="text-[11px] font-black uppercase tracking-widest text-text-muted">Recommandé pour</h4>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {data.recommended_for.map((item, i) => (
+          <span key={i} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-text-main">
+            {item}
+          </span>
+        ))}
+      </div>
+      <div className="mt-6 pt-4 border-t border-white/5">
+        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Synthèse globale</p>
+        <p className="text-xs text-text-muted leading-relaxed">{data.consensus_summary}</p>
+      </div>
+    </div>
+  </div>
+);
+
+const SummaryBriefBlock = ({ summary }: { summary: SummaryBlock }) => (
+  <div className="glass-card p-6 bg-accent-primary/5 flex flex-col md:flex-row gap-8 relative overflow-hidden">
+    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+      <Info size={120} />
+    </div>
+    
+    <div className="flex-grow space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-success mb-3 flex items-center gap-2">
+            <ThumbsUp size={12} /> Pourquoi ça plaît
+          </h4>
+          <ul className="space-y-2">
+            {summary.why_it_pleases.map((point, i) => (
+              <li key={i} className="text-sm text-text-main flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-success" />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-secondary mb-3 flex items-center gap-2">
+            <AlertCircle size={12} /> Ce qui peut freiner
+          </h4>
+          <ul className="space-y-2">
+            {summary.friction_points.map((point, i) => (
+              <li key={i} className="text-sm text-text-main flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-secondary" />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">En résumé</h4>
+        <p className="text-sm text-text-main font-bold leading-relaxed">{summary.ideal_for}</p>
+      </div>
+    </div>
+
+    <div className="md:w-64 flex-shrink-0 flex flex-col justify-center border-l border-white/5 md:pl-8">
+      <p className="text-[10px] font-black uppercase tracking-widest text-accent-primary mb-3">Par où commencer ?</p>
+      <div className="space-y-3">
+        <h5 className="font-black text-white text-lg leading-tight uppercase">{summary.starting_point.title}</h5>
+        <p className="text-xs text-text-muted leading-relaxed line-clamp-2 italic">"{summary.starting_point.description}"</p>
+        <Link to={`/${summary.starting_point.type === 'album' ? 'album' : 'morceau'}/${summary.starting_point.id}`} className="mt-2 text-[10px] font-black text-accent-primary uppercase tracking-widest flex items-center gap-2 hover:underline">
+          Accéder au contenu <ArrowRight size={12} />
+        </Link>
+      </div>
+    </div>
+  </div>
+);
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -189,7 +429,7 @@ const SafeImage = ({
   );
 };
 
-const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'premium' | 'success' | 'warning' }) => {
+const Badge = ({ children, variant = 'default', ...props }: { children: React.ReactNode, variant?: 'default' | 'premium' | 'success' | 'warning', [key: string]: any }) => {
   const styles = {
     default: 'bg-bg-surface-light text-text-muted',
     premium: 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30',
@@ -197,7 +437,7 @@ const Badge = ({ children, variant = 'default' }: { children: React.ReactNode, v
     warning: 'bg-warning/20 text-warning border border-warning/30',
   };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${styles[variant]}`}>
+    <span {...props} className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${styles[variant]}`}>
       {children}
     </span>
   );
@@ -211,7 +451,7 @@ const SectionTitle = ({ children, subtitle }: { children: React.ReactNode, subti
 );
 
 const ArtistCard = ({ artist }: { artist: Artist }) => (
-  <motion.div whileHover={{ y: -8 }} className="glass-card overflow-hidden cursor-pointer group flex flex-col h-full">
+  <motion.div whileHover={{ y: -8 }} className="glass-card overflow-hidden cursor-pointer group flex flex-col h-full border border-white/5 hover:border-accent-primary/30">
     <Link to={`/artiste/${artist.slug}`} className="flex flex-col h-full">
       <div className="aspect-[16/10] overflow-hidden relative">
         <SafeImage 
@@ -226,23 +466,30 @@ const ArtistCard = ({ artist }: { artist: Artist }) => (
           <Badge variant="default">{artist.primary_genres[0]}</Badge>
         </div>
         <div className="absolute bottom-3 right-3">
-          <div className="bg-bg-main/80 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1.5">
-            <Star size={12} className="text-warning fill-warning" />
-            <span className="text-[10px] font-black">{artist.consensus_score}%</span>
+          <div className="bg-bg-main/80 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1.5 shadow-xl">
+            <TrendingUp size={12} className="text-accent-primary" />
+            <span className="text-[10px] font-black text-white">{artist.consensus_score}% Consensus</span>
           </div>
         </div>
       </div>
-      <div className="p-5 flex-grow flex flex-col">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-black text-xl group-hover:text-accent-primary transition-colors leading-tight">{artist.name}</h3>
-        </div>
-        <p className="text-text-muted text-sm line-clamp-2 mb-4 font-medium leading-relaxed italic">"{artist.short_bio}"</p>
-        <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-text-muted">
-          <div className="flex items-center gap-1.5 text-accent-secondary">
-            <TrendingUp size={14} />
-            <span>Consensus à {artist.consensus_score} %</span>
+      <div className="p-6 flex-grow flex flex-col">
+        <h3 className="font-black text-xl group-hover:text-accent-primary transition-colors leading-tight mb-2">{artist.name}</h3>
+        <p className="text-text-muted text-sm line-clamp-2 mb-6 font-medium leading-relaxed italic">"{artist.short_bio}"</p>
+        
+        <div className="mt-auto space-y-3">
+          <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-text-muted">
+             <span>Polarisation critique</span>
+             <span className={artist.polarization_score > 60 ? 'text-accent-secondary' : 'text-success'}>
+               {artist.polarization_score > 60 ? 'Clivant' : 'Consensuel'}
+             </span>
           </div>
-          <span>{artist.review_count} avis</span>
+          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+            <motion.div 
+              initial={{ width: 0 }}
+              whileInView={{ width: `${artist.polarization_score}%` }}
+              className={`h-full ${artist.polarization_score > 60 ? 'bg-accent-secondary' : 'bg-accent-primary'}`} 
+            />
+          </div>
         </div>
       </div>
     </Link>
@@ -250,51 +497,56 @@ const ArtistCard = ({ artist }: { artist: Artist }) => (
 );
 
 const AlbumCard = ({ album, compact = false }: { album: Album, compact?: boolean }) => (
-  <motion.div whileHover={{ scale: 1.02 }} className={`glass-card cursor-pointer group overflow-hidden ${compact ? 'p-3' : 'p-4'}`}>
+  <motion.div whileHover={{ scale: 1.02 }} className={`glass-card cursor-pointer group overflow-hidden border border-white/5 hover:border-accent-secondary/30 ${compact ? 'p-3' : 'p-4'}`}>
     <Link to={`/album/${album.slug}`} className="flex gap-4 items-center">
-      <div className={`${compact ? 'w-16 h-16' : 'w-24 h-24'} rounded-xl overflow-hidden flex-shrink-0 shadow-lg`}>
+      <div className={`${compact ? 'w-16 h-16' : 'w-28 h-28'} rounded-xl overflow-hidden flex-shrink-0 shadow-lg relative`}>
         <SafeImage 
           src={album.cover_url} 
           alt={album.title} 
           fallbackType="album"
           className="w-full h-full object-cover transition-transform group-hover:scale-110" 
         />
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <div className="flex-grow min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <Badge variant="success">Album</Badge>
-          {album.is_entry_album && <span className="text-[8px] font-black text-accent-secondary uppercase tracking-tighter">Porte d'entrée</span>}
+        <div className="flex items-center gap-2 mb-1.5">
+          <Badge variant="default" className="scale-75 origin-left">{new Date(album.release_date).getFullYear()}</Badge>
+          <div className="text-[9px] font-black text-accent-secondary uppercase tracking-widest">{album.coherence_score}% Cohérence</div>
         </div>
-        <h4 className="font-black text-lg text-text-main truncate group-hover:text-accent-primary transition-colors leading-tight">{album.title}</h4>
-        <p className="text-text-muted text-xs font-bold truncate">{album.artist_name}</p>
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-black">
-            <Star size={14} className="text-warning fill-warning" />
-            <span>{album.community_score}/100</span>
+        <h4 className={`font-black text-text-main truncate group-hover:text-accent-secondary transition-colors leading-tight ${compact ? 'text-base' : 'text-xl'}`}>{album.title}</h4>
+        <p className="text-text-muted text-xs font-bold truncate mb-3">{album.artist_name}</p>
+        
+        {!compact && (
+          <div className="flex items-center gap-4">
+             <div className="flex flex-col">
+               <span className="text-[8px] font-black uppercase text-text-muted">Critique</span>
+               <span className="text-sm font-black text-white">{album.critic_score}</span>
+             </div>
+             <div className="flex flex-col">
+               <span className="text-[8px] font-black uppercase text-text-muted">Public</span>
+               <span className="text-sm font-black text-accent-secondary">{album.community_score}</span>
+             </div>
           </div>
-          <div className="text-[9px] font-black text-text-muted uppercase tracking-widest group-hover:text-text-main transition-colors flex items-center gap-1">
-            Voir l'analyse <ArrowRight size={10} />
-          </div>
-        </div>
+        )}
       </div>
     </Link>
   </motion.div>
 );
 
 const TrackCard = ({ track }: { track: Track }) => (
-  <motion.div whileHover={{ scale: 1.01 }} className="glass-card p-4 flex items-center justify-between cursor-pointer group border-l-4 border-accent-secondary">
+  <motion.div whileHover={{ x: 4 }} className="glass-card p-4 flex items-center justify-between cursor-pointer group border-l-4 border-accent-secondary hover:border-accent-primary transition-all">
     <Link to={`/morceau/${track.slug}`} className="flex items-center justify-between w-full">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-accent-secondary/10 flex items-center justify-center group-hover:bg-accent-secondary/20 transition-colors shadow-inner">
-          <PlayCircle size={24} className="text-accent-secondary" />
+        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-accent-secondary/10 transition-colors">
+          <PlayCircle size={24} className="text-accent-secondary group-hover:scale-110 transition-transform" />
         </div>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <Badge variant="default">Morceau</Badge>
+            <span className="text-[8px] font-black text-accent-secondary uppercase tracking-widest px-1.5 py-0.5 rounded bg-accent-secondary/10">{track.dominant_feeling}</span>
             {track.is_best_entry_track && <span className="text-[8px] font-black text-accent-primary uppercase tracking-tighter">Incontournable</span>}
           </div>
           <h4 className="font-black text-base group-hover:text-accent-secondary transition-colors leading-tight">{track.title}</h4>
-          <p className="text-[10px] text-text-muted uppercase font-black tracking-widest">{track.artist_name}</p>
+          <p className="text-[10px] text-text-muted uppercase font-black tracking-widest">{track.artist_name} • {track.access_level}</p>
         </div>
       </div>
       <div className="flex items-center gap-6">
@@ -302,19 +554,17 @@ const TrackCard = ({ track }: { track: Track }) => (
           <div className="text-xs font-black text-accent-secondary">{track.quick_consensus_score}%</div>
           <div className="text-[8px] font-bold text-text-muted uppercase">Consensus</div>
         </div>
-        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-accent-secondary/20 transition-colors">
-          <ChevronRight size={18} className="text-text-muted group-hover:text-text-main transition-colors" />
-        </div>
+        <ChevronRight size={18} className="text-text-muted group-hover:translate-x-1 group-hover:text-text-main transition-all" />
       </div>
     </Link>
   </motion.div>
 );
 
-const ReviewCard = ({ review, isReaderPremium = false, compact = false }: { review: Review, isReaderPremium?: boolean, compact?: boolean }) => {
+const ReviewCard = ({ review, isReaderPremium = false, compact = false, ...props }: { review: Review, isReaderPremium?: boolean, compact?: boolean, [key: string]: any }) => {
   const isLocked = !isReaderPremium && review.quality_score > 90;
 
   return (
-    <div className={`glass-card relative overflow-hidden group transition-all duration-500 border-white/5 hover:border-accent-primary/20 ${compact ? 'p-6' : 'p-8 md:p-10'}`}>
+    <div {...props} className={`glass-card relative overflow-hidden group transition-all duration-500 border-white/5 hover:border-accent-primary/20 ${compact ? 'p-6' : 'p-8 md:p-10'}`}>
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
         <div className="flex items-center gap-5">
@@ -518,29 +768,41 @@ const ExploreScreen = () => {
   const [filters, setFilters] = React.useState({
     genre: 'all',
     accessibility: 'all',
-    tone: 'all',
+    consensus: 'all',
     sort: 'relevant'
   });
 
   const filteredArtists = mockArtists.filter(a => {
     const matchesSearch = a.name.toLowerCase().includes(search.toLowerCase()) || 
-                          a.primary_genres.some(g => g.toLowerCase().includes(search.toLowerCase()));
-    const matchesGenre = filters.genre === 'all' || a.primary_genres.includes(filters.genre);
-    const matchesAccess = filters.accessibility === 'all' || a.entry_level.toLowerCase() === filters.accessibility.toLowerCase();
-    return matchesSearch && matchesGenre && matchesAccess;
+                          a.primary_genres.some(g => g.toLowerCase().includes(search.toLowerCase())) ||
+                          a.top_tags.some(t => t.toLowerCase().includes(search.toLowerCase()));
+    const matchesGenre = filters.genre === 'all' || a.primary_genres.some(g => g === filters.genre);
+    const matchesAccess = filters.accessibility === 'all' || a.entry_level === filters.accessibility;
+    const matchesConsensus = filters.consensus === 'all' || (
+      filters.consensus === 'high' ? a.consensus_score >= 80 : a.consensus_score < 80
+    );
+    return matchesSearch && matchesGenre && matchesAccess && matchesConsensus;
   });
 
   const filteredAlbums = mockAlbums.filter(a => {
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase()) || 
                           a.artist_name.toLowerCase().includes(search.toLowerCase());
     const matchesGenre = filters.genre === 'all' || a.genres.includes(filters.genre);
-    return matchesSearch && matchesGenre;
+    const matchesAccess = filters.accessibility === 'all' || (
+      filters.accessibility === 'Immédiat' ? a.accessibility_score >= 80 :
+      filters.accessibility === 'Accessible' ? a.accessibility_score >= 60 && a.accessibility_score < 80 :
+      filters.accessibility === 'Intermédiaire' ? a.accessibility_score >= 40 && a.accessibility_score < 60 :
+      a.accessibility_score < 40
+    );
+    return matchesSearch && matchesGenre && matchesAccess;
   });
 
   const filteredTracks = mockTracks.filter(t => {
     const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase()) || 
-                          t.artist_name.toLowerCase().includes(search.toLowerCase());
-    return matchesSearch;
+                          t.artist_name.toLowerCase().includes(search.toLowerCase()) ||
+                          t.community_keywords.some(kw => kw.toLowerCase().includes(search.toLowerCase()));
+    const matchesAccess = filters.accessibility === 'all' || t.access_level === filters.accessibility;
+    return matchesSearch && matchesAccess;
   });
 
   return (
@@ -552,8 +814,8 @@ const ExploreScreen = () => {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent-primary transition-colors" size={28} />
             <input 
               type="text" 
-              placeholder="Rechercher un artiste, un album ou un morceau..." 
-              className="w-full bg-bg-surface border border-white/10 rounded-3xl py-8 pl-16 pr-8 text-2xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
+              placeholder="Rechercher par nom, genre, ou mot-clé critique (#vintage, #lourdeur, #lyriciste)..." 
+              className="w-full bg-bg-surface border border-white/10 rounded-3xl py-8 pl-18 pr-8 text-2xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -564,7 +826,7 @@ const ExploreScreen = () => {
         <div className="glass-card p-6 flex flex-wrap items-center gap-8 border-white/5">
           <div className="flex items-center gap-2 text-accent-primary">
             <Filter size={18} />
-            <span className="text-xs font-black uppercase tracking-widest">Filtres</span>
+            <span className="text-xs font-black uppercase tracking-widest">Guide Discovery</span>
           </div>
           
           <div className="h-8 w-px bg-white/10 hidden md:block" />
@@ -575,7 +837,7 @@ const ExploreScreen = () => {
             options={[
               {id: 'all', label: 'Tous les genres'},
               {id: 'Pop', label: 'Pop'},
-              {id: 'Rock-Indie', label: 'Rock-Indie'},
+              {id: 'Indie Rock', label: 'Indie Rock'},
               {id: 'Hip-hop', label: 'Hip-hop / Rap'},
               {id: 'Electronic', label: 'Electronic'}
             ]} 
@@ -583,27 +845,27 @@ const ExploreScreen = () => {
           />
 
           <FilterGroup 
-            label="Accessibilité" 
+            label="Niveau d'accès" 
             value={filters.accessibility} 
             options={[
-              {id: 'all', label: 'Toutes'},
-              {id: 'accessible', label: 'Accessible'},
-              {id: 'intermédiaire', label: 'Intermédiaire'},
-              {id: 'expérimental', label: 'Exigeant'}
+              {id: 'all', label: 'Toutes les portes'},
+              {id: 'Immédiat', label: 'Immédiat'},
+              {id: 'Accessible', label: 'Accessible'},
+              {id: 'Intermédiaire', label: 'Intermédiaire'},
+              {id: 'Exigeant', label: 'Exigeant'}
             ]} 
             onChange={(v) => setFilters({...filters, accessibility: v})} 
           />
 
           <FilterGroup 
-            label="Tonalité" 
-            value={filters.tone} 
+            label="Consensus" 
+            value={filters.consensus} 
             options={[
-              {id: 'all', label: 'Toutes'},
-              {id: 'positif', label: 'Positif'},
-              {id: 'nuancé', label: 'Nuancé'},
-              {id: 'critique', label: 'Critique'}
+              {id: 'all', label: 'Indifférent'},
+              {id: 'high', label: 'Plébiscite (>80%)'},
+              {id: 'divisive', label: 'Polémiqué (<80%)'}
             ]} 
-            onChange={(v) => setFilters({...filters, tone: v})} 
+            onChange={(v) => setFilters({...filters, consensus: v})} 
           />
 
           <div className="ml-auto">
@@ -611,9 +873,9 @@ const ExploreScreen = () => {
               label="Trier par" 
               value={filters.sort} 
               options={[
-                {id: 'relevant', label: 'Plus pertinents'},
-                {id: 'popular', label: 'Plus populaires'},
-                {id: 'recent', label: 'Plus récents'}
+                {id: 'relevant', label: 'Pertinence critique'},
+                {id: 'score', label: 'Meilleurs scores'},
+                {id: 'polarization', label: 'Plus discutés'}
               ]} 
               onChange={(v) => setFilters({...filters, sort: v})} 
             />
@@ -1124,138 +1386,242 @@ const ArtistPage = () => {
   if (!artist) return <div className="text-center py-20">Artiste non trouvé.</div>;
 
   return (
-    <div className="space-y-12">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-        <ChevronLeft size={20} /> RETOUR
-      </button>
+    <div className="space-y-16 pb-20">
+      <div className="max-w-7xl mx-auto px-4">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm mb-8">
+          <ChevronLeft size={20} /> RETOUR
+        </button>
 
-      <header className="relative rounded-[3rem] overflow-hidden aspect-[21/9] md:aspect-[4/1] shadow-2xl group">
-        <SafeImage 
-          src={artist.hero_image_url} 
-          alt={artist.name} 
-          fallbackType="artist"
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-bg-main/40 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none">{artist.name}</h1>
-              <Badge variant="premium">{artist.entry_level}</Badge>
+        <header className="relative rounded-[3rem] overflow-hidden aspect-[21/9] md:aspect-[4/1] shadow-2xl group border border-white/5">
+          <SafeImage 
+            src={artist.hero_image_url} 
+            alt={artist.name} 
+            fallbackType="artist"
+            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-bg-main/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">{artist.name}</h1>
+                <AccessLevelBadge level={artist.entry_level} />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {artist.primary_genres.map(g => <Badge key={g} variant="default">{g}</Badge>)}
+                {artist.top_tags.map(t => <span key={t} className="text-[10px] font-black text-accent-secondary uppercase tracking-widest">#{t}</span>)}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {artist.primary_genres.map(g => <span key={g}><Badge>{g}</Badge></span>)}
-              {artist.top_tags.map(t => <span key={t} className="text-[10px] font-black text-accent-secondary uppercase tracking-widest">#{t}</span>)}
+            <div className="flex gap-4">
+              <button className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl font-black text-sm flex items-center gap-3 border border-white/10 hover:bg-white/20 transition-all">
+                <Share2 size={20} />
+              </button>
+              <button className="premium-gradient px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg hover:scale-105 transition-transform">
+                <PlusCircle size={20} /> SUIVRE L'ARTISTE
+              </button>
             </div>
           </div>
-          <button className="premium-gradient px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg hover:scale-105 transition-transform">
-            <PlusCircle size={20} /> SUIVRE L'ARTISTE
-          </button>
-        </div>
-      </header>
+        </header>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-8 space-y-12">
-          <section className="glass-card p-10 relative overflow-hidden border-l-4 border-accent-primary">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 rounded-2xl premium-gradient flex items-center justify-center shadow-lg">
-                <Zap size={24} className="text-white" />
-              </div>
-              <h2 className="text-2xl font-black tracking-tight uppercase">Par où commencer ?</h2>
-            </div>
-            <p className="text-xl text-text-main leading-relaxed font-medium italic mb-8">"{artist.why_it_matters}"</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockAlbums.filter(a => a.artist_id === artist.id && a.is_entry_album).map(album => (
-                <Link key={album.id} to={`/album/${album.slug}`} className="bg-bg-surface-light p-6 rounded-3xl border border-white/5 hover:border-accent-primary/30 transition-colors group">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-black text-accent-primary uppercase tracking-widest">L'Album Pilier</span>
-                    <Award size={20} className="text-accent-primary" />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <SafeImage src={album.cover_url} className="w-20 h-20 rounded-2xl shadow-xl" fallbackType="album" />
-                    <div>
-                      <div className="font-black text-lg leading-tight">{album.title}</div>
-                      <div className="text-sm text-text-muted mt-1">Porte d'entrée universelle</div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {aiSummary && (
-            <section className="bg-accent-primary/5 border border-accent-primary/20 rounded-[2.5rem] p-10 space-y-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-8 space-y-16">
+            
+            {/* Quick Summary Section */}
+            <section className="space-y-8">
               <div className="flex items-center gap-3">
-                <Zap size={24} className="text-accent-primary" />
-                <h3 className="text-xl font-black uppercase tracking-tight">Synthèse Echo AI</h3>
+                <ShieldCheck size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">En Bref</h2>
               </div>
-              <p className="text-2xl font-medium leading-tight text-text-main">"{aiSummary.summary_text}"</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <h4 className="text-xs font-black text-success uppercase flex items-center gap-2"><ThumbsUp size={14} /> Points Forts</h4>
-                  <ul className="space-y-3">
-                    {aiSummary.key_points_positive.map((p, i) => <li key={i} className="text-sm text-text-muted flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-success mt-1.5 flex-shrink-0" />{p}</li>)}
-                  </ul>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="text-xs font-black text-warning uppercase flex items-center gap-2"><AlertCircle size={14} /> Points de Vigilance</h4>
-                  <ul className="space-y-3">
-                    {aiSummary.key_points_negative.map((p, i) => <li key={i} className="text-sm text-text-muted flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0" />{p}</li>)}
-                  </ul>
-                </div>
-              </div>
+              <SummaryBriefBlock summary={artist.summary} />
             </section>
-          )}
 
-          <section className="space-y-8">
-            <div className="flex items-center justify-between">
-              <SectionTitle subtitle="Analyses approfondies de la communauté">Dernières Critiques</SectionTitle>
-              <Link to={`/avis/nouveau/artiste/${artist.id}`} className="bg-accent-primary px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity">Rédiger un avis</Link>
-            </div>
-            <div className="space-y-8">
-              {mockReviews.filter(r => r.target_id === artist.id).map(review => <div key={review.id}><ReviewCard review={review} /></div>)}
-            </div>
-          </section>
-        </div>
+            {/* Pro vs Community Block */}
+            <section className="space-y-8">
+              <ProVsCommunityBlock 
+                proScore={artist.pro_score}
+                communityScore={artist.community_score}
+                proConcensus={artist.pro_consensus}
+                communityConcensus={artist.community_consensus}
+                gap={artist.pro_vs_community_gap}
+              />
+            </section>
 
-        <div className="lg:col-span-4 space-y-8">
-          <div className="glass-card p-8 space-y-8 sticky top-10">
-            <div className="space-y-6">
-              <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Signaux Critiques</h3>
-              <div className="grid grid-cols-2 gap-8">
-                <Gauge value={artist.consensus_score} label="Consensus" />
-                <Gauge value={artist.polarization_score} label="Polarisation" color="warning" />
+            {/* Consensus Section */}
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <TrendingUp size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Consensus & Clivages</h2>
               </div>
-            </div>
-            <div className="pt-8 border-t border-white/5 space-y-6">
-              <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Écart Pro vs Communauté</h3>
-              <div className="flex items-center gap-4">
-                <div className={`text-4xl font-black ${artist.pro_vs_community_gap >= 0 ? 'text-success' : 'text-warning'}`}>
-                  {artist.pro_vs_community_gap > 0 ? '+' : ''}{artist.pro_vs_community_gap}%
+              <ConsensusBlock data={artist.consensus_data} />
+            </section>
+
+            {/* Strategy of Discovery Matrix */}
+            {artist.discography_matrix && (
+              <section className="space-y-8">
+                <div className="flex items-center gap-3">
+                  <MapPin size={24} className="text-accent-secondary" />
+                  <h2 className="text-xl font-black uppercase tracking-widest">Stratégie de Découverte</h2>
                 </div>
-                <p className="text-[10px] text-text-muted leading-tight font-bold uppercase">
-                  {artist.pro_vs_community_gap >= 0 ? "Les critiques pros sont plus enthousiastes." : "La communauté apprécie davantage."}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    { id: artist.discography_matrix.entry_point_id, label: "La Porte d'Entrée", desc: "L'idéal pour comprendre l'univers sans être heurté par la complexité.", icon: <PlayCircle size={20} />, color: 'accent-primary' },
+                    { id: artist.discography_matrix.masterpiece_id, label: "Le Chef-d'Œuvre", desc: "Là où la technique et l'émotion atteignent leur paroxysme.", icon: <Award size={20} />, color: 'success' },
+                    { id: artist.discography_matrix.experimental_id, label: "Le Virage Expérimental", desc: "Pour les auditeurs avertis cherchant la rupture.", icon: <Zap size={20} />, color: 'warning' },
+                    { id: artist.discography_matrix.hidden_gem_id, label: "La Pépite Cachée", desc: "Moins accessible, mais révélatrice d'une facette rare.", icon: <Search size={20} />, color: 'accent-secondary' }
+                  ].filter(m => m.id).map((m, i) => {
+                    const album = mockAlbums.find(a => a.id === m.id);
+                    return (
+                      <div key={i} className="glass-card p-6 border-white/5 space-y-4 group hover:border-accent-primary/20 transition-all">
+                        <div className="flex justify-between items-start">
+                          <div className={`flex items-center gap-2 text-${m.color.split('-')[1]}`}>
+                            {m.icon}
+                            <span className="text-[10px] font-black uppercase tracking-widest">{m.label}</span>
+                          </div>
+                        </div>
+                        {album && (
+                          <Link to={`/album/${album.slug}`} className="flex gap-4 items-center group/link">
+                            <SafeImage src={album.cover_url} className="w-16 h-16 rounded-xl object-cover shadow-lg" />
+                            <div className="flex-grow min-w-0">
+                              <div className="font-bold text-white truncate">{album.title}</div>
+                              <p className="text-[10px] text-text-muted leading-relaxed line-clamp-2 mt-1">{m.desc}</p>
+                            </div>
+                            <ChevronRight size={16} className="text-text-muted group-hover/link:translate-x-1 transition-transform" />
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Analysis & Polarization */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="glass-card p-10 border-l-4 border-l-accent-primary space-y-6">
+                <div className="flex items-center gap-3">
+                   <ShieldCheck size={24} className="text-accent-primary" />
+                   <h3 className="text-sm font-black uppercase tracking-widest text-white">Impact Culturel</h3>
+                </div>
+                <p className="text-sm text-text-muted leading-relaxed font-medium">{artist.cultural_impact}</p>
+              </div>
+              <div className="glass-card p-10 border-l-4 border-l-accent-secondary space-y-6">
+                <div className="flex items-center gap-3">
+                   <TrendingUp size={24} className="text-accent-secondary" />
+                   <h3 className="text-sm font-black uppercase tracking-widest text-white">Taux de Clivage</h3>
+                </div>
+                <PolarizationMeter score={artist.polarization_score} />
+                <p className="text-[10px] text-text-muted leading-relaxed italic">
+                  Méthode ÉCHO : Analyse croisée de l'écart type des notes et de la sémantique des avis.
                 </p>
               </div>
-            </div>
-            <div className="pt-8 border-t border-white/5 space-y-6">
-              <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Breakdown par Ère</h3>
-              <div className="space-y-4">
-                {artist.era_breakdown.map(era => (
-                  <div key={era.era} className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-black uppercase text-text-muted">
-                      <span>{era.era}</span>
-                      <span>{era.score}%</span>
-                    </div>
-                    <div className="h-1.5 bg-bg-surface-light rounded-full overflow-hidden">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${era.score}%` }} className="h-full bg-accent-primary" />
-                    </div>
-                  </div>
+            </section>
+
+            {/* Community Reviews Section */}
+            <section className="space-y-8">
+              <div className="flex items-center justify-between">
+                <SectionTitle subtitle="Analyses approfondies approuvées">Meilleurs avis à lire</SectionTitle>
+                <Link to={`/avis/nouveau/artiste/${artist.id}`} className="bg-accent-primary px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity">Rédiger un avis</Link>
+              </div>
+              <div className="space-y-8">
+                {mockReviews.filter(r => r.target_id === artist.id).slice(0, 3).map(review => (
+                  <ReviewCard key={review.id} review={review} />
                 ))}
               </div>
-            </div>
+            </section>
           </div>
+
+          <aside className="lg:col-span-4 space-y-8">
+            <div className="sticky top-24 space-y-8">
+              <div className="glass-card p-8 space-y-8">
+                <div className="space-y-6">
+                  <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Signaux Critiques</h3>
+                  <div className="grid grid-cols-2 gap-8">
+                    <Gauge value={artist.consensus_score} label="Consensus" />
+                    <Gauge value={artist.polarization_score} label="Polarisation" color="warning" />
+                  </div>
+                </div>
+                <div className="pt-8 border-t border-white/5">
+                   <h3 className="font-black text-sm uppercase tracking-widest text-text-muted mb-6">Évolution Artistique</h3>
+                   <div className="space-y-6">
+                      {artist.era_breakdown.map((era, i) => (
+                        <div key={i} className="space-y-3">
+                          <div className="flex justify-between items-center text-[10px] font-black uppercase text-text-muted tracking-widest">
+                            <span>{era.era}</span>
+                            <span className="text-text-main">{era.score}%</span>
+                          </div>
+                          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }} 
+                              whileInView={{ width: `${era.score}%` }} 
+                              viewport={{ once: true }}
+                              className="h-full premium-gradient" 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+              </div>
+              
+              <div className="glass-card p-8">
+                 <h3 className="font-black text-sm uppercase tracking-widest text-text-muted mb-6">Pourquoi ça compte ?</h3>
+                 <p className="text-sm text-text-main leading-relaxed font-medium">{artist.why_it_matters}</p>
+                 <div className="mt-8 pt-8 border-t border-white/5">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-4">Impact Culturel</h4>
+                    <p className="text-xs text-text-muted leading-relaxed italic">"{artist.cultural_impact}"</p>
+                 </div>
+              </div>
+            </div>
+          </aside>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const AlbumFlowAnalysis = ({ tracks, coherence }: { tracks: any[], coherence: number }) => {
+  return (
+    <div className="glass-card p-10 border-t-4 border-accent-secondary">
+      <div className="flex justify-between items-center mb-10">
+        <div className="space-y-1">
+          <h3 className="text-xl font-black uppercase tracking-widest text-white">Flux d'Écoute</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Analyse de la cohérence narrative</p>
+        </div>
+        <div className="text-right">
+          <div className="text-4xl font-black text-accent-secondary">{coherence}%</div>
+          <div className="text-[9px] font-black uppercase tracking-widest text-text-muted">Indice de Cohérence</div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {tracks.map((track, i) => (
+          <div key={track.id || i} className="group flex items-center gap-6 p-4 rounded-2xl hover:bg-white/5 transition-all relative overflow-hidden">
+             <div className="text-xs font-black text-text-muted w-6">{String(i + 1).padStart(2, '0')}</div>
+             <div className="flex-grow min-w-0">
+               <div className="flex items-center gap-3">
+                 <Link to={`/morceau/${track.id}`} className="font-bold text-white truncate hover:text-accent-primary transition-colors">{track.title}</Link>
+                 {track.is_entry_track && <Badge variant="premium">Fondamental</Badge>}
+                 {track.is_community_favorite && <Badge variant="success">Plébiscité</Badge>}
+               </div>
+               <div className="text-[10px] text-text-muted uppercase font-black mt-1 flex items-center gap-2">
+                 <span>{track.duration}</span>
+                 <span className="opacity-20">•</span>
+                 <span className="text-accent-primary">{track.sentiment || 'Neutre'}</span>
+               </div>
+             </div>
+             <div className="flex items-center gap-4">
+                <div className="h-1 w-24 bg-white/5 rounded-full overflow-hidden hidden md:block">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${60 + (i % 5) * 10}%` }}
+                    className="h-full bg-accent-secondary/40"
+                  />
+                </div>
+                <ChevronRight size={14} className="text-text-muted group-hover:translate-x-1 transition-transform" />
+             </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -1270,46 +1636,82 @@ const AlbumPage = () => {
   if (!album) return <div className="text-center py-20">Album non trouvé.</div>;
 
   return (
-    <div className="space-y-12">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-        <ChevronLeft size={20} /> RETOUR
-      </button>
-      <div className="flex flex-col md:flex-row gap-12 items-start">
-        <div className="w-full md:w-96 aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl flex-shrink-0">
-          <SafeImage src={album.cover_url} alt={album.title} className="w-full h-full object-cover" fallbackType="album" />
-        </div>
-        <div className="space-y-8 flex-grow">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Badge variant="success">Album Essentiel</Badge>
-              <span className="text-text-muted text-sm font-bold uppercase tracking-widest">{new Date(album.release_date).getFullYear()}</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">{album.title}</h1>
-            <Link to={`/artiste/${album.artist_slug}`} className="text-3xl font-bold text-accent-primary hover:underline block">{album.artist_name}</Link>
-          </div>
-          <div className="flex flex-wrap gap-12 py-8 border-y border-white/5">
-            <div className="text-center">
-              <div className="text-4xl font-black text-accent-primary">{album.critic_score}</div>
-              <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Score Critiques</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-black text-accent-secondary">{album.community_score}</div>
-              <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Score Communauté</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-black text-success">{album.accessibility_score}%</div>
-              <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Accessibilité</div>
+    <div className="space-y-16 pb-20">
+      <div className="max-w-7xl mx-auto px-4">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm mb-8">
+          <ChevronLeft size={20} /> RETOUR
+        </button>
+
+        <div className="flex flex-col lg:flex-row gap-16 items-start">
+          <div className="w-full lg:w-[450px] aspect-square rounded-[3rem] overflow-hidden shadow-2xl flex-shrink-0 group sticky top-24 border border-white/10">
+            <SafeImage 
+              src={album.cover_url} 
+              alt={album.title} 
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+              fallbackType="album" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-bg-main/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-8">
+              <button className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl font-black text-sm text-white border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2">
+                <Share2 size={18} /> PARTAGER L'ANALYSE
+              </button>
             </div>
           </div>
-          <p className="text-text-muted text-xl leading-relaxed font-medium">{album.long_description || album.short_description}</p>
+          
+          <div className="space-y-12 flex-grow">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <Badge variant="success">Album</Badge>
+                <span className="text-text-muted text-xs font-black uppercase tracking-[0.2em]">{new Date(album.release_date).getFullYear()}</span>
+                {album.is_entry_album && <div className="px-2 py-1 bg-accent-primary/20 text-accent-primary rounded-md text-[9px] font-black uppercase tracking-widest border border-accent-primary/30">Meilleure porte d'entrée</div>}
+              </div>
+              <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">{album.title}</h1>
+              <Link to={`/artiste/${album.artist_slug}`} className="text-3xl font-black text-accent-primary hover:text-accent-primary/80 transition-colors inline-block">{album.artist_name}</Link>
+            </div>
+
+            <SummaryBriefBlock summary={album.summary} />
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <Users size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Écart de Perception</h2>
+              </div>
+              <ProVsCommunityBlock 
+                proScore={album.critic_score}
+                communityScore={album.community_score}
+                proConcensus={album.pro_vs_community_analysis}
+                communityConcensus={album.summary.ideal_for}
+                gap={album.critic_score - album.community_score}
+              />
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <ListMusic size={24} className="text-accent-secondary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Analyse du Flux</h2>
+              </div>
+              <AlbumFlowAnalysis tracks={album.track_list} coherence={album.coherence_score} />
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <TrendingUp size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Consensus & Points de Friction</h2>
+              </div>
+              <ConsensusBlock data={album.consensus_data} />
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center justify-between">
+                <SectionTitle subtitle="Analyses détaillées de l'album">Critiques de la communauté</SectionTitle>
+                <Link to={`/avis/nouveau/album/${album.id}`} className="bg-accent-primary px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity">Donner mon avis</Link>
+              </div>
+              <div className="space-y-8">
+                {albumReviews.map(review => <div key={review.id}><ReviewCard review={review} /></div>)}
+              </div>
+            </section>
+          </div>
         </div>
       </div>
-      <section className="space-y-8">
-        <SectionTitle subtitle="Analyses détaillées de l'album">Critiques de la communauté</SectionTitle>
-        <div className="space-y-8">
-          {albumReviews.map(review => <div key={review.id}><ReviewCard review={review} /></div>)}
-        </div>
-      </section>
     </div>
   );
 };
@@ -1322,27 +1724,135 @@ const TrackPage = () => {
   if (!track) return <div className="text-center py-20">Morceau non trouvé.</div>;
 
   return (
-    <div className="space-y-12">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm">
-        <ChevronLeft size={20} /> RETOUR
-      </button>
-      <div className="glass-card p-12 flex flex-col md:flex-row items-center gap-12">
-        <div className="w-24 h-24 rounded-3xl premium-gradient flex items-center justify-center shadow-2xl">
-          <PlayCircle size={48} className="text-white" />
-        </div>
-        <div className="flex-grow text-center md:text-left space-y-2">
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter">{track.title}</h1>
-          <p className="text-2xl font-bold text-text-muted">{track.artist_name} — {track.album_title}</p>
-        </div>
-        <div className="text-center">
-          <div className="text-5xl font-black text-accent-secondary">{track.quick_consensus_score}%</div>
-          <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Consensus Rapide</div>
+    <div className="space-y-16 pb-20">
+      <div className="max-w-7xl mx-auto px-4">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-text-muted hover:text-text-main transition-colors font-bold text-sm mb-8">
+          <ChevronLeft size={20} /> RETOUR
+        </button>
+
+        <header className="relative glass-card p-12 border-l-8 border-accent-secondary flex flex-col md:flex-row items-center gap-12 overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:rotate-12 transition-transform duration-700">
+             <PlayCircle size={200} />
+          </div>
+          <div className="w-32 h-32 md:w-48 md:h-48 rounded-[2.5rem] premium-gradient flex items-center justify-center shadow-2xl flex-shrink-0 group-hover:scale-105 transition-transform duration-700">
+            <PlayCircle size={64} className="text-white" />
+          </div>
+          <div className="flex-grow text-center md:text-left space-y-6">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+              <Badge variant="default">Morceau</Badge>
+              <AccessLevelBadge level={track.access_level} />
+              {track.is_best_entry_track && <Badge variant="premium">Point de départ idéal</Badge>}
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">{track.title}</h1>
+              <p className="text-2xl md:text-3xl font-black text-text-muted">
+                <Link to={`/artiste/${track.artist_slug}`} className="text-accent-secondary hover:underline">{track.artist_name}</Link>
+                <span className="mx-3 opacity-30">—</span>
+                <Link to={`/album/${track.album_slug}`} className="hover:text-white transition-colors">{track.album_title}</Link>
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-4 px-12 border-l border-white/5 h-full justify-center">
+            <div className="text-center">
+              <div className="text-6xl font-black text-accent-secondary">{track.quick_consensus_score}%</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mt-2">Consensus ÉCHO</div>
+            </div>
+          </div>
+        </header>
+
+        <div className="mt-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-8 space-y-16">
+            <SummaryBriefBlock summary={track.summary!} />
+            
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Analyse de Perception</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="glass-card p-8 border-l-4 border-accent-primary space-y-6">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Profil de l'Auditeur Idéal</h4>
+                  <p className="text-sm text-text-main leading-relaxed font-bold italic">
+                    &ldquo;{track.summary!.ideal_for}&rdquo;
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-widest text-accent-primary">
+                    {track.consensus_data?.recommended_for.map(r => (
+                      <span key={r} className="px-2 py-1 bg-accent-primary/10 rounded-md border border-accent-primary/20">{r}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="glass-card p-8 border-l-4 border-accent-secondary space-y-6">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Cohérence & Contexte</h4>
+                  <p className="text-sm text-text-main leading-relaxed">
+                    {track.coherence_context}
+                  </p>
+                  <div className="pt-4 border-t border-white/5">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-text-muted">Feeling Dominant : </span>
+                    <span className="text-xs font-black text-accent-secondary uppercase">{track.dominant_feeling}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <ConsensusBlock data={track.consensus_data!} />
+
+            <section className="space-y-8">
+               <div className="flex items-center gap-3">
+                <Users size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Avis Croisés</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 {track.cross_reviews_excerpts!.map((excerpt, i) => (
+                   <div key={i} className="glass-card p-6 border-white/5 relative bg-white/2 hover:border-accent-primary/20 transition-all group">
+                      <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <MessageSquare size={40} />
+                      </div>
+                      <p className="text-sm text-text-main italic leading-relaxed mb-6">"{excerpt.text}"</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center font-black text-[10px] text-accent-primary border border-accent-primary/30 group-hover:scale-110 transition-transform">
+                          {excerpt.user_name[0]}
+                        </div>
+                        <span className="text-xs font-black text-text-muted uppercase tracking-widest">{excerpt.user_name}</span>
+                      </div>
+                   </div>
+                 ))}
+              </div>
+            </section>
+          </div>
+
+          <aside className="lg:col-span-4 space-y-8">
+            <div className="glass-card p-8 space-y-8">
+              <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Limites perçues</h3>
+              <div className="space-y-4">
+                {track.perceived_limits.map((limit, i) => (
+                  <div key={i} className="flex items-center gap-3 text-sm text-text-main bg-white/5 p-3 rounded-xl border border-white/5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-warning flex-shrink-0" />
+                    {limit}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card p-8 space-y-8">
+              <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Écouter ensuite</h3>
+              <div className="space-y-4">
+                {track.listen_next_ids.map((item, i) => (
+                  <Link key={i} to={`/${item.type === 'album' ? 'album' : 'artiste'}/${item.id}`} className="block group p-4 rounded-2xl border border-white/5 hover:border-accent-secondary/30 transition-colors bg-white/2">
+                    <div className="text-[9px] font-black uppercase text-accent-secondary mb-1">Car vous avez aimé {track.title}</div>
+                    <div className="font-black text-white group-hover:text-accent-secondary transition-colors">{item.title}</div>
+                    <p className="text-[10px] text-text-muted italic mt-2 leading-relaxed">"{item.reason}"</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card p-8 bg-accent-primary/10 border-accent-primary/20">
+               <h3 className="font-black text-sm uppercase tracking-widest text-accent-primary mb-4">Cohérence & Contexte</h3>
+               <p className="text-xs text-text-main leading-relaxed font-medium italic">"{track.coherence_context}"</p>
+            </div>
+          </aside>
         </div>
       </div>
-      <section className="max-w-3xl mx-auto space-y-8">
-        <SectionTitle>À propos de ce morceau</SectionTitle>
-        <p className="text-xl text-text-muted leading-relaxed">{track.description}</p>
-      </section>
     </div>
   );
 };
@@ -1549,36 +2059,68 @@ const ListsPage = () => {
   const [activeCategory, setActiveCategory] = React.useState('all');
   
   const categories = [
-    { id: 'all', label: 'Toutes' },
-    { id: 'Débutant', label: 'Débuter' },
-    { id: 'Pop', label: 'Pop' },
-    { id: 'Rap', label: 'Rap' },
-    { id: 'Indie', label: 'Indie' },
-    { id: 'Humeur', label: 'Humeur' },
-    { id: 'Sélections d\'experts', label: 'Experts' }
+    { id: 'all', label: 'Toutes Sélections' },
+    { id: 'Débutant', label: 'Parcours Initiation' },
+    { id: 'Expert', label: 'Analyse Expert' },
+    { id: 'Genre', label: 'Focus Genre' },
+    { id: 'Humeur', label: 'États d\'Âme' },
   ];
 
   const filteredLists = activeCategory === 'all' 
     ? mockLists 
     : mockLists.filter(l => l.category === activeCategory || l.selection_type === activeCategory);
 
-  const featuredLists = mockLists.slice(0, 2);
+  const featuredLists = mockLists.filter(l => l.selection_type === 'Expert' || l.category === 'Débutant').slice(0, 2);
   const popularLists = [...mockLists].sort((a, b) => b.like_count - a.like_count).slice(0, 4);
 
   return (
     <div className="space-y-20 pb-20">
       <header className="space-y-8 pt-10">
-        <div className="space-y-4">
-          <Badge variant="premium">Curation Communautaire</Badge>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase">
+        <div className="space-y-6">
+          <Badge variant="premium">Guided Discovery</Badge>
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-none uppercase text-white">
             EXPLOREZ LES <br />
-            <span className="text-accent-secondary">SÉLECTIONS.</span>
+            <span className="text-accent-secondary italic">PARCOURS.</span>
           </h1>
-          <p className="text-text-muted text-xl md:text-2xl max-w-2xl font-medium leading-relaxed">
-            Découvrez des parcours d'écoute créés par nos membres les plus passionnés. Des guides thématiques pour ne plus jamais être perdu.
+          <p className="text-text-muted text-xl md:text-2xl max-w-3xl font-medium leading-relaxed">
+            Ne vous contentez pas d'écouter. Apprenez à juger, comparer et découvrir avec des listes conçues comme des guides critiques et des chemins de traverse musicaux.
           </p>
         </div>
       </header>
+
+      {/* Guided Path Introduction */}
+      <section className="bg-accent-primary/5 rounded-[3rem] p-8 md:p-12 border border-accent-primary/20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+          <Zap size={240} />
+        </div>
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+            <div className="md:col-span-2 space-y-6">
+               <h2 className="text-4xl font-black tracking-tight text-white uppercase">Le jugement musical est un art.</h2>
+               <p className="text-lg text-text-muted leading-relaxed">
+                  Nos curateurs ne se contentent pas de lister des morceaux. Ils vous expliquent <strong>pourquoi</strong> les écouter, comment les comparer et ce qui définit leur importance dans l'histoire de la musique.
+               </p>
+               <div className="flex gap-4">
+                  <div className="bg-bg-main p-4 rounded-2xl border border-white/5 space-y-2">
+                    <div className="text-accent-primary font-black text-xs uppercase tracking-widest">Étape 1</div>
+                    <div className="text-sm font-bold text-white uppercase">S'initier</div>
+                  </div>
+                  <div className="bg-bg-main p-4 rounded-2xl border border-white/5 space-y-2">
+                    <div className="text-accent-secondary font-black text-xs uppercase tracking-widest">Étape 2</div>
+                    <div className="text-sm font-bold text-white uppercase">Comparer</div>
+                  </div>
+                  <div className="bg-bg-main p-4 rounded-2xl border border-white/5 space-y-2">
+                    <div className="text-success font-black text-xs uppercase tracking-widest">Étape 3</div>
+                    <div className="text-sm font-bold text-white uppercase">Maîtriser</div>
+                  </div>
+               </div>
+            </div>
+            <div className="text-center md:text-right">
+               <button className="premium-gradient px-8 py-5 rounded-3xl font-black text-sm text-white shadow-xl hover:scale-105 transition-transform flex items-center justify-center gap-3 w-full md:w-auto">
+                 CRÉER MON GUIDE <PlusCircle size={20} />
+               </button>
+            </div>
+        </div>
+      </section>
 
       {/* Categories */}
       <div className="flex flex-wrap gap-4 border-b border-white/5 pb-8">
@@ -1586,13 +2128,13 @@ const ListsPage = () => {
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`px-6 py-3 rounded-2xl font-black text-sm transition-all ${
+            className={`px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all border ${
               activeCategory === cat.id 
-                ? 'bg-accent-secondary text-white shadow-lg shadow-accent-secondary/20' 
-                : 'bg-white/5 text-text-muted hover:bg-white/10'
+                ? 'bg-accent-secondary border-accent-secondary/50 text-white shadow-xl shadow-accent-secondary/20 scale-105' 
+                : 'bg-white/5 border-white/5 text-text-muted hover:bg-white/10'
             }`}
           >
-            {cat.label.toUpperCase()}
+            {cat.label}
           </button>
         ))}
       </div>
@@ -1600,7 +2142,7 @@ const ListsPage = () => {
       {/* Featured Section */}
       {activeCategory === 'all' && (
         <section className="space-y-10">
-          <SectionTitle subtitle="Les guides les plus complets du moment">Mises en avant</SectionTitle>
+          <SectionTitle subtitle="Les sélections les plus instructives du moment">Parcours Certifiés ÉCHO</SectionTitle>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {featuredLists.map(list => <ListCard key={list.id} list={list} featured />)}
           </div>
@@ -1609,23 +2151,27 @@ const ListsPage = () => {
 
       {/* Main Grid */}
       <section className="space-y-10">
-        <SectionTitle subtitle="Parcourez l'intégralité des listes partagées">
-          {activeCategory === 'all' ? 'Toutes les listes' : `Listes ${activeCategory}`}
+        <SectionTitle subtitle="L'intelligence collective à votre service">
+          {activeCategory === 'all' ? 'Toutes les explorations' : `Guides : ${categories.find(c => c.id === activeCategory)?.label}`}
         </SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredLists.map(list => <ListCard key={list.id} list={list} />)}
         </div>
       </section>
 
-      {/* Popular Section */}
-      {activeCategory === 'all' && (
-        <section className="space-y-10">
-          <SectionTitle subtitle="Les sélections plébiscitées par la communauté">Les plus populaires</SectionTitle>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularLists.map(list => <ListCard key={list.id} list={list} compact />)}
+      {/* User Discovery Section - Call to Action */}
+      <section className="glass-card p-12 text-center space-y-8 relative overflow-hidden bg-bg-surface-light">
+          <div className="space-y-4">
+             <h2 className="text-4xl font-black tracking-tight text-white uppercase">Partagez votre expertise.</h2>
+             <p className="text-text-muted text-lg max-w-2xl mx-auto">
+                Vous avez un angle unique sur un genre ou un artiste ? Créez une liste et aidez la communauté à découvrir la musique à travers vos yeux.
+             </p>
           </div>
-        </section>
-      )}
+          <div className="flex justify-center gap-6">
+             <button className="bg-white/10 hover:bg-white/20 px-8 py-4 rounded-2xl font-black text-sm transition-all border border-white/10">VOIR MES GUIDES</button>
+             <button className="bg-accent-primary px-8 py-4 rounded-2xl font-black text-sm shadow-xl hover:shadow-accent-primary/20 transition-all">CRÉER UNE NOUVELLE LISTE</button>
+          </div>
+      </section>
     </div>
   );
 };
@@ -1940,88 +2486,107 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
         </div>
       </header>
 
-      {/* Goûts Musicaux */}
+      {/* Goûts Musicaux & Identité Critique */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-10">
-          <SectionTitle subtitle="L'ADN sonore du contributeur">Goûts Musicaux</SectionTitle>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="glass-card p-8 space-y-6">
-              <h3 className="text-sm font-black uppercase tracking-widest text-accent-primary flex items-center gap-2">
-                <Star size={16} /> Artistes Favoris
-              </h3>
-              <div className="space-y-4">
-                {favoriteArtists.map(artist => (
-                  <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-4 group">
-                    <SafeImage src={artist.cover_image_url} className="w-12 h-12 rounded-xl object-cover border border-white/10" fallbackType="artist" />
-                    <div className="flex-grow">
-                      <div className="font-bold group-hover:text-accent-primary transition-colors">{artist.name}</div>
-                      <div className="text-[10px] text-text-muted uppercase font-black">{artist.primary_genres[0]}</div>
+        <div className="lg:col-span-2 space-y-16">
+          <div className="space-y-10">
+            <SectionTitle subtitle="L'ADN critique et sonore du contributeur">Identité de Jugement</SectionTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="glass-card p-8 space-y-6 border-accent-secondary/20">
+                <h3 className="text-sm font-black uppercase tracking-widest text-accent-secondary flex items-center gap-2">
+                  <Award size={16} /> ADN Critique
+                </h3>
+                <div className="space-y-6">
+                  <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p className="text-sm text-text-main leading-relaxed">
+                      L'approche de <strong>{user.display_name}</strong> se concentre sur <span className="text-accent-secondary font-black">{user.critical_specialty}</span>. 
+                      Ses analyses privilégient souvent {user.discovery_style === 'Explorateur' ? 'la recherche de nouvelles formes sonores' : 'la structure et la cohérence artistique'}.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Sensibilité sonore</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {user.taste_tones?.map(tone => (
+                        <span key={tone} className="px-3 py-1.5 bg-accent-secondary/10 border border-accent-secondary/20 rounded-lg text-[10px] font-black text-accent-secondary uppercase tracking-widest">
+                          {tone}
+                        </span>
+                      ))}
                     </div>
-                    <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                ))}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="glass-card p-8 space-y-6">
-              <h3 className="text-sm font-black uppercase tracking-widest text-accent-primary flex items-center gap-2">
-                <Zap size={16} /> Tonalités de Goût
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {user.taste_tones?.map(tone => (
-                  <span key={tone} className="px-4 py-2 bg-accent-primary/10 border border-accent-primary/20 rounded-xl text-xs font-bold text-accent-primary">
-                    {tone}
-                  </span>
-                ))}
-              </div>
-              <div className="pt-4 space-y-4">
-                <h4 className="text-[10px] font-black text-text-muted uppercase tracking-widest">Profils Proches</h4>
-                <div className="flex -space-x-3">
-                  {similarProfiles.map(u => (
-                    <SafeImage key={u.id} src={u.avatar_url} className="w-10 h-10 rounded-full border-2 border-bg-main object-cover" title={u.display_name} fallbackType="user" />
+              <div className="glass-card p-8 space-y-6">
+                <h3 className="text-sm font-black uppercase tracking-widest text-accent-primary flex items-center gap-2">
+                  <Star size={16} /> Artistes Étendus
+                </h3>
+                <div className="space-y-4">
+                  {favoriteArtists.map(artist => (
+                    <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-4 group">
+                      <SafeImage src={artist.cover_image_url} className="w-12 h-12 rounded-xl object-cover border border-white/10" fallbackType="artist" />
+                      <div className="flex-grow">
+                        <div className="font-bold group-hover:text-accent-primary transition-colors">{artist.name}</div>
+                        <div className="text-[10px] text-text-muted uppercase font-black">{artist.primary_genres[0]}</div>
+                      </div>
+                      <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
+                    </Link>
                   ))}
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-10">
-          <SectionTitle subtitle="Ses inspirations">Suivis</SectionTitle>
-          <div className="glass-card p-8 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-accent-primary">Artistes Suivis</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {followedArtists.map(artist => (
-                <Link key={artist.id} to={`/artiste/${artist.slug}`} className="space-y-2 group">
-                  <SafeImage src={artist.cover_image_url} className="w-full aspect-square rounded-2xl object-cover border border-white/10 group-hover:border-accent-primary/30 transition-all" fallbackType="artist" />
-                  <div className="text-[10px] font-black text-center truncate group-hover:text-accent-primary transition-colors">{artist.name.toUpperCase()}</div>
-                </Link>
-              ))}
+          <div className="space-y-10">
+            <SectionTitle subtitle="Les guides d'écoute créés par ce membre">Parcours de Découverte</SectionTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {userLists.map(list => <ListCard key={list.id} list={list} />)}
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Listes Créées */}
-      {userLists.length > 0 && (
-        <section className="space-y-10">
-          <SectionTitle subtitle="Les sélections thématiques publiées">Listes Créées</SectionTitle>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {userLists.map(list => <ListCard key={list.id} list={list} />)}
+          <section className="space-y-10">
+            <SectionTitle subtitle="Ses analyses critiques les plus récentes">Derniers Avis</SectionTitle>
+            <div className="grid grid-cols-1 gap-8">
+              {mockReviews.filter(r => r.user_id === user.id).map(review => (
+                <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+                  <ReviewCard review={review} />
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside className="lg:col-span-1 space-y-12">
+          <div className="glass-card p-8 space-y-8 sticky top-24">
+             <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Pourquoi le suivre ?</h3>
+             <p className="text-sm text-text-main leading-relaxed italic">"{user.follow_reason}"</p>
+             
+             <div className="pt-8 border-t border-white/5 space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Profils d'écoute similaires</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  {similarProfiles.map(u => (
+                    <div key={u.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group">
+                      <SafeImage src={u.avatar_url} className="w-10 h-10 rounded-full object-cover border border-white/10" fallbackType="user" />
+                      <div className="flex-grow">
+                        <div className="text-sm font-bold group-hover:text-accent-primary transition-colors">{u.display_name}</div>
+                        <div className="text-[9px] text-text-muted font-black uppercase">{u.favorite_genre}</div>
+                      </div>
+                      <button className="text-[8px] font-black text-accent-primary uppercase border border-accent-primary/30 px-2 py-1 rounded hover:bg-accent-primary hover:text-white transition-all">Suivre</button>
+                    </div>
+                  ))}
+                </div>
+             </div>
+
+             <div className="pt-8 border-t border-white/5">
+                <div className="bg-bg-surface-light p-4 rounded-2xl border border-white/5 space-y-3">
+                   <div className="flex items-center gap-2 text-accent-primary">
+                      <ShieldCheck size={16} />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Membre Vérifié</span>
+                   </div>
+                   <p className="text-[10px] text-text-muted leading-relaxed">Ce membre a contribué de manière significative à la profondeur critique de la plateforme.</p>
+                </div>
+             </div>
           </div>
-        </section>
-      )}
-
-      {/* Derniers Avis */}
-      <section className="space-y-10">
-        <SectionTitle subtitle="Ses analyses critiques les plus récentes">Mes derniers avis</SectionTitle>
-        <div className="grid grid-cols-1 gap-8">
-          {mockReviews.filter(r => r.user_id === user.id).map(review => (
-            <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <ReviewCard review={review} />
-            </motion.div>
-          ))}
-        </div>
+        </aside>
       </section>
     </div>
   );
