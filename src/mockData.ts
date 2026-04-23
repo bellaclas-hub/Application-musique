@@ -5,6 +5,7 @@ export const mockUsers: User[] = [
     id: 'u1',
     username: 'melomane_du_92',
     display_name: 'Thomas R.',
+    slug: 'thomas-r',
     bio_short: 'Passionné de synth-pop et de rap alternatif. Je cherche toujours la pépite cachée.',
     avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200',
     credibility_level: 'qualifie',
@@ -24,6 +25,7 @@ export const mockUsers: User[] = [
     id: 'u2',
     username: 'justine_vibes',
     display_name: 'Justine M.',
+    slug: 'justine-m',
     bio_short: 'Exploratrice sonore. Le rock indépendant est ma maison.',
     avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200',
     credibility_level: 'confirme',
@@ -38,6 +40,7 @@ export const mockUsers: User[] = [
     id: 'u3',
     username: 'lucas_techno',
     display_name: 'Lucas B.',
+    slug: 'lucas-b',
     bio_short: 'Producteur amateur et fan de techno berlinoise. La précision avant tout.',
     avatar_url: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=200',
     credibility_level: 'visiteur',
@@ -52,6 +55,7 @@ export const mockUsers: User[] = [
     id: 'u4',
     username: 'sophie_jazz',
     display_name: 'Sophie L.',
+    slug: 'sophie-l',
     bio_short: 'Le jazz est une conversation. Je collectionne les vinyles depuis 10 ans.',
     avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200',
     credibility_level: 'qualifie',
@@ -66,6 +70,7 @@ export const mockUsers: User[] = [
     id: 'u5',
     username: 'marc_retro',
     display_name: 'Marc D.',
+    slug: 'marc-d',
     bio_short: 'Nostalgique des années 80. Le synthé est mon instrument de prédilection.',
     avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
     credibility_level: 'confirme',
@@ -80,6 +85,7 @@ export const mockUsers: User[] = [
     id: 'u6',
     username: 'clara_folk',
     display_name: 'Clara V.',
+    slug: 'clara-v',
     bio_short: 'Amoureuse des voix acoustiques et des récits intimes.',
     avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
     credibility_level: 'qualifie',
@@ -94,6 +100,7 @@ export const mockUsers: User[] = [
     id: 'u7',
     username: 'alex_hiphop',
     display_name: 'Alexandre K.',
+    slug: 'alexandre-k',
     bio_short: 'Le rap est ma culture. Analyse de flows et de beats.',
     avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
     credibility_level: 'confirme',
@@ -164,8 +171,8 @@ export const mockArtists: Artist[] = [
     primary_genres: ['Indie Rock', 'Synth-Pop'],
     short_bio: 'Le groupe de Versailles qui a conquis le monde.',
     long_bio: 'Phoenix est un groupe de rock alternatif français originaire de Versailles. Ils sont l\'un des rares groupes français à avoir remporté un Grammy Award pour leur album "Wolfgang Amadeus Phoenix".',
-    hero_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8a187499b?auto=format&fit=crop&q=80&w=1920',
-    cover_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8a187499b?auto=format&fit=crop&q=80&w=800',
+    hero_image_url: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=1920',
+    cover_image_url: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=800',
     entry_level: 'Accessible',
     consensus_score: 92,
     polarization_score: 15,
@@ -215,8 +222,8 @@ export const mockArtists: Artist[] = [
     primary_genres: ['Hip-hop', 'Rap'],
     short_bio: 'Le lyriciste sombre et introspectif du rap belge.',
     long_bio: 'Damso est un rappeur et auteur-compositeur belgo-congolais. Connu pour ses textes crus, sombres et une introspection rare dans le milieu du rap.',
-    hero_image_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=1920',
-    cover_image_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800',
+    hero_image_url: 'https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&q=80&w=1920',
+    cover_image_url: 'https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&q=80&w=800',
     entry_level: 'Exigeant',
     consensus_score: 89,
     polarization_score: 45,
@@ -272,8 +279,8 @@ export const mockArtists: Artist[] = [
     primary_genres: ['Dream Pop', 'Alt-Pop'],
     short_bio: 'La reine de la mélancolie cinématographique.',
     long_bio: 'Lana Del Rey est une artiste américaine dont la musique est connue pour sa qualité cinématographique et son exploration des thèmes de la romance tragique, du glamour et de la mélancolie.',
-    hero_image_url: 'https://images.unsplash.com/photo-1496293455970-f8581aae0e3c?auto=format&fit=crop&q=80&w=1920',
-    cover_image_url: 'https://images.unsplash.com/photo-1496293455970-f8581aae0e3c?auto=format&fit=crop&q=80&w=800',
+    hero_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8718a74a7?auto=format&fit=crop&q=80&w=1920',
+    cover_image_url: 'https://images.unsplash.com/photo-1514525253361-bee8718a74a7?auto=format&fit=crop&q=80&w=800',
     entry_level: 'Accessible',
     consensus_score: 88,
     polarization_score: 30,
@@ -323,8 +330,8 @@ export const mockArtists: Artist[] = [
     primary_genres: ['Electronic', 'French Touch'],
     short_bio: 'Le duo qui a marié l\'électro et le heavy metal.',
     long_bio: 'Justice est un duo de musique électronique français composé de Gaspard Augé et Xavier de Rosnay. Ils sont connus pour leur mélange unique de disco, d\'électro et de rock.',
-    hero_image_url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=1920',
-    cover_image_url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=800',
+    hero_image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1920',
+    cover_image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800',
     entry_level: 'Intermédiaire',
     consensus_score: 94,
     polarization_score: 10,
@@ -1085,16 +1092,23 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
     title: 'Les Essentiels de la Pop Française',
     description: 'Une sélection des albums qui ont défini la pop en France ces dernières années, entre efficacité mélodique et textes soignés.',
+    editorial_intro: 'La pop n\'est plus ce qu\'elle était. Elle est devenue hybride, introspective et techniquement brillante.',
+    why_exists: 'Pour offrir un panorama rapide mais pointu de l\'état de la pop actuelle.',
+    target_audience: 'Nouveaux venus curieux de comprendre la prod actuelle.',
+    journey_logic: 'Commencez par les voix familières pour glisser vers des structures plus complexes.',
+    entry_level: 'Immédiat',
     items: [
-      { type: 'album', id: 'alb1', slug: 'brol', title: 'Brol', why: 'L\'album qui a lancé la nouvelle vague pop.' },
-      { type: 'artist', id: 'art1', slug: 'angele', title: 'Angèle', why: 'L\'artiste incontournable du genre.' }
+      { type: 'album', id: 'alb1', slug: 'brol', title: 'Brol', artist_name: 'Angèle', why: 'L\'album qui a lancé la nouvelle vague pop.', access_level: 'Gratuit', promise: 'Le sommet de l\'écriture pop-jazz.' },
+      { type: 'artist', id: 'art1', slug: 'angele', title: 'Angèle', artist_name: 'Angèle', why: 'L\'artiste incontournable du genre.', access_level: 'Premium', promise: 'L\'indé à son sommet.' }
     ],
     like_count: 450,
     category: 'Pop',
     selection_type: 'Débutant',
+    tone_mood: 'Vibrant & Frais',
     discovery_promise: 'Comprendre la pop moderne en 5 écoutes.',
     image_url: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-01-15T10:00:00Z'
+    created_at: '2024-01-15T10:00:00Z',
+    is_premium_exclusive: false
   },
   {
     id: 'l2',
@@ -1104,15 +1118,22 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
     title: '5 Portes d\'entrée dans le Rap Introspectif',
     description: 'Pour ceux qui aiment les textes profonds, les ambiances sombres et les récits de vie sans filtre.',
+    editorial_intro: 'Le rap n\'est pas qu\'une question de BPM. C\'est souvent une thérapie à ciel ouvert.',
+    why_exists: 'Mettre en lumière la plume plutôt que le "flow" pur.',
+    target_audience: 'Fans de poésie moderne et de récits urbains.',
+    journey_logic: 'Une descente progressive dans la noirceur et la vérité brute.',
+    entry_level: 'Intermédiaire',
     items: [
-      { type: 'artist', id: 'art3', slug: 'damso', title: 'Damso', why: 'Le maître du clair-obscur belge.' }
+      { type: 'artist', id: 'art3', slug: 'damso', title: 'Damso', artist_name: 'Damso', why: 'Le maître du clair-obscur belge.', access_level: 'Gratuit', promise: 'Profondeur textuelle et prod chirurgicale.' }
     ],
     like_count: 890,
     category: 'Rap',
     selection_type: 'Expert',
+    tone_mood: 'Sombre & Poétique',
     discovery_promise: 'Plongez dans la psyché des meilleurs lyricistes.',
     image_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-02-10T14:30:00Z'
+    created_at: '2024-02-10T14:30:00Z',
+    is_premium_exclusive: true
   },
   {
     id: 'l3',
@@ -1122,16 +1143,23 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
     title: 'Indie Rock Accessible pour commencer',
     description: 'Pas besoin d\'être un puriste pour apprécier ces pépites rock aux mélodies immédiates.',
+    editorial_intro: 'L\'indie peut être intimidant. Ces listes sont là pour vous prouver le contraire.',
+    why_exists: 'Démystifier le rock indépendant "pointu".',
+    target_audience: 'Auditeurs lassés de la radio mais cherchant de l\'énergie.',
+    journey_logic: 'Focus sur l\'efficacité mélodique immédiate.',
+    entry_level: 'Accessible',
     items: [
-      { type: 'artist', id: 'art2', slug: 'phoenix', title: 'Phénix', why: 'L\'énergie pop-rock à la française.' },
-      { type: 'album', id: 'alb2', slug: 'wolfgang-amadeus-phoenix', title: 'Wolfgang Amadeus Phoenix', why: 'Un classique indémodable.' }
+      { type: 'artist', id: 'art2', slug: 'phoenix', title: 'Phénix', artist_name: 'Phoenix', why: 'L\'énergie pop-rock à la française.', access_level: 'Gratuit', promise: 'L\'album parfait pour l\'été.' },
+      { type: 'album', id: 'alb2', slug: 'wolfgang-amadeus-phoenix', title: 'Wolfgang Amadeus Phoenix', artist_name: 'Phoenix', why: 'Un classique indémodable.', access_level: 'Premium', promise: 'L\'indé à son sommet.' }
     ],
     like_count: 560,
     category: 'Indie',
     selection_type: 'Débutant',
+    tone_mood: 'Énergique & Solaire',
     discovery_promise: 'Le rock sans la barrière de l\'élitisme.',
     image_url: 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-03-05T09:15:00Z'
+    created_at: '2024-03-05T09:15:00Z',
+    is_premium_exclusive: false
   },
   {
     id: 'l4',
@@ -1141,15 +1169,22 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100',
     title: 'Albums parfaits pour la nuit',
     description: 'Des productions vaporeuses, des voix feutrées et une mélancolie douce pour vos insomnies.',
+    editorial_intro: 'Quand le bruit du monde se tait, ces albums prennent tout leur sens.',
+    why_exists: 'Accompagner la solitude nocturne avec goût.',
+    target_audience: 'Insomniaques, rêveurs et travailleurs tardifs.',
+    journey_logic: 'Une immersion de plus en plus profonde dans le calme.',
+    entry_level: 'Accessible',
     items: [
-      { type: 'artist', id: 'art4', slug: 'lana-del-rey', title: 'Lana Del Rey', why: 'La reine du glamour nostalgique.' }
+      { type: 'artist', id: 'art4', slug: 'lana-del-rey', title: 'Lana Del Rey', artist_name: 'Lana Del Rey', why: 'La reine du glamour nostalgique.', access_level: 'Gratuit', promise: 'Cinématique et intemporel.' }
     ],
     like_count: 1200,
     category: 'Humeur',
     selection_type: 'Thématique',
+    tone_mood: 'Nocturne & Vaporeux',
     discovery_promise: 'La bande-son idéale de vos pensées nocturnes.',
     image_url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-03-25T22:00:00Z'
+    created_at: '2024-03-25T22:00:00Z',
+    is_premium_exclusive: false
   },
   {
     id: 'l5',
@@ -1159,15 +1194,22 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
     title: 'Si vous aimez Angèle, essayez aussi...',
     description: 'Vous avez poncé Brol et Nonante-Cinq ? Voici la suite logique de votre parcours pop.',
+    editorial_intro: 'Vour avez dévoré la pop belge, voici le reste du monde.',
+    why_exists: 'Élargir l\'horizon des fans d\'Angèle.',
+    target_audience: 'Fans de pop francophone moderne.',
+    journey_logic: 'Des proximités évidentes vers des découvertes plus audacieuses.',
+    entry_level: 'Accessible',
     items: [
-      { type: 'artist', id: 'art1', slug: 'angele', title: 'Angèle', why: 'Votre point de départ.' }
+      { type: 'artist', id: 'art1', slug: 'angele', title: 'Angèle', artist_name: 'Angèle', why: 'Votre point de départ.', access_level: 'Gratuit', promise: 'Pop pétillante et texte malin.' }
     ],
     like_count: 340,
     category: 'Sélections d\'experts',
     selection_type: 'Thématique',
+    tone_mood: 'Curieux & Complémentaire',
     discovery_promise: 'Élargissez votre horizon pop sans perdre le fil.',
     image_url: 'https://images.unsplash.com/photo-1514525253361-bee8718a340b?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-04-01T11:30:00Z'
+    created_at: '2024-04-01T11:30:00Z',
+    is_premium_exclusive: false
   },
   {
     id: 'l6',
@@ -1177,15 +1219,22 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
     title: 'French Touch : La Renaissance',
     description: 'De Justice aux nouveaux héritiers, découvrez comment l\'électro française continue de briller.',
+    editorial_intro: 'Le "French Sound" n\'est pas mort, il a juste muté de manière spectaculaire.',
+    why_exists: 'Réhabiliter le clubbing à la française.',
+    target_audience: 'Nostalgiques de Daft Punk et curieux de la scène club.',
+    journey_logic: 'Des classiques vers les futurs anthems.',
+    entry_level: 'Intermédiaire',
     items: [
-      { type: 'artist', id: 'art5', slug: 'justice', title: 'Justice', why: 'Les piliers de l\'électro rock.' }
+      { type: 'artist', id: 'art5', slug: 'justice', title: 'Justice', artist_name: 'Justice', why: 'Les piliers de l\'électro rock.', access_level: 'Gratuit', promise: 'L\'énergie brute du dancefloor.' }
     ],
     like_count: 720,
     category: 'Electronic',
     selection_type: 'Expert',
+    tone_mood: 'Électrique & Dansant',
     discovery_promise: 'L\'énergie des clubs français dans vos oreilles.',
     image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-04-05T16:45:00Z'
+    created_at: '2024-04-05T16:45:00Z',
+    is_premium_exclusive: true
   },
   {
     id: 'l7',
@@ -1195,13 +1244,20 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100',
     title: 'Mélancolie Estivale',
     description: 'Pour ces fins de journées d\'été où le soleil se couche et laisse place à une douce tristesse.',
+    editorial_intro: 'Le soleil qui pique et le cœur qui serre.',
+    why_exists: 'Capturer l\'essence du "summer blues".',
+    target_audience: 'Ceux qui aiment conduire la nuit en été.',
+    journey_logic: 'Une lente dérive vers la nostalgie.',
+    entry_level: 'Immédiat',
     items: [],
     like_count: 210,
     category: 'Humeur',
     selection_type: 'Humeur',
+    tone_mood: 'Chaud & Mélancolique',
     discovery_promise: 'Des morceaux qui sentent le sable chaud et les regrets.',
     image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-04-10T18:20:00Z'
+    created_at: '2024-04-10T18:20:00Z',
+    is_premium_exclusive: false
   },
   {
     id: 'l8',
@@ -1211,15 +1267,22 @@ export const mockLists: SharedList[] = [
     user_avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=100',
     title: 'Textes Engagés dans la Pop Actuelle',
     description: 'Quand la mélodie sert un message fort. Féminisme, écologie, société : la pop prend position.',
+    editorial_intro: 'La pop n\'est plus superficielle, elle est politique.',
+    why_exists: 'Montrer que le fond et la forme peuvent cohabiter.',
+    target_audience: 'Auditeurs en quête de sens.',
+    journey_logic: 'Un tour d\'horizon des thématiques sociales actuelles.',
+    entry_level: 'Accessible',
     items: [
-      { type: 'track', id: 'tr1', slug: 'balance-ton-quoi', title: 'Balance ton quoi', why: 'L\'hymne d\'une génération.' }
+      { type: 'track', id: 'tr1', slug: 'balance-ton-quoi', title: 'Balance ton quoi', artist_name: 'Angèle', why: 'L\'hymne d\'une génération.', access_level: 'Gratuit', promise: 'Un manifeste pop éclatant.' }
     ],
     like_count: 315,
     category: 'Pop',
     selection_type: 'Thématique',
+    tone_mood: 'Frontal & Nécessaire',
     discovery_promise: 'Écoutez ce que les artistes ont vraiment à dire.',
     image_url: 'https://images.unsplash.com/photo-1526218626217-dc65a29bb444?auto=format&fit=crop&q=80&w=800',
-    created_at: '2024-04-12T09:00:00Z'
+    created_at: '2024-04-12T09:00:00Z',
+    is_premium_exclusive: false
   }
 ];
 

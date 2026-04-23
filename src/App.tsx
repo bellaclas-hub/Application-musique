@@ -37,7 +37,28 @@ import {
   PlayCircle,
   LayoutGrid,
   LayoutList,
-  MapPin
+  MapPin,
+  Target,
+  Heart,
+  MoreHorizontal,
+  TrendingDown,
+  Activity,
+  Compass,
+  Layers,
+  Sparkles,
+  BarChart3,
+  Calendar,
+  ThumbsDown,
+  X,
+  Check,
+  Clock,
+  Music2,
+  Mic2,
+  Disc,
+  Headphones,
+  Maximize2,
+  Minimize2,
+  Hash
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -156,15 +177,22 @@ const ProVsCommunityBlock = ({
           </div>
 
           <div className="bg-bg-surface-light p-6 rounded-3xl border border-white/5 space-y-4">
-             <div className="flex items-center gap-3">
+             <div className="flex items-center justify-between">
                <Badge variant={gapType === 'Equilibre' ? 'success' : 'premium'}>
-                Écart : {Math.abs(gap)} pts
+                 {gapType === 'Equilibre' ? 'VIBRATIONS SYNC' : gapType === 'Elite' ? 'PRÉCISION D\'ELITE' : 'PLÉBISCITE TOTAL'}
                </Badge>
-               <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Type : {gapType}</span>
+               <div className="text-[10px] font-black text-accent-secondary flex items-center gap-2">
+                 <Zap size={10} /> ÉCART : {Math.abs(gap)} PTS
+               </div>
              </div>
-             <p className="text-sm text-text-main leading-relaxed font-bold italic">
+             <p className="text-sm text-text-main leading-relaxed font-bold italic border-l-2 border-accent-primary pl-4 py-2">
                &ldquo;{insights[gapType]}&rdquo;
              </p>
+             {Math.abs(gap) > 12 && (
+               <p className="text-[10px] text-text-muted leading-relaxed font-medium">
+                 Note : Un écart de {Math.abs(gap)} points indique une vision radicalement différente entre l'aspect technique et le ressenti émotionnel.
+               </p>
+             )}
           </div>
         </div>
 
@@ -332,48 +360,68 @@ const SafeImage = ({
   src?: string, 
   alt?: string, 
   className?: string, 
-  fallbackType?: 'artist' | 'album' | 'track' | 'user'
+  fallbackType?: 'artist' | 'album' | 'track' | 'user' | 'list' | 'musical_premium'
 } & React.ImgHTMLAttributes<HTMLImageElement>) => {
   const [isError, setIsError] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [retryCount, setRetryCount] = React.useState(0);
 
   const getFallback = () => {
-    const musicFallbacks = [
-      '1493225255756-d9584f8606e9', // Singer
-      '1511671782779-c97d3d27a1d4', // Microphone
-      '1514525253361-bee8a187499b', // Concert
-      '1459749411177-042180ce673c', // Guitar
-      '1470225620780-dba8ba36b745', // Concert crowd
-      '1508700115892-45ecd05ae2ad', // Vinyl
-      '1614613535308-eb5fbd3d2c17', // Studio
-      '1504608524841-42fe6f032b4b', // Piano
-      '1487180144669-ebf7df964979', // Headphones
-      '1511379938547-c03674d01896', // Music notes
-      '1510915361894-db8b60106cb1', // Guitar player
-      '1526218626217-dc65a29bb444', // Music background
-      '1453090927415-5f45085b65c0', // Turntable
-      '1420181910359-05665bbf00b1', // Cassette
-      '1516280440614-37939bbacd81', // Singing
-      '1501386761578-eac5c94b800a', // Concert
-      '1465821185615-20b3c2fbf41b', // Studio gear
-      '1514533212735-5df27d970db0', // Piano keys
-      '1511671782779-c97d3d27a1d4', // Mic
-      '1459231978203-b7d0c47a3ecf'  // Cello
-    ];
+    // Curated high-end musical and abstract photography for each category
+    const fallbacks = {
+      artist: [
+        '1493225255756-d9584f8606e9', // Cinematic singer silhouette
+        '1511671782779-c97d3d27a1d4', // Studio microphone close-up
+        '1514525253361-bee8a187499b', // Atmospheric concert light
+        '1501386761578-eac5c94b800a', // Deep blue concert crowd
+        '1459749411177-042180ce673c', // Red vintage guitar detail
+      ],
+      album: [
+        '1508700115892-45ecd05ae2ad', // Vinyl spinning detail
+        '1594623125724-504935219d2d', // Synth knobs macro
+        '1614613535308-eb5fbd3d2c17', // Modern music studio
+        '1504608524841-42fe6f032b4b', // Piano keys monochrome
+        '1470229722913-7c0e2dbbafd3', // Technical gear in dark room
+      ],
+      track: [
+        '1487180144669-ebf7df964979', // High-end headphones
+        '1511379938547-c03674d01896', // Abstract sheet music art
+        '1453090927415-5f45085b65c0', // Turntable arm macro
+        '1516280440614-37939bbacd81', // Soundboard faders
+      ],
+      user: [
+        '1535713875002-d1d0cf377fde', // Minimalist male portrait
+        '1494790108377-be9c29b29330', // Minimalist female portrait
+        '1527980965255-d3b416303d12', // Artistic portrait silhouette
+        '1599566150163-29194dcaad36', // Monochrome studio portrait
+      ],
+      list: [
+        '1511671782779-c97d3d27a1d4', // Collection of records/studio
+        '1470225620780-dba8ba36b745', // Festival atmosphere
+        '1459749033322-861452a5ca44', // Rock concert energy
+        '1514525253361-bee8a187499b', // Artistic light composition
+      ],
+      musical_premium: [
+        '1470229722913-7c0e2dbbafd3', // Ultra-dark studio
+        '1508700115892-45ecd05ae2ad', // High-fidelity vinyl
+        '1594623125724-504935219d2d', // Analog synth macro
+        '1550684846-173484f93801', // Conceptual audio waves
+      ]
+    };
 
-    const str = alt || src || 'echo';
+    const str = alt || src || 'echo_music';
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
     }
     
-    // Add fallbackType to hash to further differentiate
-    const typeHash = fallbackType.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const index = Math.abs(hash + typeHash + retryCount) % musicFallbacks.length;
+    const category = fallbacks[fallbackType] || fallbacks.album;
+    const combinedHash = Math.abs(hash + retryCount);
+    const index = combinedHash % category.length;
     
-    return `https://images.unsplash.com/photo-${musicFallbacks[index]}?auto=format&fit=crop&q=80&w=800`;
+    const size = (fallbackType === 'user' || fallbackType === 'track') ? '400' : '800';
+    return `https://images.unsplash.com/photo-${category[index]}?auto=format&fit=crop&q=85&w=${size}`;
   };
 
   React.useEffect(() => {
@@ -496,7 +544,7 @@ const ArtistCard = ({ artist }: { artist: Artist }) => (
   </motion.div>
 );
 
-const AlbumCard = ({ album, compact = false }: { album: Album, compact?: boolean }) => (
+const AlbumCard = ({ album, compact = false }: { album: Album, compact?: boolean, key?: React.Key }) => (
   <motion.div whileHover={{ scale: 1.02 }} className={`glass-card cursor-pointer group overflow-hidden border border-white/5 hover:border-accent-secondary/30 ${compact ? 'p-3' : 'p-4'}`}>
     <Link to={`/album/${album.slug}`} className="flex gap-4 items-center">
       <div className={`${compact ? 'w-16 h-16' : 'w-28 h-28'} rounded-xl overflow-hidden flex-shrink-0 shadow-lg relative`}>
@@ -533,26 +581,34 @@ const AlbumCard = ({ album, compact = false }: { album: Album, compact?: boolean
   </motion.div>
 );
 
-const TrackCard = ({ track }: { track: Track }) => (
-  <motion.div whileHover={{ x: 4 }} className="glass-card p-4 flex items-center justify-between cursor-pointer group border-l-4 border-accent-secondary hover:border-accent-primary transition-all">
-    <Link to={`/morceau/${track.slug}`} className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-accent-secondary/10 transition-colors">
-          <PlayCircle size={24} className="text-accent-secondary group-hover:scale-110 transition-transform" />
+const TrackCard = ({ track }: { track: Track, key?: React.Key }) => (
+  <motion.div whileHover={{ x: 4 }} className="glass-card flex items-center justify-between cursor-pointer group border-l-4 border-accent-secondary hover:border-accent-primary transition-all overflow-hidden h-24">
+    <Link to={`/morceau/${track.slug}`} className="flex items-center justify-between w-full h-full px-6">
+      <div className="flex items-center gap-6 h-full py-2">
+        <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg relative flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+           <SafeImage 
+             src={track.image_url || track.album_cover_url} 
+             alt={track.title} 
+             fallbackType="track"
+             className="w-full h-full object-cover" 
+           />
+           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/link:opacity-100 transition-opacity flex items-center justify-center">
+              <PlayCircle size={24} className="text-white" />
+           </div>
         </div>
-        <div>
+        <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-[8px] font-black text-accent-secondary uppercase tracking-widest px-1.5 py-0.5 rounded bg-accent-secondary/10">{track.dominant_feeling}</span>
             {track.is_best_entry_track && <span className="text-[8px] font-black text-accent-primary uppercase tracking-tighter">Incontournable</span>}
           </div>
-          <h4 className="font-black text-base group-hover:text-accent-secondary transition-colors leading-tight">{track.title}</h4>
-          <p className="text-[10px] text-text-muted uppercase font-black tracking-widest">{track.artist_name} • {track.access_level}</p>
+          <h4 className="font-black text-lg group-hover:text-accent-secondary transition-colors leading-tight truncate max-w-[200px]">{track.title}</h4>
+          <p className="text-[10px] text-text-muted uppercase font-black tracking-widest truncate">{track.artist_name} • {track.access_level}</p>
         </div>
       </div>
       <div className="flex items-center gap-6">
         <div className="text-right hidden sm:block">
-          <div className="text-xs font-black text-accent-secondary">{track.quick_consensus_score}%</div>
-          <div className="text-[8px] font-bold text-text-muted uppercase">Consensus</div>
+          <div className="text-sm font-black text-accent-secondary">{track.quick_consensus_score}%</div>
+          <div className="text-[8px] font-bold text-text-muted uppercase tracking-widest">Consensus</div>
         </div>
         <ChevronRight size={18} className="text-text-muted group-hover:translate-x-1 group-hover:text-text-main transition-all" />
       </div>
@@ -560,134 +616,192 @@ const TrackCard = ({ track }: { track: Track }) => (
   </motion.div>
 );
 
-const ReviewCard = ({ review, isReaderPremium = false, compact = false, ...props }: { review: Review, isReaderPremium?: boolean, compact?: boolean, [key: string]: any }) => {
+const ReviewCard = ({ review, isReaderPremium = false, compact = false, index = 0, ...props }: { review: Review, isReaderPremium?: boolean, compact?: boolean, index?: number, [key: string]: any }) => {
   const isLocked = !isReaderPremium && review.quality_score > 90;
+  const isAltLayout = index % 3 === 1;
+  const isDeepLayout = index % 3 === 2;
 
   return (
-    <div {...props} className={`glass-card relative overflow-hidden group transition-all duration-500 border-white/5 hover:border-accent-primary/20 ${compact ? 'p-6' : 'p-8 md:p-10'}`}>
+    <div {...props} className={`glass-card relative overflow-hidden group transition-all duration-700 border-white/5 hover:border-accent-primary/30 ${compact ? 'p-6' : 'p-10 md:p-14'} ${isDeepLayout ? 'bg-gradient-to-br from-bg-surface to-bg-main shadow-2xl ring-1 ring-white/10' : ''}`}>
+      {/* Background Accent for variety */}
+      {isAltLayout && !compact && (
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-accent-primary/5 blur-[100px] pointer-events-none rounded-full" />
+      )}
+      
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
-        <div className="flex items-center gap-5">
-          <div className="relative">
+      <div className={`flex flex-col md:flex-row md:items-start justify-between gap-10 mb-12`}>
+        <div className="flex items-center gap-6">
+          <Link to={`/profil/${review.user_slug || review.user_id}`} className="relative block transform group-hover:scale-105 transition-transform duration-500">
             <SafeImage 
               src={review.user_avatar} 
               alt={review.user_display_name} 
               fallbackType="user"
-              className="w-14 h-14 rounded-2xl object-cover border-2 border-white/5 shadow-2xl" 
+              className="w-16 h-16 rounded-[1.25rem] object-cover border-4 border-white/5 shadow-2xl ring-4 ring-bg-main/50" 
             />
             {review.user_premium_status && (
-              <div className="absolute -top-2 -right-2 w-6 h-6 rounded-lg premium-gradient flex items-center justify-center shadow-lg">
-                <Award size={12} className="text-white" />
+              <div className="absolute -top-3 -right-3 w-8 h-8 rounded-xl premium-gradient flex items-center justify-center shadow-2xl border-4 border-bg-main">
+                <Award size={14} className="text-white" />
               </div>
             )}
-          </div>
+          </Link>
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <span className="font-black text-lg text-white tracking-tight">{review.user_display_name}</span>
+            <div className="flex items-center gap-3 mb-2">
+              <Link to={`/profil/${review.user_slug || review.user_id}`} className="font-black text-xl text-white tracking-tight hover:text-accent-primary transition-colors underline decoration-white/10 decoration-2 underline-offset-4">{review.user_display_name}</Link>
               {review.user_premium_status ? (
-                <Badge variant="premium">Premium</Badge>
+                <Badge variant="premium">Elite</Badge>
               ) : (
-                <Badge variant="default">Gratuit</Badge>
+                <Badge variant="default">Membre</Badge>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-black uppercase tracking-widest text-text-muted">
-              <span className="text-accent-primary">{review.user_expertise || 'Contributeur'}</span>
-              <span className="w-1 h-1 rounded-full bg-white/20" />
-              <span>{new Date(review.published_at).toLocaleDateString('fr-FR')}</span>
-              <span className="w-1 h-1 rounded-full bg-white/20" />
-              <Link to={`/${review.target_type === 'artist' ? 'artiste' : review.target_type === 'album' ? 'album' : 'morceau'}/${review.target_slug}`} className="text-accent-secondary hover:underline flex items-center gap-1">
-                {review.target_name} <ExternalLink size={10} />
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-widest text-text-muted">
+              <span className="text-accent-primary bg-accent-primary/10 px-2 py-0.5 rounded italic">{review.user_expertise || 'Contributeur'}</span>
+              <span className="flex items-center gap-2">
+                <Info size={10} className="opacity-40" />
+                {new Date(review.published_at).toLocaleDateString('fr-FR')}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-secondary/40 shrink-0" />
+              <Link to={`/${review.target_type === 'artist' ? 'artiste' : review.target_type === 'album' ? 'album' : 'morceau'}/${review.target_slug}`} className="text-white/60 hover:text-accent-secondary transition-colors font-bold border-b border-transparent hover:border-accent-secondary/30">
+                {review.target_name}
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-6 self-end md:self-start">
+        <div className="flex items-center gap-8 self-end md:self-start bg-white/5 p-4 rounded-3xl border border-white/5 backdrop-blur-md">
           <div className="text-right">
-            <div className="text-3xl font-black text-accent-primary leading-none flex items-baseline gap-1">
+            <div className={`text-4xl font-black leading-none flex items-baseline gap-1 ${review.rating_overall >= 4 ? 'text-accent-primary' : 'text-white'}`}>
               {review.rating_overall}<span className="text-sm text-text-muted font-bold tracking-normal">/5</span>
             </div>
-            <div className="text-[9px] font-black text-text-muted uppercase tracking-widest mt-1">Note Globale</div>
+            <div className="text-[9px] font-black text-text-muted uppercase tracking-widest mt-2">Note Avis</div>
           </div>
           <div className="w-px h-10 bg-white/10" />
           <div className="text-right">
-            <div className="text-xl font-black text-white leading-none">{review.quality_score}%</div>
-            <div className="text-[9px] font-black text-text-muted uppercase tracking-widest mt-1">Qualité</div>
+            <div className="text-2xl font-black text-white leading-none">{review.quality_score}%</div>
+            <div className="text-[9px] font-black text-text-muted uppercase tracking-widest mt-2">Précision</div>
           </div>
         </div>
       </div>
 
       {/* Content Section */}
-      <div className="space-y-8">
-        <div className="space-y-4">
-          {review.title && <h3 className="text-2xl md:text-3xl font-black tracking-tighter text-white leading-tight">{review.title}</h3>}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="premium">{review.selections.impression}</Badge>
-            <Badge variant="default">{review.selections.feeling}</Badge>
-            <Badge variant="success">{review.selections.accessibility}</Badge>
-            {review.tone && <Badge variant="warning">{review.tone}</Badge>}
-            {review.angle && <Badge variant="default">Analyse: {review.angle}</Badge>}
+      <div className="space-y-12 relative z-10">
+        <div className="space-y-6">
+          {review.title && <h3 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-[1.1] max-w-4xl">{review.title}</h3>}
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Badge variant="premium" className="bg-accent-primary/20 text-accent-primary border-accent-primary/30 uppercase tracking-widest text-[9px] px-3 py-1.5">{review.selections.impression}</Badge>
+            <Badge variant="default" className="uppercase tracking-widest text-[9px] px-3 py-1.5">{review.selections.feeling}</Badge>
+            <Badge variant="success" className="uppercase tracking-widest text-[9px] px-3 py-1.5">{review.selections.accessibility}</Badge>
+            {review.tone && <Badge variant="warning" className="uppercase tracking-widest text-[9px] px-3 py-1.5">{review.tone}</Badge>}
+            {review.angle && <Badge variant="default" className="bg-white/5 border-white/10 uppercase tracking-widest text-[9px] px-3 py-1.5 italic">Analyse {review.angle}</Badge>}
           </div>
         </div>
 
         {!compact && (
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-10 relative ${isLocked ? 'max-h-48 overflow-hidden' : ''}`}>
-            <div className="space-y-8">
-              <ReviewSection label="Pourquoi ces mots ?" content={review.justifications.why_words} icon={<Info size={14} />} />
-              <ReviewSection label="Élément marquant" content={review.justifications.key_element} icon={<Zap size={14} />} />
+          <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 relative ${isLocked ? 'max-h-64 overflow-hidden mask-fade-bottom' : ''}`}>
+             {isLocked && (
+               <div className="absolute inset-x-0 bottom-0 top-0 bg-gradient-to-t from-bg-main via-bg-main/60 to-transparent z-20 pointer-events-none" />
+             )}
+
+            <div className="space-y-12">
+              <ReviewSection 
+                label="Le verdict en quelques mots" 
+                content={review.justifications.why_words} 
+                icon={<MessageSquare size={16} />} 
+              />
+              <ReviewSection 
+                label="L'étincelle ou le bémol" 
+                content={review.justifications.key_element} 
+                icon={<Zap size={16} />} 
+                className="bg-accent-primary/5 border border-accent-primary/10 rounded-3xl p-8"
+              />
             </div>
-            <div className="space-y-8">
-              <ReviewSection label="Recommandation" content={review.justifications.recommendation} icon={<Users size={14} />} />
-              <ReviewSection label="Par où commencer ?" content={review.justifications.entry_point} icon={<ArrowRight size={14} />} color="text-accent-secondary" />
+            <div className="space-y-12">
+              <ReviewSection 
+                label="À qui s'adresse cette œuvre ?" 
+                content={review.justifications.recommendation} 
+                icon={<Users size={16} />} 
+              />
+              <ReviewSection 
+                label="Conseil d'entrée" 
+                content={review.justifications.entry_point} 
+                icon={<ArrowRight size={16} />} 
+                color="text-accent-secondary font-black"
+                className="bg-accent-secondary/5 border border-accent-secondary/10 rounded-3xl p-8"
+              />
             </div>
 
             {isLocked && (
-              <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-bg-surface/95 to-transparent flex flex-col items-center justify-end pb-8 gap-4">
-                <div className="flex items-center gap-2 text-warning font-black text-[10px] uppercase tracking-widest">
-                  <Lock size={12} /> Analyse réservée aux membres premium
+              <div className="absolute inset-0 z-30 flex flex-col items-center justify-end pb-12 px-6">
+                <div className="glass-card p-10 max-w-lg w-full text-center space-y-8 bg-bg-surface/80 blur-backdrop border-accent-primary/30 shadow-[0_0_50px_rgba(139,92,246,0.3)]">
+                  <div className="space-y-4">
+                     <div className="w-16 h-16 bg-accent-primary/20 rounded-2xl flex items-center justify-center mx-auto text-accent-primary mb-4">
+                        <Lock size={32} />
+                     </div>
+                     <h4 className="text-xl font-black uppercase tracking-tight">Analyse Approfondie Masquée</h4>
+                     <p className="text-text-muted leading-relaxed text-sm">
+                       Cet avis de qualité <strong>({review.quality_score}%)</strong> contient des arguments détaillés réservés aux membres ÉCHO Premium.
+                     </p>
+                  </div>
+                  <Link to="/premium" className="w-full premium-gradient px-10 py-5 rounded-2xl font-black text-sm shadow-2xl hover:scale-[1.03] transition-all flex items-center justify-center gap-3 text-white uppercase tracking-widest">
+                    Débloquer l'Analyse <ShieldCheck size={20} />
+                  </Link>
                 </div>
-                <Link to="/premium" className="premium-gradient px-10 py-4 rounded-2xl font-black text-sm shadow-2xl hover:scale-105 transition-transform flex items-center gap-3">
-                  PASSER AU PREMIUM POUR TOUT LIRE
-                </Link>
               </div>
             )}
           </div>
         )}
 
         {compact && isLocked && (
-          <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-3 text-text-muted text-xs font-bold">
-              <Lock size={16} className="text-warning" /> Analyse complète masquée
+          <div className="bg-bg-surface-light p-6 rounded-3xl border border-white/10 flex items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center text-warning">
+                <Lock size={18} />
+              </div>
+              <p className="text-xs font-bold text-text-muted leading-relaxed">
+                Passez premium pour lire l'analyse complète de {review.quality_score}%
+              </p>
             </div>
-            <Link to="/premium" className="text-accent-primary font-black text-[10px] uppercase tracking-widest hover:underline">Débloquer</Link>
+            <Link to="/premium" className="bg-accent-primary/10 text-accent-primary px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-accent-primary hover:text-white transition-all whitespace-nowrap">
+              DÉBLOQUER
+            </Link>
           </div>
         )}
       </div>
 
       {/* Footer Section */}
-      <div className="mt-10 pt-8 border-t border-white/5 flex flex-wrap items-center justify-between gap-6">
-        <div className="flex items-center gap-8">
-          <button className="flex items-center gap-2.5 text-xs font-black text-text-muted hover:text-accent-primary transition-colors group uppercase tracking-widest">
-            <ThumbsUp size={18} className="group-hover:scale-110 transition-transform" />
-            <span>Utile <span className="text-text-main ml-1">{review.helpful_count}</span></span>
+      <div className={`mt-14 pt-10 border-t border-white/10 flex flex-wrap items-center justify-between gap-10`}>
+        <div className="flex items-center gap-12">
+          <button className="flex items-center gap-3 text-xs font-black text-text-muted hover:text-accent-primary transition-colors group uppercase tracking-widest">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-accent-primary/10 transition-all">
+              <ThumbsUp size={20} className="group-hover:scale-110 group-hover:text-accent-primary transition-all" />
+            </div>
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-white text-lg font-black mb-1">{review.helpful_count}</span>
+              <span>Jugé Utile</span>
+            </div>
           </button>
-          <button className="flex items-center gap-2.5 text-xs font-black text-text-muted hover:text-accent-primary transition-colors group uppercase tracking-widest">
-            <Share2 size={18} className="group-hover:scale-110 transition-transform" />
-            <span>Partager</span>
+          
+          <button className="flex items-center gap-3 text-xs font-black text-text-muted hover:text-accent-secondary transition-colors group uppercase tracking-widest">
+             <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-accent-secondary/10 transition-all">
+                <Share2 size={20} />
+             </div>
+             <div className="flex flex-col items-start leading-none">
+              <span className="text-white font-bold mb-1">Partager</span>
+              <span>L'Insight</span>
+            </div>
           </button>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {isLocked ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-[10px] font-black uppercase tracking-widest border border-warning/20">
-              <Lock size={10} /> Extrait
+            <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-warning/10 text-warning text-[10px] font-black uppercase tracking-widest border border-warning/20 shadow-sm shadow-warning/10">
+              <Lock size={10} /> Extrait Verrouillé
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/10 text-success text-[10px] font-black uppercase tracking-widest border border-success/20">
-              <CheckCircle2 size={10} /> Avis complet
+            <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-success/10 text-success text-[10px] font-black uppercase tracking-widest border border-success/20 shadow-sm shadow-success/10">
+              <ShieldCheck size={10} /> Analyse Complète
             </div>
           )}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 text-text-muted text-[10px] font-black uppercase tracking-widest border border-white/10">
-            Vérifié
+          <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/5 text-text-muted text-[10px] font-black uppercase tracking-widest border border-white/10 opacity-60">
+            Audit Echo
           </div>
         </div>
       </div>
@@ -695,13 +809,13 @@ const ReviewCard = ({ review, isReaderPremium = false, compact = false, ...props
   );
 };
 
-const ReviewSection = ({ label, content, icon, color = 'text-text-muted' }: { label: string, content: string, icon: React.ReactNode, color?: string }) => (
-  <div className="space-y-2">
-    <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${color}`}>
-      {icon}
-      <span>{label}</span>
+const ReviewSection = ({ label, content, icon, color = 'text-text-muted', className = '' }: { label: string, content: string, icon: React.ReactNode, color?: string, className?: string }) => (
+  <div className={`space-y-4 ${className}`}>
+    <div className={`flex items-center gap-3 text-[10px] font-black uppercase tracking-widest ${color}`}>
+      <div className="opacity-60">{icon}</div>
+      <span className="opacity-80">{label}</span>
     </div>
-    <p className="text-sm text-text-main leading-relaxed font-medium">{content}</p>
+    <p className="text-sm text-text-main leading-relaxed font-bold italic opacity-90 border-l-2 border-white/10 pl-6">{content}</p>
   </div>
 );
 
@@ -890,8 +1004,13 @@ const ExploreScreen = () => {
         <TabButton active={activeTab === 'tracks'} onClick={() => setActiveTab('tracks')} label="Morceaux" count={filteredTracks.length} />
       </div>
 
-      {/* Results */}
       <div className="min-h-[400px]">
+        {search && (
+          <div className="mb-12">
+            <SectionTitle subtitle="Analyses croisées basées sur votre recherche">Focus : {search}</SectionTitle>
+          </div>
+        )}
+        
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab + search + JSON.stringify(filters)}
@@ -911,7 +1030,7 @@ const ExploreScreen = () => {
             )}
 
             {activeTab === 'albums' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredAlbums.length > 0 ? (
                   filteredAlbums.map(a => <div key={a.id}><AlbumCard album={a} /></div>)
                 ) : (
@@ -921,9 +1040,9 @@ const ExploreScreen = () => {
             )}
 
             {activeTab === 'tracks' && (
-              <div className="max-w-4xl space-y-4">
+              <div className="max-w-4xl space-y-4 mx-auto">
                 {filteredTracks.length > 0 ? (
-                  filteredTracks.map(t => <div key={t.id}><TrackCard track={t} /></div>)
+                  filteredTracks.map(t => <TrackCard key={t.id} track={t} />)
                 ) : (
                   <EmptyResults />
                 )}
@@ -931,6 +1050,65 @@ const ExploreScreen = () => {
             )}
           </motion.div>
         </AnimatePresence>
+
+        {/* SI VOUS AIMEZ... ESSAYEZ ÇA */}
+        {!search && activeTab === 'artists' && (
+          <section className="mt-24 space-y-12">
+            <div className="flex border-t border-white/5 pt-12">
+               <SectionTitle subtitle="Recommandations algorithmiques d'Echo">Si vous aimez ça, essayez ceci</SectionTitle>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+               <div className="glass-card p-12 bg-gradient-to-br from-accent-primary/10 to-transparent border-accent-primary/20 space-y-8 relative overflow-hidden group">
+                  <div className="absolute -right-10 -top-10 opacity-5 group-hover:rotate-12 transition-transform duration-700">
+                    <TrendingUp size={200} />
+                  </div>
+                  <div className="flex items-center gap-3 text-accent-primary relative z-10">
+                    <Zap size={24} />
+                    <span className="text-xs font-black uppercase tracking-widest">Le Match Discovery</span>
+                  </div>
+                  <div className="flex justify-between items-center relative z-10 px-4">
+                    <div className="text-center space-y-3">
+                       <SafeImage src={mockArtists[1].cover_image_url} className="w-24 h-24 rounded-full object-cover border-4 border-accent-primary/30 shadow-2xl group-hover:scale-110 transition-transform" fallbackType="artist" />
+                       <div className="text-[10px] font-black uppercase text-white tracking-widest">{mockArtists[1].name}</div>
+                    </div>
+                    <div className="flex flex-col items-center gap-3">
+                       <div className="h-0.5 w-16 bg-gradient-to-r from-transparent via-accent-secondary/50 to-transparent rounded-full" />
+                       <div className="text-[11px] font-black text-accent-secondary uppercase tracking-[0.2em]">88% MÉLODIQUE</div>
+                       <div className="h-0.5 w-16 bg-gradient-to-r from-transparent via-accent-secondary/50 to-transparent rounded-full" />
+                    </div>
+                    <div className="text-center space-y-3">
+                       <SafeImage src={mockArtists[4].cover_image_url} className="w-24 h-24 rounded-full object-cover border-4 border-accent-secondary/30 shadow-2xl group-hover:scale-110 transition-transform" fallbackType="artist" />
+                       <div className="text-[10px] font-black uppercase text-white tracking-widest">{mockArtists[4].name}</div>
+                    </div>
+                  </div>
+                  <p className="text-base text-text-muted leading-relaxed font-medium relative z-10">
+                    "Bien que séparés par des années de production, ces deux univers partagent une science du riff synthétique et une mélancolie solaire typiquement européenne."
+                  </p>
+                  <button className="bg-accent-primary text-white px-8 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition-transform w-full relative z-10">
+                    DÉCOUVRIR LE PARCOURS COMMUN
+                  </button>
+               </div>
+
+               <div className="space-y-6">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted block mb-4">Focus Critique : Consensus ou Clivage ?</h4>
+                  {[
+                    { title: "Justice : Toujours pertinent en 2024 ?", desc: "Analyse du dernier album Hyperdrama face à l'héritage de Cross.", type: 'Analysis' },
+                    { title: "Angèle : Le triomphe de la pop efficace", desc: "Comment Brol est devenu un modèle de structure pop pour toute une génération.", type: 'Review' },
+                    { title: "Damso : L'obscurité qui rassemble", desc: "Pourquoi Ipséité reste l'album le plus discuté de la décennie.", type: 'Insight' }
+                  ].map((item, i) => (
+                    <div key={i} className="glass-card p-6 border-white/5 hover:border-white/20 transition-all cursor-pointer group">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[9px] font-black text-accent-secondary uppercase tracking-widest">{item.type}</span>
+                        <ArrowRight size={14} className="text-text-muted group-hover:text-accent-secondary group-hover:translate-x-1 transition-all" />
+                      </div>
+                      <h5 className="font-black text-white mb-2">{item.title}</h5>
+                      <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">{item.desc}</p>
+                    </div>
+                  ))}
+               </div>
+            </div>
+          </section>
+        )}
       </div>
 
       {/* Discovery Section */}
@@ -981,6 +1159,7 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-bg-main text-text-main">
+      <ScrollToTop />
       {/* Desktop Sidebar */}
       <nav className="hidden md:flex flex-col w-64 bg-bg-surface border-r border-white/5 p-6 fixed h-full z-40">
         <Link to="/" className="flex items-center gap-2 mb-10 px-2 group">
@@ -1053,6 +1232,7 @@ function AppLayout() {
               <Route path="/listes" element={<ListsPage />} />
               <Route path="/communaute" element={<CommunityPage />} />
               <Route path="/profil" element={<ProfilePage isPremium={isPremium} setIsPremium={setIsPremium} />} />
+              <Route path="/profil/:slug" element={<ProfilePage isPremium={isPremium} setIsPremium={setIsPremium} />} />
               <Route path="/premium" element={<PremiumPage />} />
               <Route path="/artiste/:slug" element={<ArtistPage />} />
               <Route path="/album/:slug" element={<AlbumPage />} />
@@ -1123,22 +1303,62 @@ const ReviewsPage = ({ isPremium }: { isPremium: boolean }) => {
   });
 
   return (
-    <div className="space-y-12">
-      <header className="space-y-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div className="space-y-4">
-            <Badge variant="premium">Communauté Echo</Badge>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">Avis de la <br /><span className="text-accent-primary">COMMUNAUTÉ.</span></h1>
-            <p className="text-text-muted text-xl font-medium max-w-xl">Des avis structurés, utiles et nuancés pour mieux découvrir la musique</p>
-          </div>
-          <div className="flex gap-4">
-            <div className="glass-card px-6 py-4 text-center border-white/5">
-              <div className="text-2xl font-black text-accent-primary">{mockReviews.length}</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Avis publiés</div>
+    <div className="space-y-24 pb-20">
+      <header className="space-y-12 pt-10">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-10">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent-primary/10 border border-accent-primary/20 rounded-full text-accent-primary text-[10px] font-black uppercase tracking-widest">
+              <MessageSquare size={14} /> Intelligence Collective
             </div>
-            <div className="glass-card px-6 py-4 text-center border-white/5">
-              <div className="text-2xl font-black text-accent-secondary">12</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Auteurs actifs</div>
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase">
+              LE REGARD <br />
+              <span className="text-accent-primary">DE LA COMMUNAUTÉ.</span>
+            </h1>
+            <p className="text-text-muted text-xl md:text-2xl font-medium leading-relaxed max-w-2xl">
+              Plus que des notes, des analyses structurées pour comprendre la démarche, les clivages et l'impact de chaque œuvre.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 flex-shrink-0">
+            <div className="glass-card px-8 py-6 text-center border-white/5 bg-gradient-to-br from-white/5 to-transparent shadow-2xl">
+              <div className="text-3xl font-black text-white">{mockReviews.length}</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">Avis d'experts</div>
+            </div>
+            <div className="glass-card px-8 py-6 text-center border-white/5 bg-gradient-to-br from-white/5 to-transparent shadow-2xl">
+              <div className="text-3xl font-black text-accent-primary">{mockUsers.length}</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">Contributeurs</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Highlights Bar */}
+        <div className="flex flex-wrap gap-8 items-center pt-8 border-t border-white/5">
+          <div className="flex items-center gap-4 group">
+            <div className="w-10 h-10 rounded-full bg-accent-primary/10 flex items-center justify-center text-accent-primary group-hover:scale-110 transition-transform">
+              <TrendingUp size={18} />
+            </div>
+            <div className="text-xs">
+              <span className="text-text-muted font-bold block uppercase tracking-widest text-[9px]">Tendance</span>
+              <span className="text-white font-black truncate max-w-[200px] block">L'impact de la synth-pop en 2024</span>
+            </div>
+          </div>
+          <div className="w-px h-8 bg-white/5 hidden md:block" />
+          <div className="flex items-center gap-4 group">
+            <div className="w-10 h-10 rounded-full bg-accent-secondary/10 flex items-center justify-center text-accent-secondary group-hover:scale-110 transition-transform">
+              <Award size={18} />
+            </div>
+            <div className="text-xs">
+              <span className="text-text-muted font-bold block uppercase tracking-widest text-[9px]">Avis d'Or</span>
+              <span className="text-white font-black truncate max-w-[200px] block">Justine M. sur "Neon Nights"</span>
+            </div>
+          </div>
+          <div className="w-px h-8 bg-white/5 hidden md:block" />
+          <div className="flex items-center gap-4 group">
+            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success group-hover:scale-110 transition-transform">
+               <Zap size={18} />
+            </div>
+            <div className="text-xs">
+              <span className="text-text-muted font-bold block uppercase tracking-widest text-[9px]">Dernier Débat</span>
+              <span className="text-white font-black truncate max-w-[200px] block">12 commentaires sur "The Void"</span>
             </div>
           </div>
         </div>
@@ -1201,8 +1421,8 @@ const ReviewsPage = ({ isPremium }: { isPremium: boolean }) => {
           <p className="text-text-muted font-black uppercase tracking-[0.2em] text-xs">Analyse de la communauté en cours...</p>
         </div>
       ) : filteredReviews.length > 0 ? (
-        <div className={`grid gap-10 ${viewMode === 'compact' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-          {filteredReviews.map(review => (
+        <div className={`grid ${viewMode === 'compact' ? 'grid-cols-1 md:grid-cols-2 gap-8' : 'grid-cols-1 gap-20'}`}>
+          {filteredReviews.map((review, idx) => (
             <motion.div 
               layout
               key={review.id}
@@ -1210,7 +1430,7 @@ const ReviewsPage = ({ isPremium }: { isPremium: boolean }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ReviewCard review={review} isReaderPremium={isPremium} compact={viewMode === 'compact'} />
+              <ReviewCard review={review} isReaderPremium={isPremium} compact={viewMode === 'compact'} index={idx} />
             </motion.div>
           ))}
         </div>
@@ -1245,129 +1465,131 @@ const HomeScreen = () => {
   };
 
   return (
-    <div className="space-y-20">
+    <div className="space-y-24">
       <header className="space-y-8 pt-10 relative">
         <div className="space-y-6">
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase">
-            DÉCOUVREZ PAR OÙ <br />
-            <span className="text-accent-primary">COMMENCER.</span>
+          <Badge variant="premium">Echo Intelligence</Badge>
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.82] uppercase text-white">
+            MAÎTRISEZ VOTRE <br />
+            <span className="text-accent-primary italic">ÉCOUTE.</span>
           </h1>
           <p className="text-text-muted text-xl md:text-2xl max-w-2xl font-medium leading-relaxed">
-            Echo centralise les avis structurés et les analyses IA pour vous guider dans l'univers d'un artiste, d'un album ou d'un morceau.
+            Echo n'est pas qu'une plateforme de découverte. C'est l'assistant critique qui vous donne les clés pour comprendre, comparer et juger n'importe quel univers musical.
           </p>
         </div>
 
-        {/* Home Search Bar */}
         <form onSubmit={handleSearch} className="relative max-w-4xl group">
           <div className="absolute -inset-1 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-accent-primary transition-colors" size={24} />
             <input 
               type="text" 
-              placeholder="Rechercher un artiste, un album ou un morceau..." 
-              className="w-full bg-bg-surface border border-white/10 rounded-[2rem] py-6 pl-16 pr-8 text-xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
+              placeholder="Rechercher par #style, #mood ou nom d'artiste..." 
+              className="w-full bg-bg-surface border border-white/10 rounded-[2.5rem] py-8 pl-16 pr-8 text-xl font-medium focus:outline-none focus:border-accent-primary/50 transition-all shadow-2xl"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 bg-accent-primary hover:bg-accent-primary/80 text-white px-6 py-3 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95">
-              RECHERCHER
+            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 premium-gradient text-white px-8 py-4 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95">
+              ANALYSER
             </button>
           </div>
         </form>
 
         <div className="flex flex-wrap gap-4 pt-4">
-          <Link to="/explorer" className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors flex items-center gap-2">
-            <TrendingUp size={18} className="text-accent-secondary" /> VOIR LES TENDANCES
-          </Link>
-          <Link to="/avis" className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl font-black text-sm hover:bg-white/10 transition-colors flex items-center gap-2">
-            <MessageSquare size={18} className="text-accent-primary" /> LIRE LES DERNIERS AVIS
-          </Link>
+          {['#vintage', '#hypnotique', '#production-brute', '#écriture-ciselée'].map(tag => (
+            <button key={tag} onClick={() => { setSearchQuery(tag); navigate(`/explorer?q=${encodeURIComponent(tag)}`); }} className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] hover:text-accent-secondary transition-colors cursor-pointer">
+              {tag}
+            </button>
+          ))}
         </div>
       </header>
 
-      <section>
-        <div className="flex items-end justify-between mb-8">
-          <SectionTitle subtitle="Les artistes qui redéfinissent la scène actuelle">Tendances du moment</SectionTitle>
-          <Link to="/explorer" className="text-accent-secondary font-black text-xs uppercase tracking-widest hover:underline mb-8 flex items-center gap-2">
-            Tout explorer <ArrowRight size={14} />
-          </Link>
+      {/* Featured Entry Points */}
+      <section className="space-y-12">
+        <div className="flex items-end justify-between border-b border-white/5 pb-8">
+           <SectionTitle subtitle="Les portes d'entrée les plus accessibles de la plateforme">Par où commencer ?</SectionTitle>
+           <div className="flex gap-4">
+             <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><ChevronLeft size={20} /></button>
+             <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><ChevronRight size={20} /></button>
+           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockArtists.slice(0, 6).map(artist => <div key={artist.id}><ArtistCard artist={artist} /></div>)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {mockAlbums.filter(a => a.is_entry_album).slice(0, 4).map(album => <AlbumCard key={album.id} album={album} compact />)}
         </div>
       </section>
 
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-        <div className="lg:col-span-7 space-y-12">
-          <SectionTitle subtitle="Les analyses les plus pertinentes de la semaine">Avis à la une</SectionTitle>
+      {/* Mid-page Break: Community List Spotlight */}
+      <section className="relative overflow-hidden rounded-[3.5rem] bg-gradient-to-br from-bg-surface to-bg-main border border-white/10 p-12 md:p-20 shadow-2xl">
+        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-accent-secondary/5 to-transparent pointer-events-none" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
           <div className="space-y-8">
-            <ReviewCard review={mockReviews[0]} />
-            <ReviewCard review={mockReviews[1]} />
-          </div>
-          <Link to="/avis" className="premium-gradient w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl hover:opacity-90 transition-opacity">
-            <MessageSquare size={20} /> DÉCOUVRIR TOUS LES AVIS DE LA COMMUNAUTÉ
-          </Link>
-        </div>
-        
-        <div className="lg:col-span-5 space-y-12">
-          <SectionTitle subtitle="Sélectionnés pour leur accessibilité immédiate">Par où commencer ?</SectionTitle>
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-4">Albums Incontournables</h3>
-              {mockAlbums.filter(a => a.is_entry_album).map(album => <div key={album.id}><AlbumCard album={album} /></div>)}
-            </div>
-            <div className="space-y-4 pt-6">
-              <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-4">Morceaux Clés</h3>
-              {mockTracks.filter(t => t.is_best_entry_track).map(track => <div key={track.id}><TrackCard track={track} /></div>)}
-            </div>
-          </div>
-          
-          <div className="glass-card p-8 bg-accent-primary/5 border-accent-primary/20 space-y-6">
-            <div className="w-12 h-12 rounded-2xl premium-gradient flex items-center justify-center shadow-lg">
-              <Zap size={24} className="text-white" />
-            </div>
-            <h3 className="text-xl font-black leading-tight">Vous ne savez toujours pas quoi écouter ?</h3>
-            <p className="text-text-muted text-sm font-medium leading-relaxed">
-              Laissez notre IA analyser vos goûts et vous proposer le point d'entrée parfait dans n'importe quel genre musical.
+            <Badge variant="premium">Sélection Curatée</Badge>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] uppercase text-white">
+              DES GUIDES <br />
+              <span className="text-accent-secondary">THÉMATIQUES.</span>
+            </h2>
+            <p className="text-text-muted text-lg font-medium leading-relaxed">
+              Nos experts ne se contentent pas de lister. Ils construisent des parcours de découverte pour vous aider à appréhender des discographies complexes.
             </p>
-            <button className="text-accent-primary font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
-              Lancer l'assistant Echo <ArrowRight size={14} />
-            </button>
+            <div className="flex gap-4 pt-4">
+              <Link to="/listes" className="premium-gradient px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white shadow-xl hover:scale-105 transition-transform">Explorer les guides</Link>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden rounded-[3rem] bg-bg-surface border border-white/5 p-12 md:p-20">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent-primary/10 to-transparent pointer-events-none" />
-        <div className="relative z-10 max-w-2xl space-y-8">
-          <Badge variant="premium">Listes de la communauté</Badge>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
-            DES MILLIERS DE <br />
-            <span className="text-accent-secondary">SÉLECTIONS.</span>
-          </h2>
-          <p className="text-text-muted text-lg font-medium leading-relaxed">
-            Explorez les listes thématiques créées par nos membres les plus qualifiés. De la "Synth-pop obscure" aux "Classiques du Rap Belge".
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-            {mockLists.map(list => (
-              <Link key={list.id} to={`/liste/${list.slug}`} className="bg-bg-main/50 backdrop-blur-md p-6 rounded-3xl border border-white/5 hover:border-accent-primary/30 transition-all group">
-                <div className="flex justify-between items-start mb-4">
-                  <Badge variant="premium">{list.category}</Badge>
-                  <div className="flex items-center gap-1 text-text-muted text-[10px] font-black">
-                    <ThumbsUp size={12} /> {list.like_count}
-                  </div>
+          <div className="grid grid-cols-1 gap-6">
+            {mockLists.slice(0, 2).map(list => (
+              <Link key={list.id} to={`/liste/${list.slug}`} className="bg-white/5 backdrop-blur-xl p-8 rounded-[2rem] border border-white/10 hover:border-accent-secondary/40 transition-all flex items-center gap-8 group">
+                <SafeImage src={list.image_url} className="w-24 h-24 rounded-2xl object-cover shadow-lg group-hover:scale-105 transition-transform" fallbackType="album" />
+                <div className="flex-grow">
+                  <div className="text-[10px] font-black text-accent-secondary uppercase tracking-[0.2em] mb-2">{list.category}</div>
+                  <h3 className="text-xl font-black group-hover:text-white transition-colors">{list.title}</h3>
                 </div>
-                <h3 className="text-lg font-black group-hover:text-accent-primary transition-colors mb-2">{list.title}</h3>
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-[9px] font-black text-text-muted uppercase tracking-widest">Par {list.user_display_name}</span>
-                  <ArrowRight size={16} className="text-accent-primary group-hover:translate-x-1 transition-transform" />
-                </div>
+                <ArrowRight size={24} className="text-text-muted group-hover:text-accent-secondary group-hover:translate-x-2 transition-all" />
               </Link>
             ))}
           </div>
-          <Link to="/listes" className="inline-flex items-center gap-2 text-accent-secondary font-black text-xs uppercase tracking-widest hover:underline pt-4">
-            Voir toutes les listes <ArrowRight size={14} />
+        </div>
+      </section>
+
+      {/* Main Analysis Sections */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+        <div className="lg:col-span-8 space-y-16">
+          <SectionTitle subtitle="Analyses certifiées par le comité de rédaction Echo">Analyses à ne pas manquer</SectionTitle>
+          <div className="space-y-12">
+            {mockReviews.slice(0, 3).map(review => <ReviewCard key={review.id} review={review} />)}
+          </div>
+          <Link to="/avis" className="bg-white/5 border border-white/10 w-full py-5 rounded-3xl font-black text-sm flex items-center justify-center gap-3 hover:bg-white/10 transition-all">
+             VOIR TOUS LES AVIS QUALIFIÉS <ArrowRight size={18} />
           </Link>
+        </div>
+        
+        <div className="lg:col-span-4 sticky top-24 h-fit space-y-12">
+          <div className="space-y-8">
+            <SectionTitle subtitle="Ils font l'actualité critique">À suivre</SectionTitle>
+            <div className="space-y-6">
+              {mockArtists.slice(4, 7).map(artist => (
+                <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-4 group">
+                   <div className="relative">
+                     <SafeImage src={artist.cover_image_url} className="w-16 h-16 rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all shadow-lg" fallbackType="artist" />
+                     <div className="absolute -top-1 -right-1 w-4 h-4 bg-accent-primary rounded-full border-2 border-bg-main" />
+                   </div>
+                   <div className="flex-grow">
+                     <div className="font-black text-sm group-hover:text-accent-primary transition-colors">{artist.name}</div>
+                     <div className="text-[9px] font-black text-text-muted uppercase tracking-widest">{artist.primary_genres[0]} • {artist.consensus_score}% Consensus</div>
+                   </div>
+                   <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-card p-10 border-accent-secondary/20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform"><MessageSquare size={120} /></div>
+            <h3 className="text-xl font-black mb-4">Contribuez à l'intelligence de la plateforme.</h3>
+            <p className="text-text-muted text-sm font-medium leading-relaxed mb-8">
+              Partagez vos impressions structurées pour aider les autres à s'orienter dans la jungle des sorties.
+            </p>
+            <button className="bg-accent-secondary px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white shadow-xl hover:shadow-accent-secondary/20 transition-all w-full">CRÉER UNE ANALYSE</button>
+          </div>
         </div>
       </section>
     </div>
@@ -1430,10 +1652,69 @@ const ArtistPage = () => {
             {/* Quick Summary Section */}
             <section className="space-y-8">
               <div className="flex items-center gap-3">
-                <ShieldCheck size={24} className="text-accent-primary" />
+                <Sparkles size={24} className="text-accent-primary" />
                 <h2 className="text-xl font-black uppercase tracking-widest">En Bref</h2>
               </div>
               <SummaryBriefBlock summary={artist.summary} />
+            </section>
+
+            {/* Points d'entrée différenciés */}
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <Compass size={24} className="text-accent-secondary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Différencier les points d'entrée</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { label: "Le plus accessible", id: artist.discography_matrix?.entry_point_id, icon: <PlayCircle size={16} />, color: 'bg-emerald-500/10 text-emerald-400' },
+                  { label: "Le plus acclamé", id: artist.discography_matrix?.masterpiece_id, icon: <Award size={16} />, color: 'bg-accent-primary/10 text-accent-primary' },
+                  { label: "Le plus représentatif", id: artist.essential_works_ids[0]?.id, icon: <Target size={16} />, color: 'bg-accent-secondary/10 text-accent-secondary' },
+                  { label: "La meilleure porte", id: artist.summary.starting_point.id, icon: <Headphones size={16} />, color: 'bg-amber-500/10 text-amber-400' }
+                ].map((point, i) => {
+                  const album = mockAlbums.find(a => a.id === point.id) || mockAlbums.find(a => a.id === artist.discography_matrix?.entry_point_id);
+                  return (
+                    <Link key={i} to={`/album/${album?.slug}`} className={`${point.color} p-4 rounded-2xl border border-white/5 hover:border-white/20 transition-all space-y-3 group`}>
+                      <div className="flex items-center gap-2">
+                        {point.icon}
+                        <span className="text-[9px] font-black uppercase tracking-widest">{point.label}</span>
+                      </div>
+                      <div className="font-bold text-sm leading-tight line-clamp-1 group-hover:underline">{album?.title}</div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Repères Rapides */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="glass-card p-8 border-l-4 border-accent-secondary relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><PlayCircle size={100} /></div>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-4">Le morceau le plus accessible</h3>
+                {artist.essential_works_ids.filter(w => w.type === 'track').slice(0, 1).map(work => {
+                  const track = mockTracks.find(t => t.id === work.id);
+                  return (
+                    <div key={work.id} className="space-y-4">
+                      <div className="text-2xl font-black text-white">{track?.title || work.label}</div>
+                      <p className="text-xs text-text-muted leading-relaxed line-clamp-2">{work.label}</p>
+                      {track && <Link to={`/morceau/${track.slug}`} className="inline-flex items-center gap-2 text-accent-secondary text-[10px] font-black uppercase tracking-widest border-b border-accent-secondary/30 pb-1">Analyser le morceau</Link>}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="glass-card p-8 border-l-4 border-accent-primary relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Award size={100} /></div>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-4">L'album le plus acclamé</h3>
+                {artist.essential_works_ids.filter(w => w.type === 'album').slice(0, 1).map(work => {
+                  const album = mockAlbums.find(a => a.id === work.id);
+                  return (
+                    <div key={work.id} className="space-y-4">
+                      <div className="text-2xl font-black text-white">{album?.title || work.label}</div>
+                      <p className="text-xs text-text-muted leading-relaxed line-clamp-2">{work.label}</p>
+                      {album && <Link to={`/album/${album.slug}`} className="inline-flex items-center gap-2 text-accent-primary text-[10px] font-black uppercase tracking-widest border-b border-accent-primary/30 pb-1">Explorer l'album</Link>}
+                    </div>
+                  );
+                })}
+              </div>
             </section>
 
             {/* Pro vs Community Block */}
@@ -1445,6 +1726,16 @@ const ArtistPage = () => {
                 communityConcensus={artist.community_consensus}
                 gap={artist.pro_vs_community_gap}
               />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="glass-card p-6 border-white/5 space-y-3">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-accent-primary">Ce que la presse met en avant</h4>
+                  <p className="text-xs text-text-muted leading-relaxed font-medium line-clamp-3">"{artist.why_it_matters}"</p>
+                </div>
+                <div className="glass-card p-6 border-white/5 space-y-3">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-accent-secondary">Ce que les auditeurs mettent en avant</h4>
+                  <p className="text-xs text-text-muted leading-relaxed font-medium line-clamp-3">"{artist.community_consensus}"</p>
+                </div>
+              </div>
             </section>
 
             {/* Consensus Section */}
@@ -1517,6 +1808,55 @@ const ArtistPage = () => {
               </div>
             </section>
 
+            {/* Artistes Similaires & Œuvres Essentielles */}
+            <section className="space-y-10">
+              <div className="flex items-center gap-3">
+                <Users size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">Si vous aimez {artist.name}</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-text-muted">Artistes Similaires</h3>
+                  <div className="space-y-4">
+                    {artist.similar_artists_ids.map(id => {
+                      const similar = mockArtists.find(a => a.id === id);
+                      if (!similar) return null;
+                      return (
+                        <Link key={id} to={`/artiste/${similar.slug}`} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5">
+                          <SafeImage src={similar.cover_image_url} className="w-16 h-16 rounded-xl object-cover" fallbackType="artist" />
+                          <div className="flex-grow">
+                            <div className="font-black text-white group-hover:text-accent-primary transition-colors">{similar.name}</div>
+                            <div className="text-[10px] text-text-muted uppercase tracking-widest">{similar.primary_genres[0]}</div>
+                          </div>
+                          <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-text-muted">Œuvres Essentielles</h3>
+                  <div className="space-y-4">
+                    {artist.essential_works_ids.slice(1, 4).map((work, idx) => {
+                      const item = work.type === 'album' ? mockAlbums.find(a => a.id === work.id) : mockTracks.find(t => t.id === work.id);
+                      return (
+                        <Link key={idx} to={`/${work.type === 'album' ? 'album' : 'morceau'}/${item?.slug}`} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5">
+                          <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${work.type === 'album' ? 'bg-accent-primary/20' : 'bg-accent-secondary/20'}`}>
+                            {work.type === 'album' ? <Award className="text-accent-primary" /> : <PlayCircle className="text-accent-secondary" />}
+                          </div>
+                          <div className="flex-grow">
+                            <div className="font-black text-white group-hover:text-accent-secondary transition-colors line-clamp-1">{item?.title || work.label}</div>
+                            <div className="text-[10px] text-text-muted uppercase tracking-widest">{work.label}</div>
+                          </div>
+                          <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Community Reviews Section */}
             <section className="space-y-8">
               <div className="flex items-center justify-between">
@@ -1580,47 +1920,51 @@ const ArtistPage = () => {
   );
 };
 
+const TrackItem = ({ track, index }: { track: any, index: number, key?: React.Key }) => (
+  <div className="group flex items-center gap-6 p-4 rounded-2xl hover:bg-white/5 transition-all relative overflow-hidden">
+    <div className="text-xs font-black text-text-muted w-6">{String(index + 1).padStart(2, '0')}</div>
+    <div className="flex-grow min-w-0">
+      <div className="flex items-center gap-3">
+        <Link to={`/morceau/${track.slug || track.id}`} className="font-bold text-white truncate hover:text-accent-primary transition-colors">{track.title}</Link>
+        {track.is_entry_track && <Badge variant="premium">Fondamental</Badge>}
+        {track.is_community_favorite && <Badge variant="success">Plébiscité</Badge>}
+      </div>
+      <div className="text-[10px] text-text-muted uppercase font-black mt-1 flex items-center gap-2">
+        <span>{track.duration}</span>
+        <span className="opacity-20">•</span>
+        <span className="text-accent-primary">{track.sentiment || 'Neutre'}</span>
+      </div>
+    </div>
+    <div className="flex items-center gap-4">
+      <div className="text-[9px] font-black text-white/40 uppercase hidden sm:block">Parfait pour : {track.sentiment === 'Énergique' ? 'S\'ambiancer' : track.sentiment === 'Mélancolique' ? 'Le soir' : 'Découvrir'}</div>
+      <ChevronRight size={14} className="text-text-muted group-hover:translate-x-1 transition-transform" />
+    </div>
+  </div>
+);
+
 const AlbumFlowAnalysis = ({ tracks, coherence }: { tracks: any[], coherence: number }) => {
   return (
     <div className="glass-card p-10 border-t-4 border-accent-secondary">
-      <div className="flex justify-between items-center mb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div className="space-y-1">
-          <h3 className="text-xl font-black uppercase tracking-widest text-white">Flux d'Écoute</h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Analyse de la cohérence narrative</p>
+          <h3 className="text-xl font-black uppercase tracking-widest text-white">Analyse du Projet</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Cohérence narrative et morceaux clés</p>
         </div>
-        <div className="text-right">
-          <div className="text-4xl font-black text-accent-secondary">{coherence}%</div>
-          <div className="text-[9px] font-black uppercase tracking-widest text-text-muted">Indice de Cohérence</div>
+        <div className="flex gap-10">
+           <div className="text-right">
+            <div className="text-3xl font-black text-white">{tracks.length}</div>
+            <div className="text-[9px] font-black uppercase tracking-widest text-text-muted">Pistes</div>
+          </div>
+          <div className="text-right">
+            <div className="text-3xl font-black text-accent-secondary">{coherence}%</div>
+            <div className="text-[9px] font-black uppercase tracking-widest text-text-muted">Impact Global</div>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {tracks.map((track, i) => (
-          <div key={track.id || i} className="group flex items-center gap-6 p-4 rounded-2xl hover:bg-white/5 transition-all relative overflow-hidden">
-             <div className="text-xs font-black text-text-muted w-6">{String(i + 1).padStart(2, '0')}</div>
-             <div className="flex-grow min-w-0">
-               <div className="flex items-center gap-3">
-                 <Link to={`/morceau/${track.id}`} className="font-bold text-white truncate hover:text-accent-primary transition-colors">{track.title}</Link>
-                 {track.is_entry_track && <Badge variant="premium">Fondamental</Badge>}
-                 {track.is_community_favorite && <Badge variant="success">Plébiscité</Badge>}
-               </div>
-               <div className="text-[10px] text-text-muted uppercase font-black mt-1 flex items-center gap-2">
-                 <span>{track.duration}</span>
-                 <span className="opacity-20">•</span>
-                 <span className="text-accent-primary">{track.sentiment || 'Neutre'}</span>
-               </div>
-             </div>
-             <div className="flex items-center gap-4">
-                <div className="h-1 w-24 bg-white/5 rounded-full overflow-hidden hidden md:block">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${60 + (i % 5) * 10}%` }}
-                    className="h-full bg-accent-secondary/40"
-                  />
-                </div>
-                <ChevronRight size={14} className="text-text-muted group-hover:translate-x-1 transition-transform" />
-             </div>
-          </div>
+          <TrackItem key={track.id || i} track={track} index={i} />
         ))}
       </div>
     </div>
@@ -1669,6 +2013,25 @@ const AlbumPage = () => {
             </div>
 
             <SummaryBriefBlock summary={album.summary} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="glass-card p-8 border-l-4 border-accent-primary space-y-4">
+                 <div className="flex items-center gap-3 text-accent-primary">
+                    <Check size={18} /> <h4 className="text-xs font-black uppercase tracking-widest">Le Consensus</h4>
+                 </div>
+                 <p className="text-sm text-text-main leading-relaxed font-medium italic">"{album.consensus_data.consensus_summary}"</p>
+              </div>
+              <div className="glass-card p-8 border-l-4 border-warning space-y-4">
+                 <div className="flex items-center gap-3 text-warning">
+                    <Zap size={18} /> <h4 className="text-xs font-black uppercase tracking-widest">Ce qui divise</h4>
+                 </div>
+                 <div className="flex flex-wrap gap-2">
+                    {album.consensus_data.dividing_points.map((p, i) => (
+                      <span key={i} className="text-[10px] font-black px-2 py-1 bg-warning/10 text-warning rounded-lg uppercase">{p}</span>
+                    ))}
+                 </div>
+              </div>
+            </div>
 
             <section className="space-y-8">
               <div className="flex items-center gap-3">
@@ -1734,35 +2097,67 @@ const TrackPage = () => {
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:rotate-12 transition-transform duration-700">
              <PlayCircle size={200} />
           </div>
-          <div className="w-32 h-32 md:w-48 md:h-48 rounded-[2.5rem] premium-gradient flex items-center justify-center shadow-2xl flex-shrink-0 group-hover:scale-105 transition-transform duration-700">
-            <PlayCircle size={64} className="text-white" />
+          <div className="w-48 h-48 md:w-64 md:h-64 rounded-[3rem] overflow-hidden shadow-2xl flex-shrink-0 group-hover:scale-105 transition-transform duration-700 relative bg-bg-surface-light border border-white/10">
+            <SafeImage 
+              src={mockAlbums.find(a => a.id === track.album_id)?.cover_url} 
+              alt={track.title}
+              className="w-full h-full object-cover" 
+              fallbackType="album" 
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <PlayCircle size={64} className="text-white" />
+            </div>
           </div>
-          <div className="flex-grow text-center md:text-left space-y-6">
+          <div className="flex-grow text-center md:text-left space-y-6 relative z-10">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
               <Badge variant="default">Morceau</Badge>
-              <AccessLevelBadge level={track.access_level} />
+              <AccessLevelBadge level={track.access_level || 'Accessible'} />
               {track.is_best_entry_track && <Badge variant="premium">Point de départ idéal</Badge>}
             </div>
             <div className="space-y-2">
               <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none text-white">{track.title}</h1>
-              <p className="text-2xl md:text-3xl font-black text-text-muted">
-                <Link to={`/artiste/${track.artist_slug}`} className="text-accent-secondary hover:underline">{track.artist_name}</Link>
-                <span className="mx-3 opacity-30">—</span>
-                <Link to={`/album/${track.album_slug}`} className="hover:text-white transition-colors">{track.album_title}</Link>
-              </p>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2">
+                <Link to={`/artiste/${track.artist_slug}`} className="text-2xl md:text-3xl font-black text-accent-secondary hover:underline">{track.artist_name}</Link>
+                <span className="text-text-muted opacity-30 text-2xl">/</span>
+                <Link to={`/album/${track.album_slug}`} className="text-xl md:text-2xl font-black text-text-muted hover:text-white transition-colors">{track.album_title}</Link>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              {track.community_keywords?.map(k => (
+                <span key={k} className="px-3 py-1 bg-white/5 rounded-lg text-[10px] font-black text-text-muted uppercase tracking-widest border border-white/5">#{k}</span>
+              ))}
             </div>
           </div>
           <div className="flex flex-col items-center gap-4 px-12 border-l border-white/5 h-full justify-center">
             <div className="text-center">
               <div className="text-6xl font-black text-accent-secondary">{track.quick_consensus_score}%</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mt-2">Consensus ÉCHO</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mt-2">Echo Pulse</div>
             </div>
           </div>
         </header>
 
         <div className="mt-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-8 space-y-16">
-            <SummaryBriefBlock summary={track.summary!} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <SummaryBriefBlock summary={track.summary!} />
+               <div className="glass-card p-10 border-accent-secondary/20 flex flex-col justify-center space-y-8 bg-black/10">
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Feeling Dominant</h4>
+                    <div className="flex items-center gap-4">
+                       <Activity className="text-accent-secondary" />
+                       <div className="text-4xl font-black text-white uppercase italic">{track.dominant_feeling}</div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Niveau d'Accessibilité</h4>
+                    <div className="flex items-center gap-4">
+                       <Target className="text-accent-primary" />
+                       <div className="text-2xl font-black text-white">{track.access_level}</div>
+                    </div>
+                    <p className="text-xs text-text-muted leading-relaxed font-medium">"{track.coherence_context}"</p>
+                  </div>
+               </div>
+            </div>
             
             <section className="space-y-8">
               <div className="flex items-center gap-3">
@@ -2123,28 +2518,68 @@ const ListsPage = () => {
       </section>
 
       {/* Categories */}
-      <div className="flex flex-wrap gap-4 border-b border-white/5 pb-8">
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setActiveCategory(cat.id)}
-            className={`px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all border ${
-              activeCategory === cat.id 
-                ? 'bg-accent-secondary border-accent-secondary/50 text-white shadow-xl shadow-accent-secondary/20 scale-105' 
-                : 'bg-white/5 border-white/5 text-text-muted hover:bg-white/10'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
+      <div className="space-y-6">
+        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-text-muted border-b border-white/5 pb-4">Filtrer par approche</h3>
+        <div className="flex flex-wrap gap-3">
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`px-8 py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all border ${
+                activeCategory === cat.id 
+                  ? 'bg-white text-bg-main border-white shadow-2xl shadow-white/10 scale-105' 
+                  : 'bg-white/5 border-white/10 text-text-muted hover:border-white/30'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Featured Section */}
       {activeCategory === 'all' && (
-        <section className="space-y-10">
-          <SectionTitle subtitle="Les sélections les plus instructives du moment">Parcours Certifiés ÉCHO</SectionTitle>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {featuredLists.map(list => <ListCard key={list.id} list={list} featured />)}
+        <section className="space-y-12">
+          <div className="flex items-end justify-between gap-6">
+            <SectionTitle subtitle="L'excellence éditoriale sélectionnée par nos équipes">Parcours Certifiés ÉCHO</SectionTitle>
+            <div className="hidden md:flex items-center gap-2 text-accent-secondary font-black text-[10px] uppercase tracking-widest bg-accent-secondary/5 px-4 py-2 rounded-full border border-accent-secondary/20">
+               <Award size={14} /> Recommandés
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {featuredLists.map((list, idx) => (
+               <div key={list.id} className={idx === 0 ? 'lg:col-span-2' : ''}>
+                  <ListCard list={list} featured={idx === 0} />
+               </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Trending / Popular Horizontal - Simplified */}
+      {activeCategory === 'all' && (
+        <section className="py-20 -mx-6 md:-mx-10 px-6 md:px-10 bg-white/5 border-y border-white/5">
+          <div className="max-w-7xl mx-auto space-y-10">
+            <div className="flex items-center gap-4">
+              <TrendingUp className="text-accent-primary" />
+              <h3 className="text-2xl font-black uppercase tracking-tighter">Les plus suivis</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {popularLists.map(list => (
+                <Link key={list.id} to={`/liste/${list.slug}`} className="group space-y-4">
+                  <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 relative">
+                    <SafeImage src={list.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500" fallbackType="album" />
+                    <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-[9px] font-black text-white border border-white/10">
+                      {list.like_count} <Heart size={8} className="inline ml-1 text-accent-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-black text-sm text-white group-hover:text-accent-primary transition-colors line-clamp-1">{list.title}</h4>
+                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{list.category} • {list.items.length} Étapes</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -2181,19 +2616,32 @@ const ListCard = ({ list, featured = false, compact = false }: { list: SharedLis
     whileHover={{ y: -8 }} 
     className={`glass-card overflow-hidden group cursor-pointer flex flex-col h-full border-white/5 hover:border-accent-secondary/30 transition-all ${featured ? 'md:flex-row' : ''}`}
   >
-    <Link to={`/liste/${list.slug}`} className={`flex flex-col h-full ${featured ? 'md:flex-row' : ''}`}>
+    <Link to={`/liste/${list.slug}`} className={`flex flex-col h-full w-full ${featured ? 'md:flex-row' : ''}`}>
       <div className={`relative overflow-hidden ${featured ? 'md:w-1/2 aspect-video md:aspect-auto' : 'aspect-video'}`}>
         <SafeImage 
           src={list.image_url} 
           alt={list.title} 
-          fallbackType="album"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+          fallbackType="list"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" 
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-main/90 via-bg-main/20 to-transparent" />
+        
         <div className="absolute top-4 left-4 flex flex-wrap gap-2">
           <Badge variant="premium">{list.category}</Badge>
-          <Badge variant="default">{list.selection_type}</Badge>
+          {list.is_premium_exclusive && (
+            <div className="bg-warning/20 text-warning px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border border-warning/30 flex items-center gap-1.5 backdrop-blur-md">
+              <Lock size={10} /> Premium
+            </div>
+          )}
         </div>
+
+        <div className="absolute bottom-4 left-4 flex items-center gap-3">
+           <div className="bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${list.entry_level === 'Immédiat' ? 'bg-success' : list.entry_level === 'Exigeant' ? 'bg-error' : 'bg-warning'}`} />
+              <span className="text-[9px] font-black text-white uppercase tracking-widest">{list.entry_level || 'Niveau non défini'}</span>
+           </div>
+        </div>
+
         <div className="absolute bottom-4 right-4 bg-bg-main/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2 text-[10px] font-black">
           <ThumbsUp size={12} className="text-accent-secondary" /> {list.like_count}
         </div>
@@ -2201,32 +2649,49 @@ const ListCard = ({ list, featured = false, compact = false }: { list: SharedLis
       
       <div className={`p-8 flex flex-col flex-grow ${featured ? 'md:w-1/2' : ''}`}>
         <div className="space-y-4 flex-grow">
-          <div className="flex items-center gap-2 text-[10px] font-black text-accent-secondary uppercase tracking-widest">
-            <ListMusic size={14} /> {list.items.length} Éléments
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[10px] font-black text-accent-secondary uppercase tracking-widest">
+              <ListMusic size={14} /> {list.items.length} Insights
+            </div>
+            {list.tone_mood && (
+              <span className="text-[9px] font-black text-text-muted uppercase tracking-widest opacity-60">
+                {list.tone_mood}
+              </span>
+            )}
           </div>
+
           <h3 className={`font-black tracking-tight group-hover:text-accent-secondary transition-colors leading-tight ${featured ? 'text-3xl' : 'text-xl'}`}>
             {list.title}
           </h3>
+
           {!compact && (
             <p className="text-text-muted text-sm font-medium leading-relaxed line-clamp-3">
               {list.description}
             </p>
           )}
-          {featured && (
-            <div className="bg-accent-secondary/5 border border-accent-secondary/20 p-4 rounded-2xl mt-4">
-              <p className="text-xs font-bold italic text-accent-secondary">
-                "{list.discovery_promise}"
-              </p>
+
+          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl mt-4 relative overflow-hidden group/promise">
+            <div className="absolute top-0 right-0 p-2 opacity-5">
+              <Zap size={32} />
             </div>
-          )}
+            <p className="text-[10px] font-black text-accent-primary uppercase tracking-[0.2em] mb-2">Promesse de découverte</p>
+            <p className="text-xs font-bold text-white leading-relaxed italic">
+              "{list.discovery_promise}"
+            </p>
+          </div>
         </div>
         
         <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <SafeImage src={list.user_avatar} className="w-8 h-8 rounded-full border border-white/10" fallbackType="user" />
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Par {list.user_display_name}</span>
+            <SafeImage src={list.user_avatar} className="w-10 h-10 rounded-full border border-white/10 shadow-lg" fallbackType="user" />
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">{list.user_display_name}</span>
+              <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest leading-none">Curateur Certifié</span>
+            </div>
           </div>
-          <ArrowRight size={20} className="text-accent-secondary group-hover:translate-x-2 transition-transform" />
+          <div className="flex items-center gap-2 text-accent-secondary text-[10px] font-black uppercase tracking-[0.2em] group-hover:gap-4 transition-all">
+            VOIR LE PARCOURS <ArrowRight size={18} />
+          </div>
         </div>
       </div>
     </Link>
@@ -2236,278 +2701,534 @@ const ListCard = ({ list, featured = false, compact = false }: { list: SharedLis
 const ListPage = () => {
   const { slug } = useParams();
   const list = mockLists.find(l => l.slug === slug);
-  if (!list) return <div className="text-center py-20">Liste non trouvée.</div>;
+  
+  if (!list) return (
+    <div className="flex flex-col items-center justify-center py-32 space-y-6">
+      <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-text-muted">
+        <AlertCircle size={40} />
+      </div>
+      <h2 className="text-2xl font-black uppercase tracking-tight">Parcours Introuvable</h2>
+      <p className="text-text-muted">Ce guide a peut-être été déplacé ou supprimé.</p>
+      <Link to="/listes" className="bg-accent-primary px-8 py-4 rounded-2xl font-bold text-sm">Retourner aux explorations</Link>
+    </div>
+  );
+
   return (
-    <div className="space-y-12">
-      <header className="space-y-6">
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="premium">{list.category}</Badge>
-          <Badge variant="default">{list.selection_type}</Badge>
+    <div className="space-y-24 pb-32">
+      {/* Editorial Header */}
+      <header className="relative pt-10 min-h-[500px] flex items-center overflow-hidden rounded-[4rem] border border-white/5">
+        <div className="absolute inset-0 z-0">
+          <SafeImage src={list.image_url} className="w-full h-full object-cover opacity-30" fallbackType="list" />
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-main via-bg-main/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-main to-transparent" />
         </div>
-        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">{list.title}</h1>
-        <p className="text-text-muted text-xl max-w-3xl font-medium leading-relaxed">{list.description}</p>
-        <div className="flex items-center gap-4 pt-4">
-          <SafeImage src={list.user_avatar} className="w-10 h-10 rounded-full border-2 border-accent-secondary/20" fallbackType="user" />
-          <div>
-            <div className="text-xs font-black uppercase tracking-widest text-text-muted">Créée par</div>
-            <div className="font-black text-accent-secondary">{list.user_display_name}</div>
-          </div>
-          <div className="ml-auto flex items-center gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-black text-white">{list.items.length}</div>
-              <div className="text-[10px] font-black text-text-muted uppercase">Éléments</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-black text-accent-primary">{list.like_count}</div>
-              <div className="text-[10px] font-black text-text-muted uppercase">Likes</div>
+        
+        <div className="relative z-10 p-12 md:p-20 space-y-12 max-w-7xl mx-auto w-full">
+          <div className="flex flex-col lg:flex-row gap-16 items-start">
+            <div className="flex-grow space-y-8">
+              <div className="flex flex-wrap gap-3">
+                <Badge variant="premium" className="px-5 py-2">{list.category}</Badge>
+                <div className="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-text-muted">
+                  {list.selection_type}
+                </div>
+                {list.is_premium_exclusive && (
+                  <div className="bg-warning/10 text-warning px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-warning/20 shadow-lg shadow-warning/5 flex items-center gap-2">
+                    <Lock size={12} /> Accès Premium
+                  </div>
+                )}
+              </div>
+
+              <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase text-white drop-shadow-2xl">
+                {list.title.split(' ').map((word, i) => (
+                  <span key={i} className={i % 3 === 2 ? 'text-accent-secondary italic' : ''}>{word} </span>
+                ))}
+              </h1>
+
+              <p className="text-text-muted text-xl md:text-3xl font-medium leading-relaxed max-w-4xl border-l-4 border-accent-secondary/30 pl-8 drop-shadow-lg">
+                {list.description}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-10 pt-4">
+                <Link to={`/profil/${list.user_id}`} className="flex items-center gap-4 group">
+                  <SafeImage src={list.user_avatar} className="w-16 h-16 rounded-2xl border-2 border-white/10 group-hover:border-accent-secondary transition-all shadow-xl" fallbackType="user" />
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-1">Curateur Certifié</div>
+                    <div className="font-black text-white text-xl group-hover:text-accent-secondary transition-colors underline decoration-accent-secondary/30 underline-offset-4">{list.user_display_name}</div>
+                  </div>
+                </Link>
+                
+                <div className="h-10 w-px bg-white/10" />
+
+                <div className="flex items-center gap-8">
+                  <div className="text-center">
+                    <div className="text-4xl font-black text-white">{list.items.length}</div>
+                    <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Insights</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-black text-accent-secondary">{list.like_count}</div>
+                    <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">Explorateurs</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </header>
-      <div className="space-y-6">
-        {list.items.map((item, i) => (
-          <div key={i} className="glass-card p-8 flex flex-col md:flex-row gap-8 items-center">
-            <div className="text-4xl font-black text-accent-primary opacity-50">#{i + 1}</div>
-            <div className="flex-grow space-y-2">
-              <h3 className="text-2xl font-black">{item.title}</h3>
-              <p className="text-text-muted italic">"{item.why}"</p>
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10 -mt-20">
+        <div className="flex flex-col lg:flex-row gap-16 items-start">
+          <div className="flex-grow space-y-24">
+            {/* Note Éditoriale */}
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-accent-secondary/10 rounded-2xl flex items-center justify-center text-accent-secondary border border-accent-secondary/20 shadow-lg">
+                  <Info size={28} />
+                </div>
+                <h2 className="text-4xl font-black tracking-tighter text-white uppercase italic">Analyse du Curateur</h2>
+              </div>
+              <div className="bg-bg-surface-light p-12 rounded-[3rem] border border-white/5 space-y-8 relative overflow-hidden group hover:border-accent-secondary/20 transition-all duration-500">
+                <div className="absolute top-10 right-12 text-9xl font-serif text-white/5 pointer-events-none select-none group-hover:text-accent-secondary/5 transition-colors">“</div>
+                <p className="text-2xl text-text-main font-medium leading-relaxed italic opacity-90 first-letter:text-6xl first-letter:font-black first-letter:text-accent-secondary first-letter:float-left first-letter:mr-4 first-letter:mt-2 relative z-10">
+                  {list.editorial_intro}
+                </p>
+                <div className="pt-10 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
+                   <div className="space-y-3">
+                      <h4 className="text-[10px] font-black text-accent-secondary uppercase tracking-[0.3em]">Genèse du projet</h4>
+                      <p className="text-sm text-text-muted leading-relaxed font-medium">{list.why_exists}</p>
+                   </div>
+                   <div className="space-y-3">
+                      <h4 className="text-[10px] font-black text-accent-secondary uppercase tracking-[0.3em]">Logique de découverte</h4>
+                      <p className="text-sm text-text-muted leading-relaxed font-medium">{list.journey_logic}</p>
+                   </div>
+                </div>
+              </div>
+            </section>
+
+          {/* List Items - Detailed View */}
+          <section className="space-y-12">
+            <div className="flex items-center justify-between">
+               <h2 className="text-3xl font-black tracking-tight text-white uppercase">Les Étapes du Parcours</h2>
+               <div className="text-xs font-black text-text-muted uppercase tracking-widest">{list.items.length} SÉLECTIONS</div>
             </div>
-            <Link to={`/${item.type}/${item.slug}`} className="bg-bg-surface-light px-6 py-3 rounded-xl font-bold text-sm hover:bg-white/5 transition-colors">Voir la fiche</Link>
-          </div>
-        ))}
+            
+            <div className="space-y-8">
+              {list.items.map((item, i) => (
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  key={i} 
+                  className="group relative"
+                >
+                  <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-px bg-accent-primary/30 group-hover:w-12 transition-all hidden md:block" />
+                  <div className="glass-card p-10 flex flex-col md:flex-row gap-10 items-start border-white/5 hover:border-accent-primary/30 transition-all bg-gradient-to-br from-white/5 to-transparent shadow-2xl">
+                    <div className="flex-shrink-0 flex flex-col items-center gap-4">
+                       <div className="w-16 h-16 rounded-3xl bg-bg-main flex items-center justify-center text-2xl font-black text-white group-hover:text-accent-primary transition-colors border border-white/10 shadow-inner">
+                         {i + 1}
+                       </div>
+                       <div className="h-full w-px bg-gradient-to-b from-white/10 to-transparent flex-grow" />
+                    </div>
+
+                    <div className="flex-grow space-y-6">
+                      <div className="flex flex-wrap items-center gap-3">
+                         <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/10 bg-white/5 text-text-muted`}>
+                           {item.type === 'artist' ? 'Artiste Focus' : item.type === 'album' ? 'Album Essentiel' : 'Morceau Clé'}
+                         </div>
+                         {item.access_level === 'Premium' && (
+                           <div className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-warning/20 text-warning border border-warning/30">
+                             Premium
+                           </div>
+                         )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <h3 className="text-4xl font-black text-white tracking-tight group-hover:translate-x-1 transition-transform">{item.title}</h3>
+                        {item.artist_name && (
+                           <div className="text-accent-primary font-black uppercase tracking-[0.2em] text-xs pb-2 border-b border-white/5 inline-block">
+                              EXPLORATION : {item.artist_name}
+                           </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-4 p-5 bg-white/5 rounded-2xl border border-white/5 italic text-text-main leading-relaxed">
+                           <div className="text-accent-secondary mt-1"><Info size={16} /></div>
+                           <p>"{item.why}"</p>
+                        </div>
+                        {item.promise && (
+                           <div className="flex items-center gap-3 text-xs font-bold text-accent-secondary bg-accent-secondary/5 px-4 py-2 rounded-xl inline-flex w-full md:w-auto">
+                              <Zap size={14} /> {item.promise}
+                           </div>
+                        )}
+                      </div>
+
+                      <div className="pt-6 flex flex-wrap gap-4">
+                         <Link 
+                           to={`/${item.type}/${item.slug}`} 
+                           className="bg-accent-primary px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:scale-[1.05] shadow-xl shadow-accent-primary/20 transition-all flex items-center gap-3"
+                         >
+                           Analyse Détaillée <ArrowRight size={16} />
+                         </Link>
+                         <button className="bg-white/5 hover:bg-white/10 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all">
+                           Écouter un extrait
+                         </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside className="w-full lg:w-[400px] space-y-12 flex-shrink-0">
+           <section className="space-y-6">
+              <h3 className="text-xl font-black uppercase tracking-tighter text-white px-2 border-l-4 border-accent-secondary">Plus de ce curateur</h3>
+              <div className="space-y-4">
+                 {mockLists.filter(l => l.user_id === list.user_id && l.id !== list.id).slice(0, 3).map(l => (
+                    <Link key={l.id} to={`/liste/${l.slug}`} className="block group">
+                       <div className="glass-card p-5 bg-white/5 hover:bg-white/10 border-white/5 transition-all flex gap-4 items-center">
+                          <SafeImage src={l.image_url} className="w-16 h-16 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" fallbackType="album" />
+                          <div>
+                             <h4 className="text-xs font-black text-white group-hover:text-accent-secondary transition-colors line-clamp-1">{l.title}</h4>
+                             <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest">{l.category} • {l.items.length} Étapes</span>
+                          </div>
+                       </div>
+                    </Link>
+                 ))}
+                 {mockLists.filter(l => l.user_id === list.user_id && l.id !== list.id).length === 0 && (
+                    <p className="text-xs text-text-muted italic px-2">C'est le seul guide de ce curateur pour l'instant.</p>
+                 )}
+              </div>
+           </section>
+
+           <section className="bg-accent-primary/10 rounded-3xl p-8 border border-accent-primary/20 space-y-6">
+              <div className="flex items-center gap-3 text-accent-primary">
+                 <Search size={20} />
+                 <h3 className="text-lg font-black uppercase tracking-tight">Curation Continue</h3>
+              </div>
+              <p className="text-xs text-text-muted leading-relaxed font-medium"> Les parcours d'ÉCHO sont vivants. Nos experts mettent à jour leurs listes au gré des sorties et de l'évolution du consensus pro/commu.</p>
+              <button className="w-full bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
+                 Abonnez-vous aux mises à jour
+              </button>
+           </section>
+        </aside>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 const CommunityPage = () => {
-  const mostHelpful = [...mockUsers].sort((a, b) => b.stats.helpful_votes - a.stats.helpful_votes).slice(0, 3);
-  const toFollow = [mockUsers[0], mockUsers[3], mockUsers[5]];
+  const mostHelpful = [...mockUsers].sort((a, b) => b.stats.helpful_votes - a.stats.helpful_votes).slice(0, 4);
   const experts = mockUsers.filter(u => u.credibility_level === 'qualifie');
-  const newProfiles = mockUsers.slice(-3);
+  const risingStars = [mockUsers[1], mockUsers[4], mockUsers[6]];
+  const newArrivals = mockUsers.slice(-3).reverse();
 
   return (
-    <div className="space-y-24 pb-20">
-      <header className="space-y-6 pt-10">
-        <Badge variant="premium">L'Intelligence Collective</Badge>
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase">
-          LA COMMUNAUTÉ <br />
-          <span className="text-accent-primary">ÉCHO.</span>
+    <div className="space-y-32 pb-32 pt-10">
+      <header className="space-y-8 max-w-4xl">
+        <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent-primary/10 border border-accent-primary/20 rounded-full text-accent-primary text-[10px] font-black uppercase tracking-widest">
+          <Users size={14} /> Intelligence Collective
+        </div>
+        <h1 className="text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
+          L'ÉLITE <br />
+          <span className="text-accent-primary">CRITIQUE.</span>
         </h1>
-        <p className="text-text-muted text-xl md:text-2xl max-w-2xl font-medium leading-relaxed">
-          Découvrez les oreilles les plus affûtées de la plateforme. Suivez des experts qui partagent vos goûts ou explorez de nouveaux horizons.
+        <p className="text-text-muted text-xl md:text-2xl font-medium leading-relaxed max-w-2xl">
+          ÉCHO est porté par ses membres. Découvrez des passionnés, des experts techniques et des diggers insatiables qui redéfinissent la découverte musicale.
         </p>
       </header>
 
-      {/* À suivre cette semaine */}
-      <section className="space-y-10">
-        <SectionTitle subtitle="Les profils qui font bouger les lignes en ce moment">À suivre cette semaine</SectionTitle>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {toFollow.map(user => <CommunityUserCard key={user.id} user={user} featured />)}
+      {/* Section 1: Étoiles Montantes - Cartes Premium Larges */}
+      <section className="space-y-12">
+        <SectionTitle subtitle="Analyses de fond et découvertes majeures cette semaine">À suivre absolument</SectionTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {risingStars.map(user => (
+            <CommunityUserCard key={user.id} user={user} variant="featured" />
+          ))}
         </div>
       </section>
 
-      {/* Experts par genre */}
-      <section className="space-y-10">
-        <SectionTitle subtitle="Une expertise pointue sur des styles spécifiques">Experts par genre</SectionTitle>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {experts.map(user => <CommunityUserCard key={user.id} user={user} compact />)}
+      {/* Section 2: Experts par Genre - Design Plus Compact & Technique */}
+      <section className="py-24 bg-gradient-to-r from-bg-surface-light via-transparent to-bg-surface-light border-y border-white/5 -mx-6 md:-mx-10 px-6 md:px-10">
+        <div className="max-w-6xl mx-auto space-y-12">
+           <SectionTitle subtitle="Une maîtrise historique et stylistique absolue">La Garde des Genres</SectionTitle>
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+             {experts.map(user => <CommunityUserCard key={user.id} user={user} variant="expert" />)}
+           </div>
         </div>
       </section>
 
-      {/* Contributeurs les plus utiles */}
-      <section className="space-y-10">
-        <SectionTitle subtitle="Ceux dont les avis sont les plus plébiscités">Contributeurs les plus utiles</SectionTitle>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {mostHelpful.map(user => <CommunityUserCard key={user.id} user={user} />)}
+      {/* Section 3: Contributeurs Utiles - Focus Statistiques */}
+      <section className="space-y-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
+          <SectionTitle subtitle="Ceux dont les oreilles guident la communauté">Piliers de Confiance</SectionTitle>
+          <div className="bg-white/5 px-6 py-3 rounded-2xl border border-white/10 flex items-center gap-4">
+             <div className="w-10 h-10 rounded-full bg-accent-secondary/20 flex items-center justify-center text-accent-secondary shadow-lg">
+                <ThumbsUp size={18} />
+             </div>
+             <div className="text-xs font-bold text-text-muted">Total votes utiles <br/><span className="text-white text-lg font-black">2.4k+</span></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {mostHelpful.map(user => <CommunityUserCard key={user.id} user={user} variant="standard" />)}
         </div>
       </section>
 
-      {/* Nouveaux profils */}
-      <section className="space-y-10">
-        <SectionTitle subtitle="Les nouveaux arrivants à découvrir d'urgence">Nouveaux profils intéressants</SectionTitle>
+      {/* Section 4: Nouveaux Profils - Épuré */}
+      <section className="space-y-12">
+        <SectionTitle subtitle="Le sang neuf de la critique musicale">Nouveaux regards</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {newProfiles.map(user => <CommunityUserCard key={user.id} user={user} />)}
+          {newArrivals.map(user => <CommunityUserCard key={user.id} user={user} variant="minimal" />)}
         </div>
+      </section>
+
+      {/* CTA Final */}
+      <section className="glass-card p-16 text-center space-y-10 relative overflow-hidden bg-gradient-to-br from-accent-primary/20 to-transparent border-accent-primary/30">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none bg-[url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000')] bg-cover mix-blend-overlay" />
+          <div className="relative z-10 space-y-6">
+             <h2 className="text-5xl md:text-6xl font-black tracking-tighter leading-none uppercase">VOUS AUSSI, <br />DEVENEZ UNE <span className="text-accent-primary">RÉFÉRENCE.</span></h2>
+             <p className="text-text-muted text-xl max-w-xl mx-auto font-medium">
+                Partagez votre expertise, peaufinez vos analyses et grimpez dans les rangs de la communauté ÉCHO.
+             </p>
+             <button className="premium-gradient px-10 py-5 rounded-[2rem] font-black text-sm text-white shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase tracking-widest">
+                Compléter mon profil
+             </button>
+          </div>
       </section>
     </div>
   );
 };
 
-const CommunityUserCard = ({ user, featured = false, compact = false }: { user: User, featured?: boolean, compact?: boolean, key?: string | number }) => (
-  <motion.div 
-    whileHover={{ y: -8 }}
-    className={`glass-card overflow-hidden group border-white/5 hover:border-accent-primary/30 transition-all flex flex-col ${featured ? 'bg-gradient-to-br from-accent-primary/5 to-transparent' : ''}`}
-  >
-    <div className="p-8 space-y-6 flex-grow">
-      <div className="flex items-center gap-6">
-        <div className="relative">
-          <SafeImage 
-            src={user.avatar_url} 
-            className={`${compact ? 'w-16 h-16' : 'w-20 h-20'} rounded-2xl border-2 border-white/10 object-cover shadow-xl`} 
-            fallbackType="user"
-          />
-          {user.premium_status && (
-            <div className="absolute -top-2 -right-2 bg-accent-primary text-bg-main p-1 rounded-lg shadow-lg">
-              <Zap size={12} fill="currentColor" />
-            </div>
-          )}
-        </div>
-        <div>
-          <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-black group-hover:text-accent-primary transition-colors`}>{user.display_name}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge variant={user.credibility_level === 'qualifie' ? 'premium' : 'default'}>{user.credibility_level}</Badge>
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">{user.favorite_genre}</span>
-          </div>
-        </div>
-      </div>
+const CommunityUserCard = ({ user, variant = 'standard' }: { user: User, variant?: 'featured' | 'expert' | 'standard' | 'minimal', key?: React.Key }) => {
+  const isFeatured = variant === 'featured';
+  const isExpert = variant === 'expert';
+  const isMinimal = variant === 'minimal';
 
-      {!compact && (
-        <div className="space-y-4">
-          <p className="text-text-muted text-sm font-medium leading-relaxed line-clamp-2 italic">
-            "{user.bio_short}"
-          </p>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-              <div className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-1">Spécialité</div>
-              <div className="text-[10px] font-bold text-white truncate">{user.critical_specialty}</div>
-            </div>
-            <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-              <div className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-1">Découverte</div>
-              <div className="text-[10px] font-bold text-white truncate">{user.discovery_style}</div>
+  return (
+    <motion.div 
+      whileHover={{ y: -10, scale: 1.01 }}
+      className={`glass-card overflow-hidden group border-white/5 hover:border-accent-primary/40 transition-all flex flex-col relative
+        ${isFeatured ? 'bg-gradient-to-br from-white/5 to-transparent shadow-2xl' : ''}
+        ${isExpert ? 'bg-bg-surface-light border-white/10' : ''}
+      `}
+    >
+      <Link to={`/profil/${user.slug || user.id}`} className="flex flex-col h-full">
+        {isFeatured && (
+          <div className="absolute top-4 right-4 z-20">
+            <div className="bg-accent-primary/20 backdrop-blur-md px-3 py-1 rounded-full border border-accent-primary/30 text-[8px] font-black text-accent-primary uppercase tracking-[0.2em]">
+              PROFIL VEDETTE
             </div>
           </div>
+        )}
 
-          {featured && (
-            <div className="bg-accent-primary/10 border border-accent-primary/20 p-4 rounded-2xl">
-              <div className="text-[8px] font-black text-accent-primary uppercase tracking-widest mb-1">Pourquoi le suivre ?</div>
-              <p className="text-xs font-bold text-white leading-relaxed">
-                {user.follow_reason}
+        <div className={`${isMinimal ? 'p-6' : 'p-8'} space-y-6 flex-grow`}>
+          <div className={`flex ${isMinimal ? 'flex-col items-center text-center' : 'items-center'} gap-6`}>
+            <div className="relative">
+              <SafeImage 
+                src={user.avatar_url} 
+                className={`${isMinimal ? 'w-24 h-24' : isExpert ? 'w-16 h-16' : 'w-20 h-20'} 
+                  rounded-3xl border-2 border-white/10 object-cover shadow-2xl group-hover:border-accent-primary/50 transition-all`} 
+                fallbackType="user"
+              />
+              {user.premium_status && (
+                <div className="absolute -top-2 -right-2 bg-accent-primary text-bg-main p-1.5 rounded-xl shadow-xl border-2 border-bg-main">
+                  <Zap size={14} fill="currentColor" />
+                </div>
+              )}
+            </div>
+            <div className="flex-grow">
+              <h3 className={`${isExpert ? 'text-lg' : 'text-xl'} font-black text-white group-hover:text-accent-primary transition-colors leading-tight`}>{user.display_name}</h3>
+              <div className={`flex items-center gap-2 mt-1 ${isMinimal ? 'justify-center' : 'justify-start'}`}>
+                <Badge variant={user.credibility_level === 'qualifie' ? 'premium' : 'default'}>
+                  {user.credibility_level === 'qualifie' ? 'Expert' : user.credibility_level === 'confirme' ? 'Actif' : 'Explo'}
+                </Badge>
+                <span className="text-[9px] font-black text-accent-secondary uppercase tracking-widest">{user.favorite_genre}</span>
+              </div>
+            </div>
+          </div>
+
+          {!isMinimal && (
+            <div className="space-y-6">
+              <p className="text-text-muted text-sm font-medium leading-relaxed line-clamp-2 italic border-l-2 border-accent-primary/20 pl-4 py-1">
+                &ldquo;{user.bio_short}&rdquo;
               </p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/5 group-hover:bg-accent-primary/5 transition-colors">
+                  <div className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-1.5">Focus Principal</div>
+                  <div className="text-[10px] font-bold text-white truncate">{user.critical_specialty}</div>
+                </div>
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/5 group-hover:bg-accent-secondary/5 transition-colors">
+                  <div className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-1.5">Discovery Style</div>
+                  <div className="text-[10px] font-bold text-white truncate">{user.discovery_style}</div>
+                </div>
+              </div>
+
+              {isFeatured && (
+                <div className="bg-accent-primary/10 border border-accent-primary/20 p-5 rounded-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10"><Award size={48} /></div>
+                  <div className="text-[9px] font-black text-accent-primary uppercase tracking-widest mb-2 font-black italic">Le mot pour l'équipe</div>
+                  <p className="text-xs font-bold text-white leading-relaxed relative z-10 italic">
+                    &ldquo;{user.follow_reason}&rdquo;
+                  </p>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
 
-      <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/5">
-        <div className="text-center">
-          <div className="font-black text-sm text-white">{user.stats.reviews_count}</div>
-          <div className="text-[8px] font-bold text-text-muted uppercase">Avis</div>
+          {isMinimal && (
+            <div className="pt-4 text-center">
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Dernière analyse</div>
+              <div className="text-xs font-bold text-accent-secondary line-clamp-1 italic">
+                {user.favorite_artists_ids && user.favorite_artists_ids.length > 0 ? (
+                  mockArtists.find(a => a.id === user.favorite_artists_ids![0])?.name
+                ) : 'Selection en cours...'}
+              </div>
+            </div>
+          )}
+
+          <div className={`grid grid-cols-3 gap-4 ${isMinimal ? 'pt-4' : 'pt-6'} border-t border-white/5`}>
+            <div className="text-center group/stat">
+              <div className="font-black text-lg text-white group-hover/stat:text-accent-primary transition-colors leading-tight">{user.stats.reviews_count}</div>
+              <div className="text-[8px] font-black text-text-muted uppercase tracking-widest">Avis</div>
+            </div>
+            <div className="text-center group/stat">
+              <div className="font-black text-lg text-white group-hover/stat:text-accent-secondary transition-colors leading-tight">{user.stats.followers_count}</div>
+              <div className="text-[8px] font-black text-text-muted uppercase tracking-widest">Fans</div>
+            </div>
+            <div className="text-center group/stat">
+              <div className="font-black text-lg text-accent-primary leading-none group-hover/stat:scale-110 transition-transform">{user.stats.helpful_votes}</div>
+              <div className="text-[8px] font-black text-text-muted uppercase tracking-widest mt-1">Utiles</div>
+            </div>
+          </div>
         </div>
-        <div className="text-center">
-          <div className="font-black text-sm text-white">{user.stats.followers_count}</div>
-          <div className="text-[8px] font-bold text-text-muted uppercase">Abonnés</div>
+        
+        <div 
+          className="w-full py-5 bg-white/5 group-hover:bg-accent-primary group-hover:text-bg-main font-black text-[10px] uppercase tracking-[0.3em] transition-all text-center border-t border-white/5 flex items-center justify-center gap-3"
+        >
+          VOIR LE PROFIL <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
         </div>
-        <div className="text-center">
-          <div className="font-black text-sm text-accent-primary">{user.stats.helpful_votes}</div>
-          <div className="text-[8px] font-bold text-text-muted uppercase">Utiles</div>
-        </div>
-      </div>
-    </div>
-    
-    <button className="w-full py-4 bg-white/5 hover:bg-accent-primary hover:text-bg-main font-black text-[10px] uppercase tracking-[0.2em] transition-all">
-      VOIR LE PROFIL
-    </button>
-  </motion.div>
-);
+      </Link>
+    </motion.div>
+  );
+};
 
 const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPremium: (v: boolean) => void }) => {
-  const user = mockUsers[0];
+  const { slug } = useParams();
+  // If slug is present, find user by slug, else default to mockUsers[0] (current user)
+  const user = slug ? mockUsers.find(u => u.slug === slug) || mockUsers[0] : mockUsers[0];
+  
   const userLists = mockLists.filter(l => l.user_id === user.id);
   const favoriteArtists = mockArtists.filter(a => user.favorite_artists_ids?.includes(a.id));
   const followedArtists = mockArtists.filter(a => user.followed_artists_ids?.includes(a.id));
   const similarProfiles = mockUsers.filter(u => user.similar_profiles_ids?.includes(u.id));
+  const userReviews = mockReviews.filter(r => r.user_id === user.id);
 
   return (
     <div className="space-y-20 pb-20">
       {/* Header Profil */}
-      <header className="glass-card p-12 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden border-white/5">
-        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><UserIcon size={240} /></div>
-        <div className="relative z-10">
-          <SafeImage 
-            src={user.avatar_url} 
-            className="w-48 h-48 rounded-[3rem] border-4 border-accent-primary/30 shadow-2xl object-cover" 
-            fallbackType="user"
-          />
-          {user.premium_status && (
-            <div className="absolute -bottom-2 -right-2 bg-accent-primary text-bg-main p-3 rounded-2xl shadow-xl">
-              <Zap size={20} fill="currentColor" />
-            </div>
-          )}
+      <header className="glass-card p-12 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden border-white/5 bg-gradient-to-br from-bg-surface to-bg-main">
+        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+          <UserIcon size={320} className="text-accent-primary" />
         </div>
         
-        <div className="space-y-6 z-10 text-center md:text-left flex-grow">
-          <div className="space-y-2">
+        <div className="relative z-10">
+          <div className="relative">
+            <SafeImage 
+              src={user.avatar_url} 
+              className="w-48 h-48 rounded-[3rem] border-4 border-accent-primary/30 shadow-2xl object-cover ring-8 ring-accent-primary/10" 
+              fallbackType="user"
+            />
+            {user.premium_status && (
+              <div className="absolute -bottom-2 -right-2 bg-accent-primary text-bg-main p-3 rounded-2xl shadow-xl border-4 border-bg-main">
+                <Zap size={24} fill="currentColor" />
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="space-y-8 z-10 text-center md:text-left flex-grow">
+          <div className="space-y-4">
             <div className="flex flex-col md:flex-row items-center gap-4">
-              <h1 className="text-5xl md:text-6xl font-black tracking-tighter">{user.display_name}</h1>
-              <Badge variant="premium">{user.credibility_level}</Badge>
+              <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">{user.display_name}</h1>
+              <div className="flex gap-2">
+                <Badge variant={user.credibility_level === 'qualifie' ? 'premium' : 'default'}>
+                  {user.credibility_level === 'qualifie' ? 'Expert Certifié' : user.credibility_level === 'confirme' ? 'Contributeur Actif' : 'Explorateur'}
+                </Badge>
+                {user.premium_status && <Badge variant="success">Premium</Badge>}
+              </div>
             </div>
             {user.signature && (
-              <p className="text-accent-primary font-black text-sm uppercase tracking-[0.2em]">
+              <p className="text-accent-primary font-black text-sm uppercase tracking-[0.3em] inline-block px-4 py-1 bg-accent-primary/10 rounded-full">
                 {user.signature}
               </p>
             )}
           </div>
 
-          <p className="text-text-muted text-xl max-w-2xl italic font-medium leading-relaxed">
+          <p className="text-text-muted text-xl max-w-2xl italic font-medium leading-relaxed bg-white/5 p-6 rounded-3xl border border-white/5 border-l-4 border-accent-secondary">
             "{user.bio_short}"
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-            <div className="bg-white/5 px-5 py-3 rounded-2xl border border-white/10 backdrop-blur-sm">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-1">Genre Favori</span>
-              <span className="text-sm font-bold text-accent-primary">{user.favorite_genre}</span>
+            <div className="bg-bg-surface-light px-5 py-3 rounded-2xl border border-white/10 backdrop-blur-sm shadow-xl">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-1">Genre Prédilection</span>
+              <span className="text-sm font-bold text-accent-secondary">{user.favorite_genre}</span>
             </div>
-            <div className="bg-white/5 px-5 py-3 rounded-2xl border border-white/10 backdrop-blur-sm">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-1">Angle Critique</span>
+            <div className="bg-bg-surface-light px-5 py-3 rounded-2xl border border-white/10 backdrop-blur-sm shadow-xl">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-1">Spécialité</span>
               <span className="text-sm font-bold text-white">{user.critical_specialty}</span>
             </div>
-            <div className="bg-white/5 px-5 py-3 rounded-2xl border border-white/10 backdrop-blur-sm">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-1">Découverte</span>
-              <span className="text-sm font-bold text-white">{user.discovery_style}</span>
-            </div>
-          </div>
-
-          <div className="flex gap-10 justify-center md:justify-start pt-6 border-t border-white/5">
-            <div className="text-center">
-              <div className="text-3xl font-black text-white">{user.stats.reviews_count}</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Avis</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-black text-white">{user.stats.followers_count}</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Abonnés</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-black text-accent-primary">{user.stats.helpful_votes}</div>
-              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">Utiles</div>
+            <div className="bg-bg-surface-light px-5 py-3 rounded-2xl border border-white/10 backdrop-blur-sm shadow-xl">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-1">Méthode</span>
+              <span className="text-sm font-bold text-white uppercase tracking-tighter">{user.discovery_style}</span>
             </div>
           </div>
         </div>
+
+        <div className="flex flex-row md:flex-col gap-8 md:gap-4 justify-center md:justify-center p-8 bg-white/5 rounded-3xl border border-white/5">
+            <div className="text-center md:text-right">
+              <div className="text-4xl font-black text-white leading-none">{user.stats.reviews_count}</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">Avis</div>
+            </div>
+            <div className="text-center md:text-right">
+              <div className="text-4xl font-black text-white leading-none">{user.stats.followers_count}</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">Abonnés</div>
+            </div>
+            <div className="text-center md:text-right">
+              <div className="text-4xl font-black text-accent-primary leading-none">{user.stats.helpful_votes}</div>
+              <div className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">Votes Utiles</div>
+            </div>
+        </div>
       </header>
 
-      {/* Goûts Musicaux & Identité Critique */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-16">
-          <div className="space-y-10">
-            <SectionTitle subtitle="L'ADN critique et sonore du contributeur">Identité de Jugement</SectionTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="lg:col-span-2 space-y-24">
+          {/* ADN Sonore */}
+          <section className="space-y-10">
+            <SectionTitle subtitle="L'empreinte musicale et les préférences de ce membre">Identité Critique</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="glass-card p-8 space-y-6 border-accent-secondary/20">
-                <h3 className="text-sm font-black uppercase tracking-widest text-accent-secondary flex items-center gap-2">
-                  <Award size={16} /> ADN Critique
-                </h3>
-                <div className="space-y-6">
-                  <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <p className="text-sm text-text-main leading-relaxed">
-                      L'approche de <strong>{user.display_name}</strong> se concentre sur <span className="text-accent-secondary font-black">{user.critical_specialty}</span>. 
-                      Ses analyses privilégient souvent {user.discovery_style === 'Explorateur' ? 'la recherche de nouvelles formes sonores' : 'la structure et la cohérence artistique'}.
-                    </p>
+              <div className="glass-card p-10 space-y-8 border-accent-secondary/20 bg-gradient-to-br from-accent-secondary/5 to-transparent">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-accent-secondary/20 flex items-center justify-center text-accent-secondary">
+                    <Award size={24} />
                   </div>
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Sensibilité sonore</h4>
+                  <div>
+                    <h3 className="text-lg font-black uppercase tracking-tight">Vision Critique</h3>
+                    <p className="text-[10px] text-text-muted uppercase font-black tracking-widest">Angle de jugement</p>
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <p className="text-sm text-text-main leading-relaxed font-bold italic">
+                    &ldquo;{user.follow_reason}&rdquo;
+                  </p>
+                  <div className="space-y-4 pt-6 border-t border-white/5">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Texture de son préférée</h4>
                     <div className="flex flex-wrap gap-2">
                       {user.taste_tones?.map(tone => (
-                        <span key={tone} className="px-3 py-1.5 bg-accent-secondary/10 border border-accent-secondary/20 rounded-lg text-[10px] font-black text-accent-secondary uppercase tracking-widest">
+                        <span key={tone} className="px-4 py-2 bg-accent-secondary/10 border border-accent-secondary/20 rounded-xl text-[10px] font-black text-accent-secondary uppercase tracking-widest">
                           {tone}
                         </span>
                       ))}
@@ -2516,123 +3237,313 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
                 </div>
               </div>
 
-              <div className="glass-card p-8 space-y-6">
-                <h3 className="text-sm font-black uppercase tracking-widest text-accent-primary flex items-center gap-2">
-                  <Star size={16} /> Artistes Étendus
-                </h3>
-                <div className="space-y-4">
-                  {favoriteArtists.map(artist => (
-                    <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-4 group">
-                      <SafeImage src={artist.cover_image_url} className="w-12 h-12 rounded-xl object-cover border border-white/10" fallbackType="artist" />
+              <div className="glass-card p-10 space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-accent-primary/20 flex items-center justify-center text-accent-primary">
+                    <Star size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black uppercase tracking-tight">Artistes Favoris</h3>
+                    <p className="text-[10px] text-text-muted uppercase font-black tracking-widest">Références majeures</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {favoriteArtists.length > 0 ? favoriteArtists.map(artist => (
+                    <Link key={artist.id} to={`/artiste/${artist.slug}`} className="flex items-center gap-4 group bg-white/2 p-3 rounded-2xl border border-white/5 hover:border-accent-primary/30 transition-all">
+                      <SafeImage src={artist.cover_image_url} className="w-14 h-14 rounded-xl object-cover border border-white/10 shadow-lg" fallbackType="artist" />
                       <div className="flex-grow">
                         <div className="font-bold group-hover:text-accent-primary transition-colors">{artist.name}</div>
-                        <div className="text-[10px] text-text-muted uppercase font-black">{artist.primary_genres[0]}</div>
+                        <div className="text-[10px] text-text-muted uppercase font-black tracking-widest">{artist.primary_genres[0]}</div>
                       </div>
-                      <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight size={18} className="text-text-muted group-hover:translate-x-1 group-hover:text-accent-primary transition-all" />
                     </Link>
-                  ))}
+                  )) : (
+                    <div className="text-xs text-text-muted italic p-4 text-center border-2 border-dashed border-white/5 rounded-2xl">
+                      Aucun artiste favori enregistré
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="space-y-10">
-            <SectionTitle subtitle="Les guides d'écoute créés par ce membre">Parcours de Découverte</SectionTitle>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {userLists.map(list => <ListCard key={list.id} list={list} />)}
-            </div>
-          </div>
+          {/* Listes Créées */}
+          {userLists.length > 0 && (
+            <section className="space-y-10">
+              <SectionTitle subtitle="Les guides et parcours conçus par ce contributeur">Guides de Découverte</SectionTitle>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {userLists.map(list => <ListCard key={list.id} list={list} />)}
+              </div>
+            </section>
+          )}
 
+          {/* Derniers Avis */}
           <section className="space-y-10">
-            <SectionTitle subtitle="Ses analyses critiques les plus récentes">Derniers Avis</SectionTitle>
+            <SectionTitle subtitle={`Analyses critiques de ${user.display_name}`}>Derniers Avis</SectionTitle>
             <div className="grid grid-cols-1 gap-8">
-              {mockReviews.filter(r => r.user_id === user.id).map(review => (
+              {userReviews.length > 0 ? userReviews.map(review => (
                 <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                   <ReviewCard review={review} />
                 </motion.div>
-              ))}
+              )) : (
+                <div className="glass-card p-12 text-center space-y-4 border-white/5">
+                  <MessageSquare size={48} className="mx-auto text-text-muted opacity-20" />
+                  <p className="text-text-muted font-bold">Aucun avis publié pour le moment.</p>
+                </div>
+              )}
             </div>
           </section>
         </div>
 
+        {/* Sidebar Profil */}
         <aside className="lg:col-span-1 space-y-12">
-          <div className="glass-card p-8 space-y-8 sticky top-24">
-             <h3 className="font-black text-sm uppercase tracking-widest text-text-muted">Pourquoi le suivre ?</h3>
-             <p className="text-sm text-text-main leading-relaxed italic">"{user.follow_reason}"</p>
-             
-             <div className="pt-8 border-t border-white/5 space-y-6">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Profils d'écoute similaires</h4>
-                <div className="grid grid-cols-1 gap-4">
-                  {similarProfiles.map(u => (
-                    <div key={u.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group">
-                      <SafeImage src={u.avatar_url} className="w-10 h-10 rounded-full object-cover border border-white/10" fallbackType="user" />
-                      <div className="flex-grow">
-                        <div className="text-sm font-bold group-hover:text-accent-primary transition-colors">{u.display_name}</div>
-                        <div className="text-[9px] text-text-muted font-black uppercase">{u.favorite_genre}</div>
-                      </div>
-                      <button className="text-[8px] font-black text-accent-primary uppercase border border-accent-primary/30 px-2 py-1 rounded hover:bg-accent-primary hover:text-white transition-all">Suivre</button>
-                    </div>
-                  ))}
+          <div className="sticky top-24 space-y-12">
+            <div className="glass-card p-10 space-y-8 border-white/5 bg-bg-surface">
+              <div className="flex items-center gap-3 text-accent-primary">
+                <ShieldCheck size={20} />
+                <h3 className="font-black text-sm uppercase tracking-widest">Statut de Confiance</h3>
+              </div>
+              <div className="space-y-6">
+                <div className="p-5 bg-white/5 rounded-2xl border border-white/10 space-y-3">
+                  <div className="text-[10px] font-black text-accent-primary uppercase tracking-widest">Contributeur {user.credibility_level}</div>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Ce membre a partagé {user.stats.reviews_count} avis et aidé {user.stats.helpful_votes} personnes avec ses analyses pertinentes.
+                  </p>
                 </div>
-             </div>
+              </div>
 
-             <div className="pt-8 border-t border-white/5">
-                <div className="bg-bg-surface-light p-4 rounded-2xl border border-white/5 space-y-3">
-                   <div className="flex items-center gap-2 text-accent-primary">
-                      <ShieldCheck size={16} />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Membre Vérifié</span>
-                   </div>
-                   <p className="text-[10px] text-text-muted leading-relaxed">Ce membre a contribué de manière significative à la profondeur critique de la plateforme.</p>
+              <div className="pt-8 border-t border-white/5 space-y-8">
+                <div>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-6">Profils Similaires</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    {similarProfiles.map(u => (
+                      <Link to={`/profil/${u.slug}`} key={u.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors group">
+                        <SafeImage src={u.avatar_url} className="w-12 h-12 rounded-xl object-cover border border-white/10 group-hover:scale-105 transition-transform shadow-md" fallbackType="user" />
+                        <div className="flex-grow">
+                          <div className="text-sm font-bold group-hover:text-accent-primary transition-colors">{u.display_name}</div>
+                          <div className="text-[9px] text-text-muted font-black uppercase tracking-widest">{u.favorite_genre}</div>
+                        </div>
+                        <button className="text-[9px] font-black text-accent-primary uppercase border border-accent-primary/20 bg-accent-primary/5 px-3 py-1.5 rounded-lg hover:bg-accent-primary hover:text-white transition-all">Suivre</button>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-             </div>
+
+                {followedArtists.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-6">Suivi récemment</h4>
+                    <div className="flex flex-wrap gap-3">
+                      {followedArtists.map(artist => (
+                        <Link key={artist.id} to={`/artiste/${artist.slug}`} className="block">
+                          <SafeImage src={artist.cover_image_url} className="w-12 h-12 rounded-xl object-cover border border-white/10 hover:border-accent-primary transition-colors shadow-sm" fallbackType="artist" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-8 border-t border-white/5">
+                <button className="w-full py-5 premium-gradient rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-accent-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all text-white">
+                  S'ABONNER À {user.display_name.toUpperCase()}
+                </button>
+              </div>
+            </div>
+
+            <div className="glass-card p-8 bg-gradient-to-br from-accent-primary/10 to-transparent border-accent-primary/20 text-center space-y-4">
+               <div className="w-16 h-16 rounded-full bg-accent-primary/20 flex items-center justify-center mx-auto text-accent-primary">
+                 <Zap size={32} />
+               </div>
+               <h4 className="font-black text-sm uppercase tracking-widest text-white">Précision Critique</h4>
+               <p className="text-xs text-text-muted leading-relaxed">
+                 Le score d'utilité moyen de ce membre est de {Math.round((user.stats.helpful_votes / user.stats.reviews_count) * 10) / 10} par avis. Une référence fiable.
+               </p>
+            </div>
           </div>
         </aside>
-      </section>
+      </div>
     </div>
   );
 };
 
 const PremiumPage = () => (
-  <div className="max-w-5xl mx-auto space-y-16 py-10">
-    <header className="text-center space-y-6">
+  <div className="max-w-6xl mx-auto space-y-32 py-10 pb-32">
+    {/* Existing Hero */}
+    <header className="text-center space-y-8 pt-10">
       <Badge variant="premium">Echo Premium</Badge>
-      <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none">
+      <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
         L'EXPÉRIENCE <br />
         <span className="text-accent-primary">SANS LIMITES.</span>
       </h1>
-      <p className="text-text-muted text-xl max-w-2xl mx-auto">
-        Approfondissez votre culture musicale avec des outils d'analyse avancés et une communauté d'experts.
+      <p className="text-text-muted text-xl md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed">
+        Ne restez pas à la surface. Accédez à l'intégralité de l'intelligence musicale d'ÉCHO pour affiner votre oreille et vos choix.
       </p>
     </header>
 
+    {/* Existing Pricing Columns */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-      <div className="glass-card p-10 space-y-8 border-white/5">
-        <h3 className="text-2xl font-black uppercase tracking-tight">Version Gratuite</h3>
-        <ul className="space-y-4">
-          <li className="flex items-center gap-3 text-text-muted"><CheckCircle2 size={20} className="text-success" /> Accès à l'accueil et Explorer</li>
-          <li className="flex items-center gap-3 text-text-muted"><CheckCircle2 size={20} className="text-success" /> Résumés IA principaux</li>
-          <li className="flex items-center gap-3 text-text-muted"><CheckCircle2 size={20} className="text-success" /> Publication d'avis</li>
-          <li className="flex items-center gap-3 text-text-muted opacity-50"><Lock size={20} /> 10 sauvegardes max</li>
-          <li className="flex items-center gap-3 text-text-muted opacity-50"><Lock size={20} /> Publicité légère</li>
+      <div className="glass-card p-12 space-y-10 border-white/5 bg-bg-surface-light/30">
+        <div className="space-y-2">
+          <h3 className="text-2xl font-black uppercase tracking-tight">Version Gratuite</h3>
+          <p className="text-xs font-bold text-text-muted uppercase tracking-widest">L'essentiel de la découverte</p>
+        </div>
+        <ul className="space-y-6">
+          <li className="flex items-center gap-4 text-text-muted font-medium"><CheckCircle2 size={24} className="text-success/50" /> Accès à l'accueil et Explorer</li>
+          <li className="flex items-center gap-4 text-text-muted font-medium"><CheckCircle2 size={24} className="text-success/50" /> Résumés IA principaux</li>
+          <li className="flex items-center gap-4 text-text-muted font-medium"><CheckCircle2 size={24} className="text-success/50" /> Publication d'avis</li>
+          <li className="flex items-center gap-4 text-text-muted opacity-40 font-medium line-through"><Lock size={24} /> 10 sauvegardes max</li>
+          <li className="flex items-center gap-4 text-text-muted opacity-40 font-medium line-through"><Lock size={24} /> Publicité légère</li>
         </ul>
-        <div className="pt-6"><div className="text-4xl font-black">0€<span className="text-sm text-text-muted">/mois</span></div></div>
-        <button className="w-full py-4 rounded-2xl bg-bg-surface-light font-bold">Actuel</button>
+        <div className="pt-6 border-t border-white/5">
+          <div className="text-5xl font-black text-white">0€<span className="text-lg text-text-muted font-bold ml-2">/mois</span></div>
+        </div>
+        <button className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 font-black text-sm uppercase tracking-widest text-text-muted">Votre formule actuelle</button>
       </div>
 
-      <div className="glass-card p-10 space-y-8 border-accent-primary/30 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-6"><Badge variant="premium">Recommandé</Badge></div>
-        <h3 className="text-2xl font-black uppercase tracking-tight text-accent-primary">Echo Premium</h3>
-        <ul className="space-y-4">
-          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Lecture illimitée des avis</li>
-          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Filtres de découverte avancés</li>
-          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Parcours "Par où commencer" enrichis</li>
-          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Sauvegardes & Listes illimitées</li>
-          <li className="flex items-center gap-3 text-text-main"><CheckCircle2 size={20} className="text-accent-primary" /> Zéro publicité</li>
+      <div className="glass-card p-12 space-y-10 border-accent-primary/40 relative overflow-hidden bg-gradient-to-br from-accent-primary/10 to-transparent shadow-2xl">
+        <div className="absolute top-0 right-0 p-8"><Badge variant="premium">Meilleure Valeur</Badge></div>
+        <div className="space-y-2">
+          <h3 className="text-3xl font-black uppercase tracking-tight text-accent-primary">Echo Premium</h3>
+          <p className="text-xs font-bold text-accent-secondary uppercase tracking-widest">Le plein potentiel critique</p>
+        </div>
+        <ul className="space-y-6">
+          <li className="flex items-center gap-4 text-text-main font-bold"><CheckCircle2 size={24} className="text-accent-primary" /> Lecture illimitée des avis complets</li>
+          <li className="flex items-center gap-4 text-text-main font-bold"><CheckCircle2 size={24} className="text-accent-primary" /> Filtres de découverte haute précision</li>
+          <li className="flex items-center gap-4 text-text-main font-bold"><CheckCircle2 size={24} className="text-accent-primary" /> Parcours "Par où commencer" détaillés</li>
+          <li className="flex items-center gap-4 text-text-main font-bold"><CheckCircle2 size={24} className="text-accent-primary" /> Sauvegardes & Listes illimitées</li>
+          <li className="flex items-center gap-4 text-text-main font-bold"><CheckCircle2 size={24} className="text-accent-primary" /> Expérience 100% sans publicité</li>
         </ul>
-        <div className="pt-6"><div className="text-4xl font-black">4.99€<span className="text-sm text-text-muted">/mois</span></div></div>
-        <button className="w-full py-4 rounded-2xl premium-gradient text-white font-black shadow-xl shadow-accent-primary/20 hover:scale-[1.02] transition-transform">S'ABONNER MAINTENANT</button>
+        <div className="pt-6 border-t border-accent-primary/20">
+          <div className="text-5xl font-black text-white">4.99€<span className="text-lg text-text-muted font-bold ml-2">/mois</span></div>
+        </div>
+        <button className="w-full py-5 rounded-2xl premium-gradient text-white font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(255,107,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all">S'ABONNER MAINTENANT</button>
       </div>
     </div>
+
+    {/* Section: Ce que ça change concrètement */}
+    <section className="space-y-16">
+      <div className="text-center space-y-4">
+        <h2 className="text-4xl md:text-6xl font-black tracking-tight uppercase">Ce que ça change <br /><span className="text-accent-secondary">concrètement.</span></h2>
+        <p className="text-text-muted text-lg max-w-2xl mx-auto">Voyez comment Premium transforme votre navigation quotidienne.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+        <div className="space-y-10">
+          <div className="space-y-6">
+            <div className="w-12 h-12 bg-accent-primary/10 rounded-2xl flex items-center justify-center text-accent-primary font-black">01</div>
+            <h3 className="text-2xl font-black uppercase tracking-tight">Accès total à la pensée critique</h3>
+            <p className="text-text-muted leading-relaxed">Fini les extraits tronqués. Lisez l'intégralité des analyses techniques, des comparaisons historiques et des avis argumentés de la communauté.</p>
+          </div>
+          <div className="space-y-6">
+            <div className="w-12 h-12 bg-accent-secondary/10 rounded-2xl flex items-center justify-center text-accent-secondary font-black">02</div>
+            <h3 className="text-2xl font-black uppercase tracking-tight">Navigation sans friction</h3>
+            <p className="text-text-muted leading-relaxed">Concentrez-vous uniquement sur ce qui compte : la musique. Zéro bannière, zéro interruption, 100% immersion.</p>
+          </div>
+          <div className="space-y-6">
+             <div className="w-12 h-12 bg-success/10 rounded-2xl flex items-center justify-center text-success font-black">03</div>
+             <h3 className="text-2xl font-black uppercase tracking-tight">Algorithmes d'Accompagnement</h3>
+             <p className="text-text-muted leading-relaxed">Débloquez les blocs "Profils proches du vôtre" et "Par où commencer" pour ne plus jamais errer dans les catalogues sans boussole.</p>
+          </div>
+        </div>
+
+        <div className="relative group">
+           <div className="absolute -inset-4 bg-accent-primary/20 blur-[100px] opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity" />
+           <div className="space-y-6 relative">
+              {/* Visual Proof 1: Unlocked Review */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="glass-card p-6 border-accent-primary/30 shadow-2xl relative translate-x-4"
+              >
+                 <div className="flex items-center gap-3 mb-4">
+                    <SafeImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" className="w-8 h-8 rounded-full" />
+                    <div className="text-[10px] font-black uppercase tracking-widest text-text-muted">Avis complet débloqué</div>
+                    <Badge variant="premium" className="ml-auto">FULL</Badge>
+                 </div>
+                 <div className="space-y-2">
+                    <div className="h-2 w-full bg-white/10 rounded-full" />
+                    <div className="h-2 w-[90%] bg-white/10 rounded-full" />
+                    <p className="text-xs font-bold text-white line-clamp-2 italic">"...un mixage révolutionnaire qui place la voix au centre d'un chaos harmonique maîtrisé... C'est ici que le genre se redéfinit..."</p>
+                 </div>
+              </motion.div>
+
+              {/* Visual Proof 2: Advanced Filter */}
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="glass-card p-6 bg-accent-secondary/5 border-accent-secondary/30 shadow-xl -translate-x-8"
+              >
+                 <div className="flex items-center gap-2 mb-4 text-accent-secondary">
+                    <Filter size={14} /> <span className="text-[10px] font-black uppercase tracking-widest">Filtre Précision</span>
+                 </div>
+                 <div className="flex flex-wrap gap-2">
+                    <div className="px-3 py-1 bg-accent-secondary text-white rounded-lg text-[9px] font-black">PROD SATUREE</div>
+                    <div className="px-3 py-1 bg-white/10 text-white rounded-lg text-[9px] font-black italic">BPM +140</div>
+                    <div className="px-3 py-1 border border-accent-secondary/30 text-accent-secondary rounded-lg text-[9px] font-black">DÉSERT ROCK</div>
+                 </div>
+              </motion.div>
+
+              {/* Visual Proof 3: Similar Profiles */}
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="glass-card p-6 border-success/30 shadow-lg translate-x-12"
+              >
+                 <div className="flex items-center gap-2 mb-4 text-success">
+                    <Users size={14} /> <span className="text-[10px] font-black uppercase tracking-widest">Auditeurs similaires</span>
+                 </div>
+                 <div className="flex -space-x-3">
+                    {[1,2,3,4].map(i => (
+                       <SafeImage key={i} src={`https://i.pravatar.cc/100?u=${i}`} className="w-10 h-10 rounded-full border-2 border-bg-main" />
+                    ))}
+                    <div className="w-10 h-10 rounded-full bg-success/20 border-2 border-bg-main flex items-center justify-center text-success text-[10px] font-black">+14</div>
+                 </div>
+              </motion.div>
+           </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Section: Pour qui est le Premium */}
+    <section className="bg-bg-surface-light/50 p-12 md:p-20 rounded-[3rem] border border-white/5 space-y-16">
+      <div className="text-center space-y-4">
+        <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase italic">Pour qui est <br /><span className="text-accent-primary">Echo Premium ?</span></h2>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="space-y-6 text-center">
+           <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white mx-auto shadow-inner">
+             <LayoutList size={28} />
+           </div>
+           <h4 className="text-xl font-black uppercase tracking-tight">Pour les lecteurs de fond</h4>
+           <p className="text-text-muted text-sm leading-relaxed">Vous détestez rester en surface. Vous voulez comprendre l'histoire de chaque note et peser chaque argument de la critique.</p>
+        </div>
+        <div className="space-y-6 text-center">
+           <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white mx-auto shadow-inner">
+             <ShieldCheck size={28} />
+           </div>
+           <h4 className="text-xl font-black uppercase tracking-tight">Pour les indécis exigeants</h4>
+           <p className="text-text-muted text-sm leading-relaxed">Vous voulez être sûr(e) que votre prochaine écoute sera la bonne. Premium vous donne les clés pour comparer avant de cliquer.</p>
+        </div>
+        <div className="space-y-6 text-center">
+           <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white mx-auto shadow-inner">
+             <TrendingUp size={28} />
+           </div>
+           <h4 className="text-xl font-black uppercase tracking-tight">Pour les explorateurs rapides</h4>
+           <p className="text-text-muted text-sm leading-relaxed">Plus de temps à perdre avec des algorithmes génériques. Allez droit au but avec des filtres et des parcours d'experts ultra-précis.</p>
+        </div>
+      </div>
+
+      <div className="pt-10 flex flex-col items-center space-y-6">
+        <p className="text-text-muted font-bold text-lg mb-4 italic">Rejoignez 1,200+ membres déjà abonnés.</p>
+        <button className="premium-gradient px-12 py-6 rounded-[2.5rem] font-black text-lg text-white shadow-2xl hover:scale-[1.05] active:scale-[0.95] transition-all">
+           DÉBLOQUER MON EXPÉRIENCE
+        </button>
+        <p className="text-[10px] text-text-muted uppercase tracking-[0.2em] font-black">ANNULABLE À TOUT MOMENT • ESSAI GRATUIT DE 7 JOURS</p>
+      </div>
+    </section>
   </div>
 );
 

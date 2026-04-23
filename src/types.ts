@@ -14,6 +14,7 @@ export interface User {
   id: string;
   username: string;
   display_name: string;
+  slug: string; // Added slug for routing
   bio_short: string;
   avatar_url: string;
   credibility_level: 'visiteur' | 'confirme' | 'qualifie';
@@ -131,6 +132,7 @@ export interface Track {
   album_id: string;
   album_title: string;
   album_slug: string;
+  album_cover_url?: string; // Added for accessibility
   artist_id: string;
   artist_name: string;
   artist_slug: string;
@@ -140,6 +142,7 @@ export interface Track {
   is_best_entry_track: boolean;
   quick_consensus_score: number;
   description?: string;
+  image_url?: string; // Added for easier access
   
   // New features
   community_keywords?: string[];
@@ -156,6 +159,7 @@ export interface Track {
 export interface Review {
   id: string;
   user_id: string;
+  user_slug?: string; // Added for routing convenience
   user_display_name: string;
   user_avatar: string;
   user_expertise?: string;
@@ -209,13 +213,29 @@ export interface SharedList {
   user_avatar?: string;
   title: string;
   description: string;
-  items: { type: EntityType; id: string; slug: string; title: string; why: string }[];
+  editorial_intro?: string;
+  why_exists?: string;
+  target_audience?: string;
+  journey_logic?: string;
+  entry_level?: 'Immédiat' | 'Accessible' | 'Intermédiaire' | 'Exigeant';
+  items: { 
+    type: EntityType; 
+    id: string; 
+    slug: string; 
+    title: string; 
+    artist_name?: string;
+    why: string; 
+    access_level?: 'Gratuit' | 'Premium';
+    promise?: string;
+  }[];
   like_count: number;
   category: string;
   selection_type: 'Débutant' | 'Expert' | 'Thématique' | 'Humeur';
   discovery_promise: string;
+  tone_mood?: string;
   image_url: string;
   created_at: string;
+  is_premium_exclusive?: boolean;
 }
 
 export interface ProReview {
