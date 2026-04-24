@@ -638,10 +638,10 @@ export const mockReviews: Review[] = [
       limitations: ['trop lisse']
     },
     justifications: {
-      why_words: 'Angèle a réussi à créer un univers qui parle à tout le monde tout en restant très personnel.',
+      why_tags: 'Angèle a réussi à créer un univers qui parle à tout le monde tout en restant très personnel.',
       key_element: 'Sa capacité à écrire des refrains qui restent en tête dès la première écoute.',
-      dividing_factor: 'Certains peuvent trouver sa voix trop "lisse", mais c\'est ce qui fait son charme.',
-      recommendation: 'Pour quiconque veut comprendre la pop française des années 2020.',
+      friction_points: 'Certains peuvent trouver sa voix trop "lisse", mais c\'est ce qui fait son charme.',
+      who_recommended: 'Pour quiconque veut comprendre la pop française des années 2020.',
       entry_point: 'Commencez par "Brol", c\'est la base.'
     },
     quality_score: 95,
@@ -673,10 +673,10 @@ export const mockReviews: Review[] = [
       limitations: []
     },
     justifications: {
-      why_words: 'L\'album n\'a pas pris une ride en 15 ans. La production est toujours aussi fraîche.',
+      why_tags: 'L\'album n\'a pas pris une ride en 15 ans. La production est toujours aussi fraîche.',
       key_element: 'L\'enchaînement parfait des morceaux, on ne s\'ennuie jamais.',
-      dividing_factor: 'Peut-être un peu trop "propre" pour les puristes du rock garage.',
-      recommendation: 'C\'est l\'album idéal pour découvrir le rock indépendant français.',
+      friction_points: 'Peut-être un peu trop "propre" pour les puristes du rock garage.',
+      who_recommended: 'C\'est l\'album idéal pour découvrir le rock indépendant français.',
       entry_point: 'Écoutez "1901" et "Lisztomania" en boucle.'
     },
     quality_score: 98,
@@ -710,10 +710,10 @@ export const mockReviews: Review[] = [
       limitations: ['un peu court']
     },
     justifications: {
-      why_words: 'C\'est le genre de morceau qui vous donne le sourire instantanément.',
+      why_tags: 'C\'est le genre de morceau qui vous donne le sourire instantanément.',
       key_element: 'Le synthé au début est iconique.',
-      dividing_factor: 'Peut sembler un peu répétitif à la longue.',
-      recommendation: 'À mettre dans toutes les playlists de soirée.',
+      friction_points: 'Peut sembler un peu répétitif à la longue.',
+      who_recommended: 'À mettre dans toutes les playlists de soirée.',
       entry_point: 'Écoutez-le fort.'
     },
     quality_score: 82,
@@ -746,10 +746,10 @@ export const mockReviews: Review[] = [
       limitations: ['trop sombre', 'parfois violent']
     },
     justifications: {
-      why_words: 'Damso est un génie des mots, mais son univers est parfois trop lourd à porter.',
+      why_tags: 'Damso est un génie des mots, mais son univers est parfois trop lourd à porter.',
       key_element: 'Sa capacité à créer des images mentales très fortes.',
-      dividing_factor: 'Sa noirceur peut en repousser plus d\'un.',
-      recommendation: 'Pour ceux qui aiment analyser chaque rime.',
+      friction_points: 'Sa noirceur peut en repousser plus d\'un.',
+      who_recommended: 'Pour ceux qui aiment analyser chaque rime.',
       entry_point: 'Ipséité reste son œuvre la plus équilibrée.'
     },
     quality_score: 91,
@@ -781,10 +781,10 @@ export const mockReviews: Review[] = [
       limitations: ['quelques longueurs']
     },
     justifications: {
-      why_words: 'C\'est un album qui fait du bien, sans être superficiel.',
+      why_tags: 'C\'est un album qui fait du bien, sans être superficiel.',
       key_element: 'Le mélange entre pop et touches jazzy.',
-      dividing_factor: 'Certains titres sont un peu en dessous du reste.',
-      recommendation: 'Idéal pour les trajets en voiture.',
+      friction_points: 'Certains titres sont un peu en dessous du reste.',
+      who_recommended: 'Idéal pour les trajets en voiture.',
       entry_point: 'Balance ton quoi est le point de départ évident.'
     },
     quality_score: 88,
@@ -816,10 +816,10 @@ export const mockReviews: Review[] = [
       limitations: []
     },
     justifications: {
-      why_words: 'Un texte fort sur une musique légère, c\'est la recette parfaite.',
+      why_tags: 'Un texte fort sur une musique légère, c\'est la recette parfaite.',
       key_element: 'Le clip et le message derrière.',
-      dividing_factor: 'Peut sembler trop "entendu" maintenant.',
-      recommendation: 'Indispensable pour comprendre la culture actuelle.',
+      friction_points: 'Peut sembler trop "entendu" maintenant.',
+      who_recommended: 'Indispensable pour comprendre la culture actuelle.',
       entry_point: 'À écouter avec attention.'
     },
     quality_score: 96,
@@ -851,10 +851,10 @@ export const mockReviews: Review[] = [
       limitations: ['parfois un peu distant']
     },
     justifications: {
-      why_words: 'Leur son est unique, reconnaissable entre mille.',
+      why_tags: 'Leur son est unique, reconnaissable entre mille.',
       key_element: 'La voix de Thomas Mars.',
-      dividing_factor: 'Leur côté "Versailles" peut agacer.',
-      recommendation: 'Pour ceux qui aiment le rock qui fait danser.',
+      friction_points: 'Leur côté "Versailles" peut agacer.',
+      who_recommended: 'Pour ceux qui aiment le rock qui fait danser.',
       entry_point: 'Wolfgang Amadeus Phoenix est leur sommet.'
     },
     quality_score: 92,
@@ -886,10 +886,10 @@ export const mockReviews: Review[] = [
       limitations: []
     },
     justifications: {
-      why_words: 'Damso signe ici l\'un de ses morceaux les plus touchants et universels.',
+      why_tags: 'Damso signe ici l\'un de ses morceaux les plus touchants et universels.',
       key_element: 'La guitare acoustique qui porte tout le morceau.',
-      dividing_factor: 'Un peu trop entendu en radio peut-être.',
-      recommendation: 'À écouter un soir de pluie.',
+      friction_points: 'Un peu trop entendu en radio peut-être.',
+      who_recommended: 'À écouter un soir de pluie.',
       entry_point: 'Le clip est aussi une œuvre à part entière.'
     },
     quality_score: 94,
@@ -921,10 +921,10 @@ export const mockReviews: Review[] = [
       limitations: ['un peu lent']
     },
     justifications: {
-      why_words: 'Ce morceau a redéfini les codes de la pop alternative.',
+      why_tags: 'Ce morceau a redéfini les codes de la pop alternative.',
       key_element: 'La voix grave et vaporeuse de Lana.',
-      dividing_factor: 'Son esthétique nostalgique peut sembler forcée.',
-      recommendation: 'Indispensable pour comprendre la pop des années 2010.',
+      friction_points: 'Son esthétique nostalgique peut sembler forcée.',
+      who_recommended: 'Indispensable pour comprendre la pop des années 2010.',
       entry_point: 'L\'album Born to Die est un must.'
     },
     quality_score: 89,
@@ -956,10 +956,10 @@ export const mockReviews: Review[] = [
       limitations: []
     },
     justifications: {
-      why_words: 'Justice a réussi à marier l\'électro et le rock comme personne.',
+      why_tags: 'Justice a réussi à marier l\'électro et le rock comme personne.',
       key_element: 'Leur sens de la grandiloquence et du spectacle.',
-      dividing_factor: 'Leur son très compressé peut fatiguer à la longue.',
-      recommendation: 'À écouter avant de sortir en club.',
+      friction_points: 'Leur son très compressé peut fatiguer à la longue.',
+      who_recommended: 'À écouter avant de sortir en club.',
       entry_point: 'L\'album † (Cross) est un monument.'
     },
     quality_score: 97,
@@ -991,10 +991,10 @@ export const mockReviews: Review[] = [
       limitations: ['trop répétitif', 'manque de relief']
     },
     justifications: {
-      why_words: 'Lana Del Rey a un univers incroyable, mais elle a tendance à se répéter.',
+      why_tags: 'Lana Del Rey a un univers incroyable, mais elle a tendance à se répéter.',
       key_element: 'Son imagerie cinématographique très forte.',
-      dividing_factor: 'La lenteur de ses compositions.',
-      recommendation: 'Pour une écoute de fond en fin de soirée.',
+      friction_points: 'La lenteur de ses compositions.',
+      who_recommended: 'Pour une écoute de fond en fin de soirée.',
       entry_point: 'Norman Fucking Rockwell est son album le plus abouti.'
     },
     quality_score: 82,
@@ -1026,10 +1026,10 @@ export const mockReviews: Review[] = [
       limitations: []
     },
     justifications: {
-      why_words: 'C\'est le morceau qui a fait découvrir Justice au monde entier.',
+      why_tags: 'C\'est le morceau qui a fait découvrir Justice au monde entier.',
       key_element: 'Les voix d\'enfants et la ligne de basse funky.',
-      dividing_factor: 'Peut sembler trop "pop" pour les fans de leur côté sombre.',
-      recommendation: 'Impossible de ne pas danser en l\'écoutant.',
+      friction_points: 'Peut sembler trop "pop" pour les fans de leur côté sombre.',
+      who_recommended: 'Impossible de ne pas danser en l\'écoutant.',
       entry_point: 'À écouter en boucle.'
     },
     quality_score: 95,
@@ -1061,10 +1061,10 @@ export const mockReviews: Review[] = [
       limitations: ['manque de relief', 'trop lisse', 'trop répétitif']
     },
     justifications: {
-      why_words: 'Je ne comprends pas l\'engouement massif. C\'est de la pop très générique.',
+      why_tags: 'Je ne comprends pas l\'engouement massif. C\'est de la pop très générique.',
       key_element: 'La production est propre mais sans aucune prise de risque.',
-      dividing_factor: 'Le côté "produit marketing" très présent.',
-      recommendation: 'Pour passer en fond sonore dans un magasin.',
+      friction_points: 'Le côté "produit marketing" très présent.',
+      who_recommended: 'Pour passer en fond sonore dans un magasin.',
       entry_point: 'Les singles suffisent amplement.'
     },
     quality_score: 62,

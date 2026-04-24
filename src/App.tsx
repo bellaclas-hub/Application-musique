@@ -283,38 +283,50 @@ const SummaryBriefBlock = ({ summary }: { summary: SummaryBlock }) => (
       <Info size={120} />
     </div>
     
-    <div className="flex-grow space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-success mb-3 flex items-center gap-2">
-            <ThumbsUp size={12} /> Pourquoi ça plaît
+    <div className="flex-grow space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-success flex items-center gap-2">
+            <ThumbsUp size={14} /> Pourquoi ça plaît
           </h4>
-          <ul className="space-y-2">
+          <div className="flex flex-wrap gap-2">
             {summary.why_it_pleases.map((point, i) => (
-              <li key={i} className="text-sm text-text-main flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-success" />
+              <span key={i} className="text-xs bg-success/10 text-success px-3 py-1.5 rounded-full font-bold border border-success/20">
                 {point}
-              </li>
+              </span>
             ))}
-          </ul>
+          </div>
         </div>
-        <div>
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-secondary mb-3 flex items-center gap-2">
-            <AlertCircle size={12} /> Ce qui peut freiner
+        <div className="space-y-4">
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-secondary flex items-center gap-2">
+            <AlertCircle size={14} /> Ce qui peut freiner
           </h4>
-          <ul className="space-y-2">
+          <div className="flex flex-wrap gap-2">
             {summary.friction_points.map((point, i) => (
-              <li key={i} className="text-sm text-text-main flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-secondary" />
+              <span key={i} className="text-xs bg-secondary/10 text-secondary px-3 py-1.5 rounded-full font-bold border border-secondary/20">
                 {point}
-              </li>
+              </span>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
-      <div>
-        <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">En résumé</h4>
-        <p className="text-sm text-text-main font-bold leading-relaxed">{summary.ideal_for}</p>
+      
+      <div className="pt-6 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Recommandé pour</h4>
+          <p className="text-base text-white font-bold leading-relaxed">{summary.ideal_for}</p>
+        </div>
+        <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+           <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-full bg-accent-primary/10 flex items-center justify-center text-accent-primary">
+               <Zap size={16} />
+             </div>
+             <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-accent-primary">L'avis dominant</p>
+                <p className="text-xs text-text-muted italic">"Une œuvre qui redéfinit les codes du genre par son audace technique."</p>
+             </div>
+           </div>
+        </div>
       </div>
     </div>
 
@@ -580,6 +592,28 @@ const TrackCard = ({ track }: { track: Track, key?: React.Key }) => (
   </motion.div>
 );
 
+const TagItem = ({ label, values, color }: { label: string, values: string[], color: string }) => (
+  <div className="space-y-1">
+    <div className="text-[8px] font-black uppercase tracking-[0.2em] text-text-muted">{label}</div>
+    <div className="flex flex-wrap gap-1">
+      {values.filter(v => v).map(v => (
+        <span key={v} className={`text-[10px] font-black uppercase ${color}`}>{v}</span>
+      ))}
+    </div>
+  </div>
+);
+
+const TagGrid = ({ selections }: { selections: Review['selections'] }) => (
+  <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 bg-white/5 p-6 rounded-3xl border border-white/5">
+    <TagItem label="Impression" values={[selections.impression]} color="text-accent-primary" />
+    <TagItem label="Highlights" values={selections.highlights} color="text-accent-secondary" />
+    <TagItem label="Ressenti" values={[selections.feeling]} color="text-success" />
+    <TagItem label="Accès" values={[selections.accessibility]} color="text-warning" />
+    <TagItem label="Pour qui" values={selections.target_audience} color="text-white" />
+    <TagItem label="Limites" values={selections.limitations} color="text-secondary" />
+  </div>
+);
+
 const ReviewCard = ({ review, isReaderPremium = false, compact = false, index = 0, ...props }: { review: Review, isReaderPremium?: boolean, compact?: boolean, index?: number, [key: string]: any }) => {
   const isLocked = !isReaderPremium && review.quality_score > 90;
   const isAltLayout = index % 3 === 1;
@@ -648,15 +682,9 @@ const ReviewCard = ({ review, isReaderPremium = false, compact = false, index = 
 
       {/* Content Section */}
       <div className="space-y-12 relative z-10">
-        <div className="space-y-6">
+        <div className="space-y-8">
           {review.title && <h3 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-[1.1] max-w-4xl">{review.title}</h3>}
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Badge variant="premium" className="bg-accent-primary/20 text-accent-primary border-accent-primary/30 uppercase tracking-widest text-[9px] px-3 py-1.5">{review.selections.impression}</Badge>
-            <Badge variant="default" className="uppercase tracking-widest text-[9px] px-3 py-1.5">{review.selections.feeling}</Badge>
-            <Badge variant="success" className="uppercase tracking-widest text-[9px] px-3 py-1.5">{review.selections.accessibility}</Badge>
-            {review.tone && <Badge variant="warning" className="uppercase tracking-widest text-[9px] px-3 py-1.5">{review.tone}</Badge>}
-            {review.angle && <Badge variant="default" className="bg-white/5 border-white/10 uppercase tracking-widest text-[9px] px-3 py-1.5 italic">Analyse {review.angle}</Badge>}
-          </div>
+          {!compact && <TagGrid selections={review.selections} />}
         </div>
 
         {!compact && (
@@ -667,25 +695,30 @@ const ReviewCard = ({ review, isReaderPremium = false, compact = false, index = 
 
             <div className="space-y-12">
               <ReviewSection 
-                label="Le verdict en quelques mots" 
-                content={review.justifications.why_words} 
+                label="Analyse des mots-clés" 
+                content={review.justifications.why_tags} 
                 icon={<MessageSquare size={16} />} 
               />
               <ReviewSection 
-                label="L'étincelle ou le bémol" 
+                label="L'élément marquant" 
                 content={review.justifications.key_element} 
                 icon={<Zap size={16} />} 
                 className="bg-accent-primary/5 border border-accent-primary/10 rounded-3xl p-8"
               />
+              <ReviewSection 
+                label="Points de friction / clivages" 
+                content={review.justifications.friction_points} 
+                icon={<AlertCircle size={16} />} 
+              />
             </div>
             <div className="space-y-12">
               <ReviewSection 
-                label="À qui s'adresse cette œuvre ?" 
-                content={review.justifications.recommendation} 
+                label="Cible & Recommandation" 
+                content={review.justifications.who_recommended} 
                 icon={<Users size={16} />} 
               />
               <ReviewSection 
-                label="Conseil d'entrée" 
+                label="Par où commencer ?" 
                 content={review.justifications.entry_point} 
                 icon={<ArrowRight size={16} />} 
                 color="text-accent-secondary font-black"
@@ -1277,11 +1310,11 @@ const ReviewsPage = ({ isPremium }: { isPremium: boolean }) => {
               <MessageSquare size={14} /> Intelligence Collective
             </div>
             <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase">
-              LE REGARD <br />
-              <span className="text-accent-primary">DE LA COMMUNAUTÉ.</span>
+              L'APPRENTISSAGE <br />
+              <span className="text-accent-primary text-4xl md:text-6xl">PAR LE JUGEMENT CROISÉ.</span>
             </h1>
             <p className="text-text-muted text-xl md:text-2xl font-medium leading-relaxed max-w-2xl">
-              Plus que des notes, des analyses structurées pour comprendre la démarche, les clivages et l'impact de chaque œuvre.
+              ÉCHO centralise les avis experts et citoyens pour vous aider à former votre propre opinion, au-delà de la simple notation.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 flex-shrink-0">
@@ -1613,17 +1646,19 @@ const ArtistPage = () => {
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8 space-y-16">
+          <div className="lg:col-span-12 space-y-16">
             
-            {/* Quick Summary Section */}
+            {/* Primary Summary - NOW FULL WIDTH AND TOP */}
             <section className="space-y-8">
               <div className="flex items-center gap-3">
                 <Sparkles size={24} className="text-accent-primary" />
-                <h2 className="text-xl font-black uppercase tracking-widest">En Bref</h2>
+                <h2 className="text-xl font-black uppercase tracking-widest">Synthèse Collective</h2>
               </div>
               <SummaryBriefBlock summary={artist.summary} />
             </section>
-
+          </div>
+          
+          <div className="lg:col-span-8 space-y-16">
             {/* Points d'entrée différenciés */}
             <section className="space-y-8">
               <div className="flex items-center gap-3">
@@ -1979,7 +2014,13 @@ const AlbumPage = () => {
               <Link to={`/artiste/${album.artist_slug}`} className="text-3xl font-black text-accent-primary hover:text-accent-primary/80 transition-colors inline-block">{album.artist_name}</Link>
             </div>
 
-            <SummaryBriefBlock summary={album.summary} />
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <Sparkles size={24} className="text-accent-primary" />
+                <h2 className="text-xl font-black uppercase tracking-widest">En un clin d'œil</h2>
+              </div>
+              <SummaryBriefBlock summary={album.summary} />
+            </section>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="glass-card p-8 border-l-4 border-accent-primary space-y-4">
@@ -2103,11 +2144,19 @@ const TrackPage = () => {
           </div>
         </header>
 
-        <div className="mt-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8 space-y-16">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               <SummaryBriefBlock summary={track.summary!} />
-               <div className="glass-card p-10 border-accent-secondary/20 flex flex-col justify-center space-y-8 bg-black/10">
+        <div className="mt-16 space-y-16">
+          <section className="space-y-8">
+            <div className="flex items-center gap-3">
+              <Sparkles size={24} className="text-accent-primary" />
+              <h2 className="text-xl font-black uppercase tracking-widest">Synthèse du morceau</h2>
+            </div>
+            <SummaryBriefBlock summary={track.summary!} />
+          </section>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-8 space-y-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="glass-card p-10 border-accent-secondary/20 flex flex-col justify-center space-y-8 bg-black/10">
                   <div className="space-y-4">
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-text-muted">Feeling Dominant</h4>
                     <div className="flex items-center gap-4">
@@ -2216,7 +2265,8 @@ const TrackPage = () => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 const ReviewFormPage = () => {
@@ -2235,10 +2285,10 @@ const ReviewFormPage = () => {
       limitations: [] as string[]
     },
     justifications: {
-      why_words: '',
+      why_tags: '',
       key_element: '',
-      dividing_factor: '',
-      recommendation: '',
+      friction_points: '',
+      who_recommended: '',
       entry_point: ''
     }
   });
@@ -2247,13 +2297,18 @@ const ReviewFormPage = () => {
     impression: ['marquant', 'accessible', 'exigeant', 'captivant', 'inégal', 'surévalué', 'singulier', 'efficace', 'ambitieux', 'répétitif', 'maîtrisé', 'polarisant'],
     highlights: ['production', 'voix', 'écriture', 'flow', 'mélodie', 'émotion', 'énergie', 'cohérence', 'originalité', 'ambiance', 'structure', 'instrumentation'],
     feeling: ['intense', 'mélancolique', 'euphorique', 'introspectif', 'brut', 'aérien', 'sombre', 'chaleureux', 'nerveux', 'immersif', 'frontal', 'apaisant'],
-    accessibility: ['immédiat', 'accessible', 'intermédiaire', 'exigeant', 'réservé aux amateurs'],
+    accessibility: ['immédiat', 'accessible', 'intermédiaire', 'exigeant', 'réservé aux amateurs du genre'],
     target_audience: ['curieux', 'grand public', 'amateurs du genre', 'fans de production', 'amateurs de textes', 'auditeurs émotionnels', 'chercheurs de nouveautés', 'fans d\'univers marqués'],
     limitations: ['trop long', 'trop répétitif', 'trop lisse', 'trop dense', 'trop froid', 'trop technique', 'manque de relief', 'manque d\'originalité', 'difficile d\'accès', 'inégal', 'peu mémorable']
   };
 
   const isStep1Valid = formData.rating > 0 && formData.selections.impression && formData.selections.highlights.length > 0 && formData.selections.feeling && formData.selections.accessibility && formData.selections.target_audience.length > 0;
-  const isStep2Valid = formData.justifications.why_words.length > 20 && formData.justifications.key_element.length > 20;
+  const isStep2Valid = 
+    formData.justifications.why_tags.length > 10 && 
+    formData.justifications.key_element.length > 10 && 
+    formData.justifications.friction_points.length > 10 &&
+    formData.justifications.who_recommended.length > 10 &&
+    formData.justifications.entry_point.length > 10;
 
   const toggleMulti = (category: 'highlights' | 'target_audience' | 'limitations', val: string) => {
     const current = formData.selections[category];
@@ -2337,11 +2392,11 @@ const ReviewFormPage = () => {
             </div>
 
             <div className="space-y-8">
-              <TextArea label="Pourquoi avez-vous choisi ces mots ?" value={formData.justifications.why_words} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, why_words: v } })} />
-              <TextArea label="Quel élément vous a le plus marqué ?" value={formData.justifications.key_element} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, key_element: v } })} />
-              <TextArea label="Qu'est-ce qui peut freiner ou diviser ?" value={formData.justifications.dividing_factor} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, dividing_factor: v } })} />
-              <TextArea label="À qui le recommanderiez-vous ?" value={formData.justifications.recommendation} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, recommendation: v } })} />
-              <TextArea label="Par quoi faudrait-il commencer ?" value={formData.justifications.entry_point} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, entry_point: v } })} />
+              <TextArea label="1. Pourquoi avez-vous choisi ces mots pour décrire ce contenu ?" value={formData.justifications.why_tags} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, why_tags: v } })} />
+              <TextArea label="2. Quel élément vous a le plus convaincu ou marqué ?" value={formData.justifications.key_element} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, key_element: v } })} />
+              <TextArea label="3. Qu’est-ce qui peut freiner ou diviser selon vous ?" value={formData.justifications.friction_points} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, friction_points: v } })} />
+              <TextArea label="4. À quel type d’auditeur le recommanderiez-vous, et pourquoi ?" value={formData.justifications.who_recommended} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, who_recommended: v } })} />
+              <TextArea label="5. Par quoi faudrait-il commencer pour entrer dans cet univers ?" value={formData.justifications.entry_point} onChange={(v) => setFormData({ ...formData, justifications: { ...formData.justifications, entry_point: v } })} />
             </div>
 
             <button disabled={!isStep2Valid} onClick={() => setStep(3)} className={`w-full py-6 rounded-[2rem] font-black text-xl transition-all ${isStep2Valid ? 'premium-gradient text-white shadow-2xl hover:scale-[1.02]' : 'bg-white/5 text-text-muted cursor-not-allowed'}`}>

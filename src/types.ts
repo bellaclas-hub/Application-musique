@@ -182,10 +182,10 @@ export interface Review {
 
   // ÉTAPE 2: Justifications
   justifications: {
-    why_words: string;
+    why_tags: string;
     key_element: string;
-    dividing_factor: string;
-    recommendation: string;
+    friction_points: string;
+    who_recommended: string;
     entry_point: string;
   };
   
