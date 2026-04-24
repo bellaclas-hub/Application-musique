@@ -1152,6 +1152,7 @@ const MobileNavItem = ({ to, icon, active }: { to: string, icon: React.ReactNode
 
 function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isPremium, setIsPremium] = React.useState(false);
 
   return (
@@ -1190,7 +1191,10 @@ function AppLayout() {
           <div className="px-2">
             <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4">Vos Listes</h3>
             <div className="space-y-3">
-              <button className="flex items-center gap-3 text-text-muted hover:text-text-main transition-colors group w-full text-left">
+              <button 
+                onClick={() => navigate('/listes')}
+                className="flex items-center gap-3 text-text-muted hover:text-text-main transition-colors group w-full text-left"
+              >
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
                   <PlusCircle size={16} />
                 </div>
@@ -1508,11 +1512,27 @@ const HomeScreen = () => {
         <div className="flex items-end justify-between border-b border-white/5 pb-8">
            <SectionTitle subtitle="Les portes d'entrée les plus accessibles de la plateforme">Par où commencer ?</SectionTitle>
            <div className="flex gap-4">
-             <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><ChevronLeft size={20} /></button>
-             <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><ChevronRight size={20} /></button>
+             <button 
+               onClick={() => {
+                 const el = document.getElementById('discovery-matrix');
+                 el?.scrollBy({ left: -300, behavior: 'smooth' });
+               }}
+               className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+             >
+               <ChevronLeft size={20} />
+             </button>
+             <button 
+               onClick={() => {
+                 const el = document.getElementById('discovery-matrix');
+                 el?.scrollBy({ left: 300, behavior: 'smooth' });
+               }}
+               className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+             >
+               <ChevronRight size={20} />
+             </button>
            </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div id="discovery-matrix" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto pb-4 scrollbar-hide">
           {mockAlbums.filter(a => a.is_entry_album).slice(0, 4).map(album => <AlbumCard key={album.id} album={album} compact />)}
         </div>
       </section>
@@ -1633,10 +1653,23 @@ const ArtistPage = () => {
               </div>
             </div>
             <div className="flex gap-4">
-              <button className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl font-black text-sm flex items-center gap-3 border border-white/10 hover:bg-white/20 transition-all">
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('Lien de l\'artiste copié !');
+                }}
+                className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl font-black text-sm flex items-center gap-3 border border-white/10 hover:bg-white/20 transition-all"
+              >
                 <Share2 size={20} />
               </button>
-              <button className="premium-gradient px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg hover:scale-105 transition-transform">
+              <button 
+                onClick={(e) => {
+                  const btn = e.currentTarget;
+                  btn.innerText = 'SUIVI';
+                  btn.classList.add('bg-success');
+                }}
+                className="premium-gradient px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg hover:scale-105 transition-transform"
+              >
                 <PlusCircle size={20} /> SUIVRE L'ARTISTE
               </button>
             </div>
@@ -1923,11 +1956,14 @@ const ArtistPage = () => {
 };
 
 const TrackItem = ({ track, index }: { track: any, index: number, key?: React.Key }) => (
-  <div className="group flex items-center gap-6 p-4 rounded-2xl hover:bg-white/5 transition-all relative overflow-hidden">
+  <Link 
+    to={`/morceau/${track.slug || track.id}`}
+    className="group flex items-center gap-6 p-4 rounded-2xl hover:bg-white/5 transition-all relative overflow-hidden"
+  >
     <div className="text-xs font-black text-text-muted w-6">{String(index + 1).padStart(2, '0')}</div>
     <div className="flex-grow min-w-0">
       <div className="flex items-center gap-3">
-        <Link to={`/morceau/${track.slug || track.id}`} className="font-bold text-white truncate hover:text-accent-primary transition-colors">{track.title}</Link>
+        <span className="font-bold text-white truncate group-hover:text-accent-primary transition-colors">{track.title}</span>
         {track.is_entry_track && <Badge variant="premium">Fondamental</Badge>}
         {track.is_community_favorite && <Badge variant="success">Plébiscité</Badge>}
       </div>
@@ -1941,7 +1977,7 @@ const TrackItem = ({ track, index }: { track: any, index: number, key?: React.Ke
       <div className="text-[9px] font-black text-white/40 uppercase hidden sm:block">Parfait pour : {track.sentiment === 'Énergique' ? 'S\'ambiancer' : track.sentiment === 'Mélancolique' ? 'Le soir' : 'Découvrir'}</div>
       <ChevronRight size={14} className="text-text-muted group-hover:translate-x-1 transition-transform" />
     </div>
-  </div>
+  </Link>
 );
 
 const AlbumFlowAnalysis = ({ tracks, coherence }: { tracks: any[], coherence: number }) => {
@@ -1997,7 +2033,13 @@ const AlbumPage = () => {
               fallbackType="album" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-bg-main/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-8">
-              <button className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl font-black text-sm text-white border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2">
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('Lien de l\'album copié !');
+                }}
+                className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl font-black text-sm text-white border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2"
+              >
                 <Share2 size={18} /> PARTAGER L'ANALYSE
               </button>
             </div>
@@ -3349,7 +3391,18 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
                           <div className="text-sm font-bold group-hover:text-accent-primary transition-colors">{u.display_name}</div>
                           <div className="text-[9px] text-text-muted font-black uppercase tracking-widest">{u.favorite_genre}</div>
                         </div>
-                        <button className="text-[9px] font-black text-accent-primary uppercase border border-accent-primary/20 bg-accent-primary/5 px-3 py-1.5 rounded-lg hover:bg-accent-primary hover:text-white transition-all">Suivre</button>
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const btn = e.currentTarget;
+                            btn.innerText = 'SUIVI';
+                            btn.classList.add('bg-accent-primary', 'text-white');
+                          }}
+                          className="text-[9px] font-black text-accent-primary uppercase border border-accent-primary/20 bg-accent-primary/5 px-3 py-1.5 rounded-lg hover:bg-accent-primary hover:text-white transition-all"
+                        >
+                          Suivre
+                        </button>
                       </Link>
                     ))}
                   </div>
