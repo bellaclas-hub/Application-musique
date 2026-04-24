@@ -333,7 +333,8 @@ const SummaryBriefBlock = ({ summary }: { summary: SummaryBlock }) => (
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  React.useLayoutEffect(() => {
+
+  React.useEffect(() => {
     const scrollTarget = () => {
       window.scrollTo(0, 0);
       document.documentElement.scrollTo(0, 0);
@@ -343,10 +344,15 @@ const ScrollToTop = () => {
     };
 
     scrollTarget();
-    // Small timeout as a fallback for complex layout shifts during animation
-    const timer = setTimeout(scrollTarget, 0);
-    return () => clearTimeout(timer);
+    // Immediate and delayed scroll to handle animations and layout shifts
+    const handle = requestAnimationFrame(scrollTarget);
+    const timer = setTimeout(scrollTarget, 100);
+    return () => {
+      cancelAnimationFrame(handle);
+      clearTimeout(timer);
+    };
   }, [pathname]);
+
   return null;
 };
 
@@ -367,67 +373,28 @@ const SafeImage = ({
   const [retryCount, setRetryCount] = React.useState(0);
 
   const getFallback = () => {
-    // Curated high-end musical and abstract photography for each category
     const fallbacks = {
-      artist: [
-        '1493225255756-d9584f8606e9', // Cinematic singer silhouette
-        '1511671782779-c97d3d27a1d4', // Studio microphone close-up
-        '1514525253361-bee8a187499b', // Atmospheric concert light
-        '1501386761578-eac5c94b800a', // Deep blue concert crowd
-        '1459749411177-042180ce673c', // Red vintage guitar detail
-      ],
-      album: [
-        '1508700115892-45ecd05ae2ad', // Vinyl spinning detail
-        '1594623125724-504935219d2d', // Synth knobs macro
-        '1614613535308-eb5fbd3d2c17', // Modern music studio
-        '1504608524841-42fe6f032b4b', // Piano keys monochrome
-        '1470229722913-7c0e2dbbafd3', // Technical gear in dark room
-      ],
-      track: [
-        '1487180144669-ebf7df964979', // High-end headphones
-        '1511379938547-c03674d01896', // Abstract sheet music art
-        '1453090927415-5f45085b65c0', // Turntable arm macro
-        '1516280440614-37939bbacd81', // Soundboard faders
-      ],
-      user: [
-        '1535713875002-d1d0cf377fde', // Minimalist male portrait
-        '1494790108377-be9c29b29330', // Minimalist female portrait
-        '1527980965255-d3b416303d12', // Artistic portrait silhouette
-        '1599566150163-29194dcaad36', // Monochrome studio portrait
-      ],
-      list: [
-        '1511671782779-c97d3d27a1d4', // Collection of records/studio
-        '1470225620780-dba8ba36b745', // Festival atmosphere
-        '1459749033322-861452a5ca44', // Rock concert energy
-        '1514525253361-bee8a187499b', // Artistic light composition
-      ],
-      musical_premium: [
-        '1470229722913-7c0e2dbbafd3', // Ultra-dark studio
-        '1508700115892-45ecd05ae2ad', // High-fidelity vinyl
-        '1594623125724-504935219d2d', // Analog synth macro
-        '1550684846-173484f93801', // Conceptual audio waves
-      ]
+      artist: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=800',
+      album: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800',
+      track: 'https://images.unsplash.com/photo-1487180144669-ebf7df964979?auto=format&fit=crop&q=80&w=800',
+      user: 'https://images.unsplash.com/photo-1550684848-86a5d8727436?auto=format&fit=crop&q=80&w=200',
+      list: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800',
+      musical_premium: 'https://images.unsplash.com/photo-1514525253361-bee8a187499b?auto=format&fit=crop&q=80&w=800',
     };
-
-    const str = alt || src || 'echo_music';
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0;
-    }
-    
-    const category = fallbacks[fallbackType] || fallbacks.album;
-    const combinedHash = Math.abs(hash + retryCount);
-    const index = combinedHash % category.length;
-    
-    const size = (fallbackType === 'user' || fallbackType === 'track') ? '400' : '800';
-    return `https://images.unsplash.com/photo-${category[index]}?auto=format&fit=crop&q=85&w=${size}`;
+    return fallbacks[fallbackType] || fallbacks.album;
   };
 
   React.useEffect(() => {
     setIsLoading(true);
     setIsError(false);
     setRetryCount(0);
+
+    // Safety timeout to ensure loader doesn't get stuck forever
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
   }, [src]);
 
   const finalSrc = isError || !src ? getFallback() : src;
@@ -453,7 +420,7 @@ const SafeImage = ({
       <motion.img
         key={finalSrc}
         initial={{ opacity: 0 }}
-        animate={{ opacity: isLoading ? 0 : 1 }}
+        animate={{ opacity: 1 }} // Force opacity 1, we rely on the loader overlay hiding it
         transition={{ duration: 0.5 }}
         src={finalSrc}
         alt={alt}
@@ -527,9 +494,6 @@ const ArtistCard = ({ artist }: { artist: Artist }) => (
         <div className="mt-auto space-y-3">
           <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-text-muted">
              <span>Polarisation critique</span>
-             <span className={artist.polarization_score > 60 ? 'text-accent-secondary' : 'text-success'}>
-               {artist.polarization_score > 60 ? 'Clivant' : 'Consensuel'}
-             </span>
           </div>
           <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
             <motion.div 
@@ -1230,10 +1194,12 @@ function AppLayout() {
               <Route path="/explore" element={<Navigate to="/explorer" replace />} />
               <Route path="/avis" element={<ReviewsPage isPremium={isPremium} />} />
               <Route path="/listes" element={<ListsPage />} />
+              <Route path="/parcours" element={<Navigate to="/listes" replace />} />
+              <Route path="/parcours/:slug" element={<ListPage />} />
               <Route path="/communaute" element={<CommunityPage />} />
               <Route path="/profil" element={<ProfilePage isPremium={isPremium} setIsPremium={setIsPremium} />} />
               <Route path="/profil/:slug" element={<ProfilePage isPremium={isPremium} setIsPremium={setIsPremium} />} />
-              <Route path="/premium" element={<PremiumPage />} />
+              <Route path="/premium" element={<PremiumPage isPremium={isPremium} setIsPremium={setIsPremium} />} />
               <Route path="/artiste/:slug" element={<ArtistPage />} />
               <Route path="/album/:slug" element={<AlbumPage />} />
               <Route path="/morceau/:slug" element={<TrackPage />} />
@@ -1588,7 +1554,7 @@ const HomeScreen = () => {
             <p className="text-text-muted text-sm font-medium leading-relaxed mb-8">
               Partagez vos impressions structurées pour aider les autres à s'orienter dans la jungle des sorties.
             </p>
-            <button className="bg-accent-secondary px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white shadow-xl hover:shadow-accent-secondary/20 transition-all w-full">CRÉER UNE ANALYSE</button>
+            <Link to="/explorer" className="bg-accent-secondary px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white shadow-xl hover:shadow-accent-secondary/20 transition-all w-full flex items-center justify-center">CRÉER UNE ANALYSE</Link>
           </div>
         </div>
       </section>
@@ -1839,8 +1805,9 @@ const ArtistPage = () => {
                   <div className="space-y-4">
                     {artist.essential_works_ids.slice(1, 4).map((work, idx) => {
                       const item = work.type === 'album' ? mockAlbums.find(a => a.id === work.id) : mockTracks.find(t => t.id === work.id);
+                      if (!item) return null;
                       return (
-                        <Link key={idx} to={`/${work.type === 'album' ? 'album' : 'morceau'}/${item?.slug}`} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5">
+                        <Link key={idx} to={`/${work.type === 'album' ? 'album' : 'morceau'}/${item.slug}`} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5">
                           <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${work.type === 'album' ? 'bg-accent-primary/20' : 'bg-accent-secondary/20'}`}>
                             {work.type === 'album' ? <Award className="text-accent-primary" /> : <PlayCircle className="text-accent-secondary" />}
                           </div>
@@ -2452,6 +2419,7 @@ const TextArea = ({ label, value, onChange }: { label: string, value: string, on
 
 const ListsPage = () => {
   const [activeCategory, setActiveCategory] = React.useState('all');
+  const navigate = useNavigate();
   
   const categories = [
     { id: 'all', label: 'Toutes Sélections' },
@@ -2510,7 +2478,10 @@ const ListsPage = () => {
                </div>
             </div>
             <div className="text-center md:text-right">
-               <button className="premium-gradient px-8 py-5 rounded-3xl font-black text-sm text-white shadow-xl hover:scale-105 transition-transform flex items-center justify-center gap-3 w-full md:w-auto">
+               <button 
+                 onClick={() => navigate('/explorer')}
+                 className="premium-gradient px-8 py-5 rounded-3xl font-black text-sm text-white shadow-xl hover:scale-105 transition-transform flex items-center justify-center gap-3 w-full md:w-auto"
+               >
                  CRÉER MON GUIDE <PlusCircle size={20} />
                </button>
             </div>
@@ -3366,19 +3337,27 @@ const ProfilePage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPre
   );
 };
 
-const PremiumPage = () => (
-  <div className="max-w-6xl mx-auto space-y-32 py-10 pb-32">
-    {/* Existing Hero */}
-    <header className="text-center space-y-8 pt-10">
-      <Badge variant="premium">Echo Premium</Badge>
-      <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
-        L'EXPÉRIENCE <br />
-        <span className="text-accent-primary">SANS LIMITES.</span>
-      </h1>
-      <p className="text-text-muted text-xl md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed">
-        Ne restez pas à la surface. Accédez à l'intégralité de l'intelligence musicale d'ÉCHO pour affiner votre oreille et vos choix.
-      </p>
-    </header>
+const PremiumPage = ({ isPremium, setIsPremium }: { isPremium: boolean, setIsPremium: (v: boolean) => void }) => {
+  const navigate = useNavigate();
+
+  const handleActivate = () => {
+    setIsPremium(true);
+    navigate('/');
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-32 py-10 pb-32">
+      {/* Existing Hero */}
+      <header className="text-center space-y-8 pt-10">
+        <Badge variant="premium">Echo Premium</Badge>
+        <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
+          L'EXPÉRIENCE <br />
+          <span className="text-accent-primary">SANS LIMITES.</span>
+        </h1>
+        <p className="text-text-muted text-xl md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed">
+          Ne restez pas à la surface. Accédez à l'intégralité de l'intelligence musicale d'ÉCHO pour affiner votre oreille et vos choix.
+        </p>
+      </header>
 
     {/* Existing Pricing Columns */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -3416,7 +3395,12 @@ const PremiumPage = () => (
         <div className="pt-6 border-t border-accent-primary/20">
           <div className="text-5xl font-black text-white">4.99€<span className="text-lg text-text-muted font-bold ml-2">/mois</span></div>
         </div>
-        <button className="w-full py-5 rounded-2xl premium-gradient text-white font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(255,107,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all">S'ABONNER MAINTENANT</button>
+        <button 
+          onClick={handleActivate}
+          className="w-full py-5 rounded-2xl premium-gradient text-white font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(255,107,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          {isPremium ? 'DÉJÀ PREMIUM' : "S'ABONNER MAINTENANT"}
+        </button>
       </div>
     </div>
 
@@ -3456,7 +3440,7 @@ const PremiumPage = () => (
                 className="glass-card p-6 border-accent-primary/30 shadow-2xl relative translate-x-4"
               >
                  <div className="flex items-center gap-3 mb-4">
-                    <SafeImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" className="w-8 h-8 rounded-full" />
+                    <SafeImage src="https://images.unsplash.com/photo-1550684848-86a5d8727436?auto=format&fit=crop&q=80&w=100" className="w-8 h-8 rounded-full" />
                     <div className="text-[10px] font-black uppercase tracking-widest text-text-muted">Avis complet débloqué</div>
                     <Badge variant="premium" className="ml-auto">FULL</Badge>
                  </div>
@@ -3496,7 +3480,7 @@ const PremiumPage = () => (
                  </div>
                  <div className="flex -space-x-3">
                     {[1,2,3,4].map(i => (
-                       <SafeImage key={i} src={`https://i.pravatar.cc/100?u=${i}`} className="w-10 h-10 rounded-full border-2 border-bg-main" />
+                       <SafeImage key={i} src={`https://images.unsplash.com/photo-1550684848-86a5d8727436?auto=format&fit=crop&q=80&w=100`} className="w-10 h-10 rounded-full border-2 border-bg-main" fallbackType="user" />
                     ))}
                     <div className="w-10 h-10 rounded-full bg-success/20 border-2 border-bg-main flex items-center justify-center text-success text-[10px] font-black">+14</div>
                  </div>
@@ -3546,6 +3530,7 @@ const PremiumPage = () => (
     </section>
   </div>
 );
+};
 
 export default function App() {
   return (
